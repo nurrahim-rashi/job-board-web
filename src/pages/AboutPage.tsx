@@ -3,7 +3,6 @@ import { AboutHero } from "../components/AboutPage/AboutHero";
 import { ContactSection } from "../components/AboutPage/ContactSection";
 import { MissionSection } from "../components/AboutPage/MissionSection";
 import { TeamSection } from "../components/AboutPage/TeamSection";
-import { ValuesSection } from "../components/AboutPage/ValuesSection";
 import { Navbar } from "../components/Navbar";
 export default function AboutPage() {
   return (
@@ -12,7 +11,6 @@ export default function AboutPage() {
       <main>
         <AboutHero />
         <MissionSection />
-        <ValuesSection />
         <TeamSection />
         <ContactSection />
       </main>
