@@ -21,8 +21,8 @@ export function ContactSection() {
               <Mail />
               hello@polaris.jobs
             </a>
-            <a className="contact-secondary" href="#roles">
-              Browse roles <ArrowRight />
+            <a className="contact-secondary" href="/jobs">
+              Browse jobs <ArrowRight />
             </a>
           </aside>
           <footer>
