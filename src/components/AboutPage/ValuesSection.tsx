@@ -30,8 +30,8 @@ const values = [
   },
   {
     icon: Compass,
-    title: "Local context",
-    body: "Built for Indonesia: hybrid, remote and on-site roles, local pay bands, and location-aware discovery.",
+    title: "Global scope",
+    body: "We list roles worldwide. We help make your dream job a reality.",
   },
   {
     icon: Sparkles,
