@@ -1,0 +1,3 @@
+import { ArrowRight, Mail, MapPin } from "../site/Icons";
+import { Reveal } from "../../hooks/useReveal";
+export function ContactSection() { return <section className="about-contact"><Reveal><div><section><h2>Want to work with us?</h2><p>Whether you are hiring, looking, or just want to say hello, we read every message.</p></section><aside><a className="button button-primary" href="mailto:hello@polaris.jobs"><Mail />hello@polaris.jobs</a><a className="contact-secondary" href="#roles">Browse roles <ArrowRight /></a></aside><footer><p><MapPin /><span><b>Jakarta, Indonesia</b>Remote-first team, working across WIB.</span></p><p><Mail /><span><b>Press & partnerships</b>hello@polaris.jobs</span></p></footer></div></Reveal></section>; }

@@ -1,6 +1,3 @@
-import { Stars } from "./site/Stars";
-import { Reveal } from "../hooks/useReveal";
-
 export function Footer() {
   const columns = [
     { title: "Candidates", links: ["Roles", "Weekly drop", "Salary data"] },
@@ -10,9 +7,8 @@ export function Footer() {
 
   return (
     <footer id="apply" className="site-footer">
-      <Stars />
-      <div>
-        <Reveal className="footer-cta">
+      <div className="footer-content">
+        <div className="footer-cta">
           <h2>Let&rsquo;s find the right one</h2>
           <p>
             Tell us what you&rsquo;re looking for, or what you&rsquo;re hiring
@@ -21,10 +17,10 @@ export function Footer() {
           <a className="button button-light" href="mailto:hello@polaris.jobs">
             Get in touch
           </a>
-        </Reveal>
+        </div>
         <section className="footer-links">
           <article>
-            <h3>Polaris</h3>
+            <h3>✦ Polaris</h3>
             <p>Work you&rsquo;re proud of.</p>
           </article>
           {columns.map((column) => (
@@ -38,9 +34,7 @@ export function Footer() {
             </article>
           ))}
         </section>
-        <small>
-          © 2026–{new Date().getFullYear()} Polaris. Find what's worth for you.
-        </small>
+        <small>© 2026 ✦ Polaris. Find what's worth for you.</small>
       </div>
     </footer>
   );

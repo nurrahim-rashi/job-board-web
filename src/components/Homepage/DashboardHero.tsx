@@ -1,0 +1,5 @@
+import { useState } from "react";
+import { ArrowRight, Briefcase, MapPin, Search } from "../site/Icons";
+import { Stars } from "../site/Stars";
+const stats = [["Applications", "7", "3 in review"], ["Saved roles", "12", "2 closing soon"], ["Profile strength", "80%", "Add your CV"], ["Invites", "2", "From verified teams"]];
+export function DashboardHero() { const [location, setLocation] = useState("Jakarta, Indonesia"); return <section className="dashboard-hero"><div className="night-sky" /><div className="night-overlay" /><Stars /><div className="dashboard-wrap"><p className="eyebrow light">Welcome back</p><h1>Good to see you, Rashifa.<br /><span>9 new roles since Tuesday.</span></h1><div className="dashboard-search"><label><Search /><input placeholder="Job title or keyword" /></label><label><Briefcase /><input placeholder="Company field" /></label><label><MapPin /><input value={location} onChange={(event) => setLocation(event.target.value)} /></label><a href="#feed">Search <ArrowRight /></a></div><dl>{stats.map(([label, value, note]) => <div key={label}><dt>{label}</dt><dd>{value}</dd><small>{note}</small></div>)}</dl></div></section>; }

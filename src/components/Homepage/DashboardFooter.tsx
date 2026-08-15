@@ -1,0 +1,3 @@
+import { Stars } from "../site/Stars";
+const columns = [["For you", "All jobs", "Saved roles", "Applications"], ["Companies", "All companies", "Post a job", "Pricing"], ["Account", "Profile", "Notifications", "Sign out"]];
+export function DashboardFooter() { return <footer className="dashboard-footer"><Stars /><div><section><article><h3>Polaris</h3><p>Work you&rsquo;re proud of.</p></article>{columns.map(([heading, ...links]) => <article key={heading}><b>{heading}</b>{links.map((link) => <a href="#top" key={link}>{link}</a>)}</article>)}</section><small>© 2026–{new Date().getFullYear()} Polaris. Signed in as Rashifa · Product Designer</small></div></footer>; }

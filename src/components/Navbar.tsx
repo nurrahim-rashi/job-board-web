@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { AuthModal } from "./site/AuthModal";
 
 const links = [
-  ["Roles", "#roles"],
-  ["For teams", "#services"],
-  ["Stories", "#stories"],
-  ["Help Center", "#faq"],
+  { label: "Jobs" },
+  { label: "Companies" },
+  { label: "Stories" },
+  { label: "About" },
 ];
 
 export function Navbar() {
@@ -21,24 +21,17 @@ export function Navbar() {
     <header className={`site-nav ${scrolled ? "is-scrolled" : ""}`}>
       <nav>
         <a href="#top" className="nav-mark" aria-label="Polaris home">
-          ✦
+          ✦ Polaris
         </a>
         <ul>
-          {links.map(([label, href]) => (
-            <li key={href}>
-              <a href={href}>{label}</a>
+          {links.map((link) => (
+            <li>
+              <a>{link.label}</a>
             </li>
           ))}
         </ul>
-        <button
-          type="button"
-          className="nav-sign-in"
-          onClick={() => setAuthOpen(true)}
-        >
+        <a className="nav-cta" onClick={() => setAuthOpen(true)}>
           Sign in
-        </button>
-        <a className="nav-cta" href="#apply">
-          Post a job
         </a>
       </nav>
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />

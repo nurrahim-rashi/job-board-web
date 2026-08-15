@@ -61,3 +61,7 @@ export const Share = icon("M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4
 export const Upload = icon("M12 16V3m0 0L7 8m5-5 5 5M4 14v5a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5");
 export const Wallet = icon("M20 7V5a2 2 0 0 0-2-2H5a3 3 0 0 0 0 6h14a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H5a3 3 0 0 1-3-3V6M16 14h.01");
 export const Close = icon("m18 6-12 12M6 6l12 12");
+export const Eye = icon("M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Zm10 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z");
+export const Target = icon("M12 2v4m0 12v4M2 12h4m12 0h4M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm0-6a10 10 0 1 1 0 20 10 10 0 0 1 0-20Z");
+export const Mail = icon("M3 5h18v14H3Zm0 1 9 7 9-7");
+export const Shield = icon("M12 22s8-3.8 8-10V5l-8-3-8 3v7c0 6.2 8 10 8 10Zm-3.5-10 2.3 2.3 4.8-4.8");
