@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { AuthModal } from "./site/AuthModal";
 
 const links = [
-  { label: "Jobs" },
-  { label: "Companies" },
-  { label: "Stories" },
-  { label: "About" },
+  { label: "Jobs", href: "/jobs" },
+  { label: "Companies", href: "/companies" },
+  { label: "Stories", href: "/stories" },
+  { label: "About", href: "/about" },
 ];
 
 export function Navbar() {
@@ -20,13 +20,13 @@ export function Navbar() {
   return (
     <header className={`site-nav ${scrolled ? "is-scrolled" : ""}`}>
       <nav>
-        <a href="#top" className="nav-mark" aria-label="Polaris home">
+        <a href="/" className="nav-mark" aria-label="Polaris home">
           ✦ Polaris
         </a>
         <ul>
           {links.map((link) => (
-            <li>
-              <a>{link.label}</a>
+            <li key={link.label}>
+              <a href={link.href}>{link.label}</a>
             </li>
           ))}
         </ul>

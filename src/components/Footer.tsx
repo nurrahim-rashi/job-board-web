@@ -8,7 +8,7 @@ export function Footer() {
   return (
     <footer id="apply" className="site-footer">
       <div className="footer-content">
-        <div className="footer-cta">
+        <div className="footer-cta footer-static-cta">
           <h2>Let&rsquo;s find the right one</h2>
           <p>
             Tell us what you&rsquo;re looking for, or what you&rsquo;re hiring

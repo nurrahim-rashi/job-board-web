@@ -1,3 +1,4 @@
+import { Reveal } from "../../hooks/useReveal";
 import { SectionHead } from "./SectionHead";
 const reviews = [
   [
@@ -17,8 +18,9 @@ export function TestimonialsSection() {
   return (
     <section id="stories" className="testimonials">
       <SectionHead
-        title="Trusted by thousands"
-        body="We build for people who read the whole posting. Turns out, they write back too."
+        eyebrow="Testimonials"
+        title="Stories from those who found their true north with Polaris"
+        body=""
       />
       <div className="marquees">
         {reviews.map((row, rowIndex) => (
@@ -35,7 +37,12 @@ export function TestimonialsSection() {
             ))}
           </div>
         ))}
-      </div>
+      </div>{" "}
+      <Reveal className="benefits-cta" delay={120}>
+        <a className="button button-primary" href="/stories">
+          View more stories
+        </a>
+      </Reveal>
     </section>
   );
 }

@@ -1,8 +1,11 @@
 import { useSyncExternalStore } from "react";
 import AboutPage from "../pages/AboutPage";
+import BrowseJobsPage from "../pages/BrowseJobsPage";
+import BrowseCompaniesPage from "../pages/BrowseCompaniesPage";
 import Homepage from "../pages/Homepage";
 import JobDetailPage from "../pages/JobDetailPage";
 import LandingPage from "../pages/LandingPage";
+import StoriesPage from "../pages/StoriesPage";
 
 function hasSession() {
   const preview = new URLSearchParams(window.location.search).get("loggedIn");
@@ -26,8 +29,8 @@ function getPathname() {
 function NotFoundPage() {
   return (
     <main className="not-found">
-      <p className="eyebrow">404</p>
-      <h1>That page is not on the map.</h1>
+      <h1>404</h1>
+      <h2>That page is not on the map.</h2>
       <a className="button button-primary" href="/">
         Back home
       </a>
@@ -40,6 +43,9 @@ export function AppRouter() {
   if (pathname === "/" || pathname === "/home")
     return hasSession() ? <Homepage /> : <LandingPage />;
   if (pathname === "/about") return <AboutPage />;
+  if (pathname === "/stories") return <StoriesPage />;
+  if (pathname === "/companies") return <BrowseCompaniesPage />;
+  if (pathname === "/jobs") return <BrowseJobsPage />;
   if (/^\/jobs\/[^/]+$/.test(pathname)) return <JobDetailPage />;
   return <NotFoundPage />;
 }

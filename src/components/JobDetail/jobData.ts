@@ -1,3 +1,48 @@
-export const job = { title: "Senior Product Designer", company: "Fieldnote", industry: "Fintech", city: "Jakarta Selatan, Indonesia", type: "Hybrid", salary: "Rp 22.000.000 – 30.000.000 / month", posted: "Posted 3 days ago", deadline: "Applications close 30 Aug 2026", applicants: 48, tags: ["Design systems", "Fintech", "Figma", "0→1", "Research"] };
-export const detailSections: Array<[string, string[]]> = [["What you’ll do", ["Own discovery, concept and delivery for the merchant app squad.", "Grow and maintain the Fieldnote design system alongside two engineers.", "Run monthly research sessions with merchants across Jabodetabek.", "Partner with product and data to define success metrics before build."]], ["What we’re looking for", ["5+ years designing consumer or B2B product interfaces.", "A portfolio showing shipped work, not concepts.", "Comfortable writing specs and prototyping in Figma.", "Working proficiency in Bahasa Indonesia and English."]], ["Benefits", ["BPJS + private health for you and dependants", "Hybrid: 2 days in the Senopati studio", "Annual learning budget of Rp 15 jt", "16 weeks parental leave"]]];
-export const hiringProcess = [["Pre-selection test", "25 multiple choice · 30 minutes"], ["CV screening", "2–4 working days"], ["Portfolio interview", "60 minutes with the design lead"], ["Team session", "Product + engineering"], ["Offer", "Reference check, then paperwork"]];
+export const job = {
+  title: "Senior Product Designer",
+  company: "Fieldnote",
+  industry: "Fintech",
+  city: "Jakarta Selatan, Indonesia",
+  type: "Hybrid",
+  salary: "Rp 22.000.000 – 30.000.000 / month",
+  posted: "Posted 3 days ago",
+  deadline: "Applications close 30 Aug 2026",
+  applicants: 48,
+  tags: ["Design systems", "Fintech", "Figma", "0→1", "Research"],
+};
+export const detailSections: Array<[string, string[]]> = [
+  [
+    "What you’ll do",
+    [
+      "Own discovery, concept and delivery for the merchant app squad.",
+      "Grow and maintain the Fieldnote design system alongside two engineers.",
+      "Run monthly research sessions with merchants across Jabodetabek.",
+      "Partner with product and data to define success metrics before build.",
+    ],
+  ],
+  [
+    "What we’re looking for",
+    [
+      "5+ years designing consumer or B2B product interfaces.",
+      "A portfolio showing shipped work, not concepts.",
+      "Comfortable writing specs and prototyping in Figma.",
+      "Working proficiency in Bahasa Indonesia and English.",
+    ],
+  ],
+  [
+    "Benefits",
+    [
+      "BPJS + private health for you and dependants",
+      "Hybrid: 2 days in the Senopati studio",
+      "Annual learning budget of Rp 15 jt",
+      "16 weeks parental leave",
+    ],
+  ],
+];
+export const hiringProcess = [
+  ["Pre-selection test", "25 multiple choice · 30 minutes"],
+  ["CV screening", "2–4 working days"],
+  ["Portfolio interview", "60 minutes with the design lead"],
+  ["Team session", "Product + engineering"],
+  ["Offer", "Reference check, then paperwork"],
+];

@@ -47,13 +47,8 @@ export function ServicesSection() {
         <SectionHead
           eyebrow="For companies"
           title="We treat every company as a partner"
-          body="We ensure scoping, writing, and screening from people who have hired for small teams themselves."
+          body=""
         />
-        <Reveal className="center">
-          <a className="button button-primary" href="#apply">
-            Post a job
-          </a>
-        </Reveal>
         <div className="service-grid">
           {services.map(({ icon: Icon, title, body }, index) => (
             <Reveal key={title} delay={(index % 3) * 90}>
@@ -66,7 +61,12 @@ export function ServicesSection() {
               </article>
             </Reveal>
           ))}
-        </div>
+        </div>{" "}
+        <Reveal className="center">
+          <a className="button button-primary" href="#apply">
+            Post a job
+          </a>
+        </Reveal>
       </div>
     </section>
   );

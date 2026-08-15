@@ -25,18 +25,39 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
         onSubmit={handleSubmit}
         onMouseDown={(event) => event.stopPropagation()}
       >
-        <button className="auth-close" type="button" onClick={onClose} aria-label="Close sign in">
+        <button
+          className="auth-close"
+          type="button"
+          onClick={onClose}
+          aria-label="Close sign in"
+        >
           <Close />
         </button>
-        <p className="eyebrow">Welcome back</p>
-        <h2>Sign in to Northstar</h2>
-        <p className="auth-copy">Track applications, save roles, and receive better matches.</p>
+        <h2>Sign in to Polaris</h2>
+        <p className="auth-copy">
+          Track applications, save roles, and receive better matches.
+        </p>
         <label htmlFor="sign-in-email">Email</label>
-        <input id="sign-in-email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required placeholder="you@example.com" />
+        <input
+          id="sign-in-email"
+          type="email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          required
+          placeholder="you@example.com"
+        />
         <label htmlFor="sign-in-password">Password</label>
-        <input id="sign-in-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} required placeholder="••••••••" />
-        <button className="auth-submit" type="submit">Sign in</button>
-        <p className="auth-note">Demo mode: any valid email and password opens the dashboard.</p>
+        <input
+          id="sign-in-password"
+          type="password"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          required
+          placeholder="••••••••"
+        />
+        <button className="auth-submit" type="submit">
+          Sign in
+        </button>
       </form>
     </div>
   );

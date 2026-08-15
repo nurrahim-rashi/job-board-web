@@ -21,7 +21,7 @@ export function FaqSection() {
         <SectionHead
           eyebrow="Help Center"
           title="Questions we get a lot"
-          body="Everything else is one email away, and a person answers it."
+          body=""
         />
         <dl className="faq">
           {questions.map(([question, answer], index) => (

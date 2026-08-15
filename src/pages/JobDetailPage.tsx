@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { ApplicationModal } from "../components/JobDetail/ApplicationModal";
 import { JobBodySection } from "../components/JobDetail/JobBodySection";
-import { JobHeader } from "../components/JobDetail/JobHeader";
 import { JobHero } from "../components/JobDetail/JobHero";
+import { Navbar } from "../components/Navbar";
 
 export default function JobDetailPage() {
   const [saved, setSaved] = useState(false);
@@ -15,7 +15,7 @@ export default function JobDetailPage() {
   };
   return (
     <div id="top" className="job-detail-page">
-      <JobHeader />
+      <Navbar />
       <main>
         <JobHero
           applied={applied}

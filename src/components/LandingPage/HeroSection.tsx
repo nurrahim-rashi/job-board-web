@@ -27,27 +27,13 @@ export function HeroSection() {
             companies that actually answer.
           </p>
           <div className="hero-actions">
-            <a className="button button-light" href="#roles">
+            <a className="button button-light" href="/jobs">
               Browse jobs
             </a>
             <a className="button button-outline" href="#services">
               I&rsquo;m hiring <ArrowRight />
             </a>
           </div>
-          <dl className="hero-stats">
-            <div>
-              <dt>Reply guarantee</dt>
-              <dd>10 working days</dd>
-            </div>
-            <div>
-              <dt>Live listings</dt>
-              <dd>62</dd>
-            </div>
-            <div>
-              <dt>Pay bands shown</dt>
-              <dd>100%</dd>
-            </div>
-          </dl>
         </div>
         <div className="latest-drop float-slow">
           <div className="drop-title">

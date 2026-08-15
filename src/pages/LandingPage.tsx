@@ -1,10 +1,10 @@
 import { Footer } from "../components/Footer";
+import { ApplicantBenefits } from "../components/LandingPage/ApplicantBenefits";
 import { FaqSection } from "../components/LandingPage/FaqSection";
 import { HeroSection } from "../components/LandingPage/HeroSection";
-import { ManifestoSection } from "../components/LandingPage/ManifestoSection";
-import { RecentWorkSection } from "../components/LandingPage/RecentWorkSection";
+import { HiringConstellation } from "../components/LandingPage/HiringConstellation";
+import { SubscribeSection } from "../components/LandingPage/SubscribeSection";
 import { ServicesSection } from "../components/LandingPage/ServicesSection";
-import { TechnologiesSection } from "../components/LandingPage/TechnologiesSection";
 import { TestimonialsSection } from "../components/LandingPage/TestimonialsSection";
 import { Navbar } from "../components/Navbar";
 
@@ -14,11 +14,11 @@ export default function LandingPage() {
       <Navbar />
       <main>
         <HeroSection />
-        <ManifestoSection />
-        <TestimonialsSection />
-        <TechnologiesSection />
+        <ApplicantBenefits />
+        <HiringConstellation />
         <ServicesSection />
-        <RecentWorkSection />
+        <SubscribeSection />
+        <TestimonialsSection />
         <FaqSection />
       </main>
       <Footer />
