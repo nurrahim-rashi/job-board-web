@@ -76,3 +76,4 @@ export const SlidersHorizontal = icon("M4 7h16M7 7v0M4 17h16M17 17v0M4 12h16M12 
 export const BellRing = Bell;
 export const Timer = Clock;
 export const Quote = icon('M9 11H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4v6Zm12 0h-4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4v6Z');
+export const Users = icon("M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75");

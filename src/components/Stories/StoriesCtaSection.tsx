@@ -1,4 +1,4 @@
-import { ArrowRight, Sparkles } from "../site/Icons";
+import { ArrowRight } from "../site/Icons";
 import { Reveal } from "../../hooks/useReveal";
 export function StoriesCtaSection() {
   return (

@@ -1,5 +1,4 @@
 import { ApplicantStoriesSection } from "../components/Stories/ApplicantStoriesSection";
-import { CompanyStoriesSection } from "../components/Stories/CompanyStoriesSection";
 import { StoriesCtaSection } from "../components/Stories/StoriesCtaSection";
 import { StoriesHero } from "../components/Stories/StoriesHero";
 import { Navbar } from "../components/Navbar";
@@ -11,7 +10,6 @@ export default function StoriesPage() {
       <main>
         <StoriesHero />
         <ApplicantStoriesSection />
-        <CompanyStoriesSection />
         <StoriesCtaSection />
       </main>
       <Footer />

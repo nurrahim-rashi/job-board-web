@@ -1,5 +1,5 @@
 import { MapPin } from "../site/Icons";
-import { Stars } from "../site/Stars";
+import { JobsBoardHero } from "../site/JobsBoardHero";
 
 type BrowseHeroProps = {
   locating: boolean;
@@ -9,9 +9,8 @@ type BrowseHeroProps = {
 
 export function BrowseHero({ locating, located, onLocate }: BrowseHeroProps) {
   return (
-    <section className="browse-hero">
-      <Stars />
-      <div>
+    <JobsBoardHero>
+      <div className="browse-jobs-hero-copy">
         <p className="eyebrow light">All jobs</p>
         <h1>
           Best job listings
@@ -31,6 +30,6 @@ export function BrowseHero({ locating, located, onLocate }: BrowseHeroProps) {
               : "Use my location"}
         </button>
       </div>
-    </section>
+    </JobsBoardHero>
   );
 }

@@ -1,31 +1,14 @@
-import { Stars } from "../site/Stars";
+import type { ReactNode } from "react";
+import { Building, Users } from "../site/Icons";
 import { milestones } from "./storiesData";
+
+const nodes = [{ x: 18, y: 28, size: 42, label: "AP", delay: 0 }, { x: 34, y: 62, size: 36, label: "BW", delay: 1.2 }, { x: 52, y: 22, size: 48, label: "NK", delay: 2.4 }, { x: 70, y: 58, size: 38, label: "CT", delay: 0.8 }, { x: 86, y: 32, size: 44, label: "YM", delay: 1.8 }, { x: 62, y: 78, size: 34, label: "DP", delay: 3.2 }, { x: 42, y: 42, size: 28, label: "F", delay: 2 }, { x: 78, y: 44, size: 30, label: "W", delay: 1.6 }];
+const connections: [number, number][] = [[0, 2], [2, 4], [0, 5], [1, 5], [3, 4], [6, 0], [6, 1], [7, 2], [7, 3], [5, 3]];
+
 export function StoriesHero() {
-  return (
-    <section className="stories-hero">
-      <Stars />
-      <i className="stories-aurora" />
-      <div>
-        <p className="eyebrow light">Stories</p>
-        <h1>
-          The right fit,
-          <br />
-          <span>told by the people who found it.</span>
-        </h1>
-        <p>
-          Every match on Polaris has two sides. Here are the applicants who
-          stopped shouting into the void, and the teams who stopped reading
-          three hundred CVs to find one person.
-        </p>
-        <dl>
-          {milestones.map(([value, label]) => (
-            <div key={label}>
-              <dt>{value}</dt>
-              <dd>{label}</dd>
-            </div>
-          ))}
-        </dl>
-      </div>
-    </section>
-  );
+  return <section className="social-garden"><div className="social-mesh" /><i className="social-glow" /><i className="social-glow-secondary" /><Leaf className="leaf-one" path="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8 0-1.76.57-3.38 1.53-4.69l5.16 5.16c.39.39 1.02.39 1.41 0l5.16-5.16C19.43 8.62 20 10.24 20 12c0 4.41-3.59 8-8 8z" /><Leaf className="leaf-two" path="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22l1-2.3A4.49 4.49 0 0 0 8 20C19 20 22 3 22 3c-1 2-5 5-5 5z" /><Leaf className="leaf-three" path="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22l1-2.3A4.49 4.49 0 0 0 8 20C19 20 22 3 22 3c-1 2-5 5-5 5z" /><Network /><div className="social-garden-content"><div className="social-garden-top"><div><p className="eyebrow"><Users />Stories</p><h1>The right fit,<br /><span>grown from real connection.</span></h1><p>Every match on Polaris has two sides. Here are the applicants who stopped shouting into the void, and the teams who stopped reading three hundred CVs to find one person.</p></div><div className="social-stat-cards"><StatCard icon={<Users />} value="1,240" label="matches made" /><StatCard icon={<Building />} value="9 days" label="median to offer" /></div></div><dl>{milestones.map(([value, label]) => <div key={label}><dt>{value}</dt><dd>{label}</dd></div>)}</dl></div></section>;
 }
+
+function Leaf({ className, path }: { className: string; path: string }) { return <svg className={`social-leaf ${className}`} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d={path} /></svg>; }
+function StatCard({ icon, value, label }: { icon: ReactNode; value: string; label: string }) { return <article><i>{icon}</i><p><b>{value}</b><span>{label}</span></p></article>; }
+function Network() { return <div className="social-network" aria-hidden="true"><svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="social-vine" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#567450" stopOpacity=".6" /><stop offset="100%" stopColor="#9eaa75" stopOpacity=".3" /></linearGradient></defs>{connections.map(([fromIndex, toIndex], index) => { const from = nodes[fromIndex]!; const to = nodes[toIndex]!; return <line key={index} x1={from.x} y1={from.y} x2={to.x} y2={to.y} stroke="url(#social-vine)" style={{ animationDelay: `${index * .18}s` }} />; })}{nodes.map((node) => <g key={node.label} style={{ animationDelay: `${node.delay}s` }}><circle cx={node.x} cy={node.y} r={node.size / 12} /><circle className="social-pulse" cx={node.x} cy={node.y} r={node.size / 12} style={{ animationDelay: `${node.delay}s` }} /></g>)}</svg></div>; }
