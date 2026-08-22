@@ -6,6 +6,8 @@ import Homepage from "../pages/Homepage";
 import JobDetailPage from "../pages/JobDetailPage";
 import LandingPage from "../pages/LandingPage";
 import StoriesPage from "../pages/StoriesPage";
+import ProfilePage from "../pages/ProfilePage";
+import EmailActionPage from "../pages/EmailActionPage";
 
 function hasSession() {
   const preview = new URLSearchParams(window.location.search).get("loggedIn");
@@ -42,6 +44,10 @@ export function AppRouter() {
   const pathname = useSyncExternalStore(subscribe, getPathname, () => "/");
   if (pathname === "/" || pathname === "/home")
     return hasSession() ? <Homepage /> : <LandingPage />;
+  if (pathname === "/profile") return hasSession() ? <ProfilePage /> : <LandingPage />;
+  if (pathname === "/verify-email") return <EmailActionPage action="verify" />;
+  if (pathname === "/reset-password") return <EmailActionPage action="forgot" />;
+  if (pathname === "/reset-password/confirm") return <EmailActionPage action="reset" />;
   if (pathname === "/about") return <AboutPage />;
   if (pathname === "/stories") return <StoriesPage />;
   if (pathname === "/companies") return <BrowseCompaniesPage />;
