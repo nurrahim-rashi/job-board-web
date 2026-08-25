@@ -8,6 +8,7 @@ import LandingPage from "../pages/LandingPage";
 import StoriesPage from "../pages/StoriesPage";
 import ProfilePage from "../pages/ProfilePage";
 import EmailActionPage from "../pages/EmailActionPage";
+import DashboardPage from "../pages/DashboardPage";
 
 function hasSession() {
   const preview = new URLSearchParams(window.location.search).get("loggedIn");
@@ -45,6 +46,7 @@ export function AppRouter() {
   if (pathname === "/" || pathname === "/home")
     return hasSession() ? <Homepage /> : <LandingPage />;
   if (pathname === "/profile") return hasSession() ? <ProfilePage /> : <LandingPage />;
+  if (pathname === "/dashboard") return hasSession() ? <DashboardPage /> : <LandingPage />;
   if (pathname === "/verify-email") return <EmailActionPage action="verify" />;
   if (pathname === "/reset-password") return <EmailActionPage action="forgot" />;
   if (pathname === "/reset-password/confirm") return <EmailActionPage action="reset" />;

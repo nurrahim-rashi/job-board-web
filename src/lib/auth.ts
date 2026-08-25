@@ -21,6 +21,12 @@ export type AuthUser = {
 
 type Session = { token: string; user: AuthUser };
 type ApiResponse<T> = { message?: string; data?: T };
+export type DashboardOverview = {
+  name: string;
+  city: string | null;
+  newJobs: number;
+  stats: { label: string; value: string; note: string }[];
+};
 
 async function request<T>(path: string, options: RequestInit = {}) {
   const response = await fetch(`${apiUrl}/auth${path}`, {
@@ -52,6 +58,12 @@ export async function getProfile() {
   const response = await request<AuthUser>("/me");
   if (!response.data) throw new Error("Unable to load profile");
   saveUser(response.data);
+  return response.data;
+}
+
+export async function getDashboardOverview() {
+  const response = await request<DashboardOverview>("/dashboard-overview");
+  if (!response.data) throw new Error("Unable to load dashboard overview");
   return response.data;
 }
 

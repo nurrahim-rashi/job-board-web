@@ -23,9 +23,15 @@ export function Navbar() {
     const updateAuth = () => setLoggedIn(Boolean(getToken()));
     window.addEventListener("authchange", updateAuth);
     window.addEventListener("storage", updateAuth);
-    return () => { window.removeEventListener("authchange", updateAuth); window.removeEventListener("storage", updateAuth); };
+    return () => {
+      window.removeEventListener("authchange", updateAuth);
+      window.removeEventListener("storage", updateAuth);
+    };
   }, []);
-  async function handleLogout() { await logout(); window.location.assign("/"); }
+  async function handleLogout() {
+    await logout();
+    window.location.assign("/");
+  }
   return (
     <header className={`site-nav ${scrolled ? "is-scrolled" : ""}`}>
       <nav>
@@ -33,13 +39,30 @@ export function Navbar() {
           ✦ Polaris
         </a>
         <ul>
-          {links.map((link) => (
+          {links.filter((link) => !loggedIn || !["Stories", "About"].includes(link.label)).map((link) => (
             <li key={link.label}>
               <a href={link.href}>{link.label}</a>
             </li>
           ))}
         </ul>
-        {loggedIn ? <><a className="nav-profile" href="/profile">Profile</a><button type="button" className="nav-cta" onClick={handleLogout}>Sign out</button></> : <button type="button" className="nav-cta" onClick={() => setAuthOpen(true)}>Sign in</button>}
+        {loggedIn ? (
+          <>
+            <a className="nav-profile" href="/dashboard">
+              Dashboard
+            </a>
+            <button type="button" className="nav-cta" onClick={handleLogout}>
+              Sign out
+            </button>
+          </>
+        ) : (
+          <button
+            type="button"
+            className="nav-cta"
+            onClick={() => setAuthOpen(true)}
+          >
+            Sign in
+          </button>
+        )}
       </nav>
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
     </header>
