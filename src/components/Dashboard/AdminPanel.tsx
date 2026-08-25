@@ -1,0 +1,7 @@
+import { ArrowRight, FileText, Users } from "../site/Icons";
+
+const postings = [["Senior Product Designer", "24 applicants", "Live"], ["Frontend Engineer", "18 applicants", "Live"], ["Product Operations", "Draft", "Draft"]];
+
+export function AdminPanel() {
+  return <section className="role-panel"><div className="panel-stats"><article><span>Live roles</span><b>3</b><small>1 closes this week</small></article><article><span>Applicants</span><b>42</b><small>8 need review</small></article><article><span>Interviews</span><b>5</b><small>Next: tomorrow</small></article></div><div className="panel-grid"><article className="panel-card"><p className="eyebrow">Hiring overview</p><h2>Roles in motion</h2><ul className="workspace-list">{postings.map(([title, meta, status]) => <li key={title}><FileText /><span><b>{title}</b><small>{meta}</small></span><em className={status === "Live" ? "good" : "wait"}>{status}</em></li>)}</ul><a href="/jobs">Manage roles <ArrowRight /></a></article><article className="panel-card"><p className="eyebrow">Next up</p><h2>Interview queue</h2><div className="interview-note"><Users /><div><b>Rashifa Amara</b><small>Senior Product Designer · 10:00 WIB</small></div></div><div className="interview-note"><Users /><div><b>Ardi Pratama</b><small>Frontend Engineer · 14:30 WIB</small></div></div><a href="/profile">Open company profile <ArrowRight /></a></article></div></section>;
+}

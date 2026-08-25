@@ -12,7 +12,9 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [role, setRole] = useState<"JOB_SEEKER" | "COMPANY_ADMIN">("JOB_SEEKER");
+  const [role, setRole] = useState<"JOB_SEEKER" | "COMPANY_ADMIN">(
+    "JOB_SEEKER",
+  );
   const [companyName, setCompanyName] = useState("");
   const [phone, setPhone] = useState("");
   const [city, setCity] = useState("");
@@ -41,7 +43,11 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
       window.location.assign(sessionStorage.getItem("authReturnTo") ?? "/");
       sessionStorage.removeItem("authReturnTo");
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : "Unable to sign in.");
+      setError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Unable to sign in.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -74,23 +80,58 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
             ? "Start saving roles, tracking applications, and finding better matches."
             : "Track applications, save roles, and receive better matches."}
         </p>
-        {registering && <>
-          <label htmlFor="register-name">Name</label>
-          <input id="register-name" type="text" value={name} onChange={(event) => setName(event.target.value)} required placeholder="Your name" />
-          <label htmlFor="register-role">Register as</label>
-          <select id="register-role" value={role} onChange={(event) => setRole(event.target.value as "JOB_SEEKER" | "COMPANY_ADMIN")}>
-            <option value="JOB_SEEKER">Job seeker</option>
-            <option value="COMPANY_ADMIN">Company admin</option>
-          </select>
-          {role === "COMPANY_ADMIN" && <>
-            <label htmlFor="company-name">Company name</label>
-            <input id="company-name" value={companyName} onChange={(event) => setCompanyName(event.target.value)} required placeholder="Your company" />
-            <label htmlFor="company-phone">Phone</label>
-            <input id="company-phone" value={phone} onChange={(event) => setPhone(event.target.value)} required placeholder="0812..." />
-            <label htmlFor="company-city">City</label>
-            <input id="company-city" value={city} onChange={(event) => setCity(event.target.value)} required placeholder="Jakarta" />
-          </>}
-        </>}
+        {registering && (
+          <>
+            <label htmlFor="register-name">Name</label>
+            <input
+              id="register-name"
+              type="text"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              required
+              placeholder="Your name"
+            />
+            <label htmlFor="register-role">Register as</label>
+            <select
+              id="register-role"
+              value={role}
+              onChange={(event) =>
+                setRole(event.target.value as "JOB_SEEKER" | "COMPANY_ADMIN")
+              }
+            >
+              <option value="JOB_SEEKER">Job seeker</option>
+              <option value="COMPANY_ADMIN">Company admin</option>
+            </select>
+            {role === "COMPANY_ADMIN" && (
+              <>
+                <label htmlFor="company-name">Company name</label>
+                <input
+                  id="company-name"
+                  value={companyName}
+                  onChange={(event) => setCompanyName(event.target.value)}
+                  required
+                  placeholder="Your company"
+                />
+                <label htmlFor="company-phone">Phone</label>
+                <input
+                  id="company-phone"
+                  value={phone}
+                  onChange={(event) => setPhone(event.target.value)}
+                  required
+                  placeholder="0812..."
+                />
+                <label htmlFor="company-city">City</label>
+                <input
+                  id="company-city"
+                  value={city}
+                  onChange={(event) => setCity(event.target.value)}
+                  required
+                  placeholder="Jakarta"
+                />
+              </>
+            )}
+          </>
+        )}
         <label htmlFor="sign-in-email">Email</label>
         <input
           id="sign-in-email"
@@ -110,20 +151,40 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
             required
             placeholder="••••••••"
           />
-          <button type="button" onClick={() => setShowPassword((visible) => !visible)} aria-label={showPassword ? "Hide password" : "Show password"}>
+          <button
+            type="button"
+            onClick={() => setShowPassword((visible) => !visible)}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+          >
             <Eye />
           </button>
         </div>
-        {error && <p className="auth-error" role="alert">{error}</p>}
-        {registering && <p className="auth-note">We send a verification link to your email. Verify it within one hour to apply or subscribe.</p>}
+        {error && (
+          <p className="auth-error" role="alert">
+            {error}
+          </p>
+        )}
+        {registering && (
+          <p className="auth-note">
+            We send a verification link to your email. Verify it within one hour
+            to apply or subscribe.
+          </p>
+        )}
         <button className="auth-submit" type="submit" disabled={submitting}>
-          {submitting ? "Please wait…" : registering ? "Create account" : "Sign in"}
+          {submitting
+            ? "Please wait…"
+            : registering
+              ? "Create account"
+              : "Sign in"}
         </button>
         <p className="auth-switch">
           {registering ? "Already have an account?" : "New to Polaris?"}
           <button
             type="button"
-            onClick={() => { setMode(registering ? "signIn" : "register"); setError(""); }}
+            onClick={() => {
+              setMode(registering ? "signIn" : "register");
+              setError("");
+            }}
           >
             {registering ? "Sign in" : "Register"}
           </button>
