@@ -1,59 +1,48 @@
-import { useSyncExternalStore } from "react";
+import { Link, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import AboutPage from "../pages/AboutPage";
-import BrowseJobsPage from "../pages/BrowseJobsPage";
 import BrowseCompaniesPage from "../pages/BrowseCompaniesPage";
+import BrowseJobsPage from "../pages/BrowseJobsPage";
+import DashboardPage from "../pages/DashboardPage";
+import EmailActionPage from "../pages/EmailActionPage";
 import Homepage from "../pages/Homepage";
 import JobDetailPage from "../pages/JobDetailPage";
 import LandingPage from "../pages/LandingPage";
-import StoriesPage from "../pages/StoriesPage";
 import ProfilePage from "../pages/ProfilePage";
-import EmailActionPage from "../pages/EmailActionPage";
-import DashboardPage from "../pages/DashboardPage";
+import StoriesPage from "../pages/StoriesPage";
 
-function hasSession() {
-  const preview = new URLSearchParams(window.location.search).get("loggedIn");
-  return (
-    preview === "true" ||
-    ["accessToken", "authToken", "token"].some((key) =>
-      Boolean(localStorage.getItem(key)),
-    )
-  );
+function hasSession(search: string) {
+  const preview = new URLSearchParams(search).get("loggedIn");
+  return preview === "true" || ["accessToken", "authToken", "token"].some((key) => Boolean(localStorage.getItem(key)));
 }
 
-function subscribe(onStoreChange: () => void) {
-  window.addEventListener("popstate", onStoreChange);
-  return () => window.removeEventListener("popstate", onStoreChange);
+function HomeRoute() {
+  const { search } = useLocation();
+  return hasSession(search) ? <Homepage /> : <LandingPage />;
 }
 
-function getPathname() {
-  return window.location.pathname;
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { search } = useLocation();
+  return hasSession(search) ? children : <Navigate replace to="/" />;
 }
 
 function NotFoundPage() {
-  return (
-    <main className="not-found">
-      <h1>404</h1>
-      <h2>That page is not on the map.</h2>
-      <a className="button button-primary" href="/">
-        Back home
-      </a>
-    </main>
-  );
+  return <main className="not-found"><h1>404</h1><h2>That page is not on the map.</h2><Link className="button button-primary" to="/">Back home</Link></main>;
 }
 
 export function AppRouter() {
-  const pathname = useSyncExternalStore(subscribe, getPathname, () => "/");
-  if (pathname === "/" || pathname === "/home")
-    return hasSession() ? <Homepage /> : <LandingPage />;
-  if (pathname === "/profile") return hasSession() ? <ProfilePage /> : <LandingPage />;
-  if (pathname === "/dashboard") return hasSession() ? <DashboardPage /> : <LandingPage />;
-  if (pathname === "/verify-email") return <EmailActionPage action="verify" />;
-  if (pathname === "/reset-password") return <EmailActionPage action="forgot" />;
-  if (pathname === "/reset-password/confirm") return <EmailActionPage action="reset" />;
-  if (pathname === "/about") return <AboutPage />;
-  if (pathname === "/stories") return <StoriesPage />;
-  if (pathname === "/companies") return <BrowseCompaniesPage />;
-  if (pathname === "/jobs") return <BrowseJobsPage />;
-  if (/^\/jobs\/[^/]+$/.test(pathname)) return <JobDetailPage />;
-  return <NotFoundPage />;
+  return <Routes>
+    <Route path="/" element={<HomeRoute />} />
+    <Route path="/home" element={<HomeRoute />} />
+    <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+    <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+    <Route path="/verify-email" element={<EmailActionPage action="verify" />} />
+    <Route path="/reset-password" element={<EmailActionPage action="forgot" />} />
+    <Route path="/reset-password/confirm" element={<EmailActionPage action="reset" />} />
+    <Route path="/about" element={<AboutPage />} />
+    <Route path="/stories" element={<StoriesPage />} />
+    <Route path="/companies" element={<BrowseCompaniesPage />} />
+    <Route path="/jobs" element={<BrowseJobsPage />} />
+    <Route path="/jobs/:slug" element={<JobDetailPage />} />
+    <Route path="*" element={<NotFoundPage />} />
+  </Routes>;
 }

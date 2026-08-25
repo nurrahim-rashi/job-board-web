@@ -12,7 +12,7 @@ const companies = [
   ["Kessel", "Logistics", "3"],
   ["Wren", "Design studio", "2"],
 ];
-export function DashboardSidebar() {
+export function Sidebar() {
   return (
     <aside className="dashboard-side">
       <Reveal>
