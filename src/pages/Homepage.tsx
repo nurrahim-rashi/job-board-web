@@ -1,7 +1,7 @@
 import { Footer } from "../components/Footer";
 import { Navbar } from "../components/Navbar";
-import { DashboardHero } from "../components/Homepage/Hero";
-import { DashboardSidebar } from "../components/Homepage/Sidebar";
+import { HeroSection } from "../components/Homepage/Hero";
+import { Sidebar } from "../components/Homepage/Sidebar";
 import { JobFeedSection } from "../components/Homepage/JobFeedSection";
 
 export default function Homepage() {
@@ -9,10 +9,10 @@ export default function Homepage() {
     <div id="top" className="dashboard-page">
       <Navbar />
       <main>
-        <DashboardHero />
+        <HeroSection />
         <div className="dashboard-layout">
           <JobFeedSection />
-          <DashboardSidebar />
+          <Sidebar />
         </div>
       </main>
       <Footer />
