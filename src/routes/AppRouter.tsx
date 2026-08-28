@@ -9,10 +9,18 @@ import JobDetailPage from "../pages/JobDetailPage";
 import LandingPage from "../pages/LandingPage";
 import ProfilePage from "../pages/ProfilePage";
 import StoriesPage from "../pages/StoriesPage";
+import AssessmentDiscoveryPage from "../pages/AssessmentDiscoveryPage";
+import AssessmentDetailPage from "../pages/AssessmentDetailPage";
+import AssessmentTakePage from "../pages/AssessmentTakePage";
 
 function hasSession(search: string) {
   const preview = new URLSearchParams(search).get("loggedIn");
-  return preview === "true" || ["accessToken", "authToken", "token"].some((key) => Boolean(localStorage.getItem(key)));
+  return (
+    preview === "true" ||
+    ["accessToken", "authToken", "token"].some((key) =>
+      Boolean(localStorage.getItem(key)),
+    )
+  );
 }
 
 function HomeRoute() {
@@ -26,23 +34,84 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function NotFoundPage() {
-  return <main className="not-found"><h1>404</h1><h2>That page is not on the map.</h2><Link className="button button-primary" to="/">Back home</Link></main>;
+  return (
+    <main className="not-found">
+      <h1>404</h1>
+      <h2>That page is not on the map.</h2>
+      <Link className="button button-primary" to="/">
+        Back home
+      </Link>
+    </main>
+  );
 }
 
 export function AppRouter() {
-  return <Routes>
-    <Route path="/" element={<HomeRoute />} />
-    <Route path="/home" element={<HomeRoute />} />
-    <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-    <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-    <Route path="/verify-email" element={<EmailActionPage action="verify" />} />
-    <Route path="/reset-password" element={<EmailActionPage action="forgot" />} />
-    <Route path="/reset-password/confirm" element={<EmailActionPage action="reset" />} />
-    <Route path="/about" element={<AboutPage />} />
-    <Route path="/stories" element={<StoriesPage />} />
-    <Route path="/companies" element={<BrowseCompaniesPage />} />
-    <Route path="/jobs" element={<BrowseJobsPage />} />
-    <Route path="/jobs/:slug" element={<JobDetailPage />} />
-    <Route path="*" element={<NotFoundPage />} />
-  </Routes>;
+  return (
+    <Routes>
+      <Route path="/" element={<HomeRoute />} />
+      <Route path="/home" element={<HomeRoute />} />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <DashboardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/verify-email"
+        element={<EmailActionPage action="verify" />}
+      />
+      <Route
+        path="/reset-password"
+        element={<EmailActionPage action="forgot" />}
+      />
+      <Route
+        path="/reset-password/confirm"
+        element={<EmailActionPage action="reset" />}
+      />
+      <Route path="/about" element={<AboutPage />} />
+      <Route path="/stories" element={<StoriesPage />} />
+      <Route path="/companies" element={<BrowseCompaniesPage />} />
+      <Route path="/jobs" element={<BrowseJobsPage />} />
+      <Route path="/jobs/:slug" element={<JobDetailPage />} />
+
+      <Route
+        path="/dashboard/assessments"
+        element={
+          <ProtectedRoute>
+            <AssessmentDiscoveryPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/dashboard/assessments/:assessmentId"
+        element={
+          <ProtectedRoute>
+            <AssessmentDetailPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/dashboard/assessments/:assessmentId/take"
+        element={
+          <ProtectedRoute>
+            <AssessmentTakePage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
+  );
 }

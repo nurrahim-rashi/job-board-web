@@ -1,8 +1,103 @@
 import { ArrowRight, FileText, Sparkles } from "../site/Icons";
+import { Link } from "react-router-dom";
 
-const applications = [["Senior Product Designer", "Fieldnote", "Interview", "good"], ["Design Lead", "Tidewell", "In review", "wait"], ["UI Designer", "Kessel", "CV screening", "wait"]];
-const recommended = [["Product Designer, Growth", "Nusantara Pay", "92% match"], ["Senior UI Designer", "Bright Harbor", "88% match"], ["Design Systems Lead", "Wren", "84% match"]];
+const applications = [
+  ["Senior Product Designer", "Fieldnote", "Interview", "good"],
+  ["Design Lead", "Tidewell", "In review", "wait"],
+  ["UI Designer", "Kessel", "CV screening", "wait"],
+];
+const recommended = [
+  ["Product Designer, Growth", "Nusantara Pay", "92% match"],
+  ["Senior UI Designer", "Bright Harbor", "88% match"],
+  ["Design Systems Lead", "Wren", "84% match"],
+];
 
 export function ApplicantPanel() {
-  return <section className="role-panel"><div className="panel-stats"><article><span>Applications</span><b>7</b><small>3 in review</small></article><article><span>Saved roles</span><b>12</b><small>2 closing soon</small></article><article><span>Profile strength</span><b>80%</b><small>Add your CV</small></article></div><div className="panel-grid"><article className="panel-card"><p className="eyebrow">Your applications</p><h2>Where things stand</h2><ul className="workspace-list">{applications.map(([role, company, status, tone]) => <li key={role}><FileText /><span><b>{role}</b><small>{company}</small></span><em className={tone}>{status}</em></li>)}</ul><a href="/jobs">View applications <ArrowRight /></a></article><article className="panel-card"><p className="eyebrow">Your profile</p><h2>Almost there</h2><p>Complete your profile and upload a CV to apply in one tap.</p><div className="workspace-progress"><i /></div><small>80% complete</small><a href="/profile">Complete profile <ArrowRight /></a></article></div><article className="panel-card recommendation-card"><p className="eyebrow">Picked for you</p><h2>Roles that fit your signals</h2><ul className="recommendation-list">{recommended.map(([role, company, score]) => <li key={role}><Sparkles /><span><b>{role}</b><small>{company}</small></span><strong>{score}</strong><a href="/jobs"><ArrowRight /></a></li>)}</ul></article></section>;
+  return (
+    <section className="role-panel">
+      <div className="panel-stats">
+        <article>
+          <span>Applications</span>
+          <b>7</b>
+          <small>3 in review</small>
+        </article>
+        <article>
+          <span>Saved roles</span>
+          <b>12</b>
+          <small>2 closing soon</small>
+        </article>
+        <article>
+          <span>Profile strength</span>
+          <b>80%</b>
+          <small>Add your CV</small>
+        </article>
+      </div>
+
+      <div className="panel-grid">
+        <article className="panel-card">
+          <p className="eyebrow">Your applications</p>
+          <h2>Where things stand</h2>
+          <ul className="workspace-list">
+            {applications.map(([role, company, status, tone]) => (
+              <li key={role}>
+                <FileText />
+                <span>
+                  <b>{role}</b>
+                  <small>{company}</small>
+                </span>
+                <em className={tone}>{status}</em>
+              </li>
+            ))}
+          </ul>
+          <a href="/jobs">
+            View applications <ArrowRight />
+          </a>
+        </article>
+        <article className="panel-card">
+          <p className="eyebrow">Your profile</p>
+          <h2>Almost there</h2>
+          <p>Complete your profile and upload a CV to apply in one tap.</p>
+          <div className="workspace-progress">
+            <i />
+          </div>
+          <small>80% complete</small>
+          <a href="/profile">
+            Complete profile <ArrowRight />
+          </a>
+        </article>
+      </div>
+
+      <article className="panel-card">
+        <p className="eyebrow">Skill assessment</p>
+
+        <h2>Prove your skills</h2>
+
+        <p>Take skill assessments, earn badges, and strengthen your profile.</p>
+
+        <Link to="/dashboard/assessments">
+          Browse assessments <ArrowRight />
+        </Link>
+      </article>
+
+      <article className="panel-card recommendation-card">
+        <p className="eyebrow">Picked for you</p>
+        <h2>Roles that fit your signals</h2>
+        <ul className="recommendation-list">
+          {recommended.map(([role, company, score]) => (
+            <li key={role}>
+              <Sparkles />
+              <span>
+                <b>{role}</b>
+                <small>{company}</small>
+              </span>
+              <strong>{score}</strong>
+              <a href="/jobs">
+                <ArrowRight />
+              </a>
+            </li>
+          ))}
+        </ul>
+      </article>
+    </section>
+  );
 }
