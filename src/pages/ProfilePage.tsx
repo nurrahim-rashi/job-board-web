@@ -3,15 +3,16 @@ import { Navbar } from "../components/Navbar";
 import {
   changePassword,
   getProfile,
-  getStoredUser,
   resendVerification,
   updateProfile,
   uploadAvatar,
-  type AuthUser,
-} from "../lib/auth";
+} from "../services/auth.service";
+import { useAuth } from "../stores/useAuth";
+import type { AuthUser } from "../types/auth";
 
 export default function ProfilePage() {
-  const [user, setUser] = useState<AuthUser | null>(getStoredUser);
+  const storedUser = useAuth((state) => state.user);
+  const [user, setUser] = useState<AuthUser | null>(storedUser);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
 

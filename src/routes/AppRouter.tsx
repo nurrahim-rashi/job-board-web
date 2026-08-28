@@ -9,10 +9,11 @@ import JobDetailPage from "../pages/JobDetailPage";
 import LandingPage from "../pages/LandingPage";
 import ProfilePage from "../pages/ProfilePage";
 import StoriesPage from "../pages/StoriesPage";
+import { useAuth } from "../stores/useAuth";
 
 function hasSession(search: string) {
   const preview = new URLSearchParams(search).get("loggedIn");
-  return preview === "true" || ["accessToken", "authToken", "token"].some((key) => Boolean(localStorage.getItem(key)));
+  return preview === "true" || Boolean(useAuth.getState().token);
 }
 
 function HomeRoute() {

@@ -1436,6 +1436,8 @@ p {
   font-size: 14px;
   margin: 13px 0 0;
 }
+.location-note { align-items: center; display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; }
+.location-manual { display: flex; gap: 8px; }.location-manual input { background: #fcfaf4; border: 1px solid #ded9cf; border-radius: 999px; font: 13px "DM Sans", sans-serif; padding: 9px 13px; width: 145px; }.location-manual button { background: transparent; border: 0; color: #485eb4; cursor: pointer; font-size: 13px; font-weight: 700; padding: 8px 0; }
 .nearby-grid {
   display: grid;
   gap: 15px;
