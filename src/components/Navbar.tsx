@@ -14,6 +14,7 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const loggedIn = useAuth((state) => Boolean(state.token));
+  const isAdmin = useAuth((state) => state.user?.role === "COMPANY_ADMIN");
   useEffect(() => {
     const update = () => setScrolled(window.scrollY > 24);
     update();
@@ -39,7 +40,7 @@ export function Navbar() {
         </ul>
         {loggedIn ? (
           <>
-            <a className="nav-profile" href="/dashboard">
+            <a className="nav-profile" href={isAdmin ? "/admin" : "/dashboard"}>
               Dashboard
             </a>
             <button type="button" className="nav-cta" onClick={handleLogout}>
