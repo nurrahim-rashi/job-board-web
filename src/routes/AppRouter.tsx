@@ -6,6 +6,9 @@ import AdminJobFormPage from "../pages/AdminJobFormPage";
 import AdminJobsPage from "../pages/AdminJobsPage";
 import AdminTestPage from "../pages/AdminTestPage";
 import AdminTestsPage from "../pages/AdminTestsPage";
+import AssessmentDetailPage from "../pages/AssessmentDetailPage";
+import AssessmentDiscoveryPage from "../pages/AssessmentDiscoveryPage";
+import AssessmentTakePage from "../pages/AssessmentTakePage";
 import BrowseCompaniesPage from "../pages/BrowseCompaniesPage";
 import BrowseJobsPage from "../pages/BrowseJobsPage";
 import DashboardPage from "../pages/DashboardPage";
@@ -24,7 +27,9 @@ function hasSession(search: string) {
 
 function isCompanyAdmin(search: string) {
   const preview = new URLSearchParams(search).get("role");
-  return preview === "admin" || useAuth.getState().user?.role === "COMPANY_ADMIN";
+  return (
+    preview === "admin" || useAuth.getState().user?.role === "COMPANY_ADMIN"
+  );
 }
 
 function HomeRoute() {
@@ -39,40 +44,174 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const { search } = useLocation();
-  if (!hasSession(search)) return <Navigate replace to="/" />;
-  return isCompanyAdmin(search) ? children : <Navigate replace to={{ pathname: "/dashboard", search }} />;
+
+  if (!hasSession(search)) {
+    return <Navigate replace to="/" />;
+  }
+
+  return isCompanyAdmin(search) ? (
+    children
+  ) : (
+    <Navigate replace to={{ pathname: "/dashboard", search }} />
+  );
 }
 
 function DashboardRoute() {
   const { search } = useLocation();
-  return isCompanyAdmin(search) ? <Navigate replace to={{ pathname: "/admin", search }} /> : <DashboardPage />;
+
+  return isCompanyAdmin(search) ? (
+    <Navigate replace to={{ pathname: "/admin", search }} />
+  ) : (
+    <DashboardPage />
+  );
 }
 
 function NotFoundPage() {
-  return <main className="not-found"><h1>404</h1><h2>That page is not on the map.</h2><Link className="button button-primary" to="/">Back home</Link></main>;
+  return (
+    <main className="not-found">
+      <h1>404</h1>
+      <h2>That page is not on the map.</h2>
+      <Link className="button button-primary" to="/">
+        Back home
+      </Link>
+    </main>
+  );
 }
 
 export function AppRouter() {
-  return <Routes>
-    <Route path="/" element={<HomeRoute />} />
-    <Route path="/home" element={<HomeRoute />} />
-    <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-    <Route path="/dashboard" element={<ProtectedRoute><DashboardRoute /></ProtectedRoute>} />
-    <Route path="/admin" element={<AdminRoute><AdminJobsPage /></AdminRoute>} />
-    <Route path="/admin/jobs/new" element={<AdminRoute><AdminJobFormPage /></AdminRoute>} />
-    <Route path="/admin/jobs/:slug" element={<AdminRoute><AdminJobDetailPage /></AdminRoute>} />
-    <Route path="/admin/jobs/:slug/edit" element={<AdminRoute><AdminJobFormPage /></AdminRoute>} />
-    <Route path="/admin/jobs/:slug/test" element={<AdminRoute><AdminTestPage /></AdminRoute>} />
-    <Route path="/admin/applicants" element={<AdminRoute><AdminApplicantsPage /></AdminRoute>} />
-    <Route path="/admin/tests" element={<AdminRoute><AdminTestsPage /></AdminRoute>} />
-    <Route path="/verify-email" element={<EmailActionPage action="verify" />} />
-    <Route path="/reset-password" element={<EmailActionPage action="forgot" />} />
-    <Route path="/reset-password/confirm" element={<EmailActionPage action="reset" />} />
-    <Route path="/about" element={<AboutPage />} />
-    <Route path="/stories" element={<StoriesPage />} />
-    <Route path="/companies" element={<BrowseCompaniesPage />} />
-    <Route path="/jobs" element={<BrowseJobsPage />} />
-    <Route path="/jobs/:slug" element={<JobDetailPage />} />
-    <Route path="*" element={<NotFoundPage />} />
-  </Routes>;
+  return (
+    <Routes>
+      <Route path="/" element={<HomeRoute />} />
+      <Route path="/home" element={<HomeRoute />} />
+
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <DashboardRoute />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/dashboard/assessments"
+        element={
+          <ProtectedRoute>
+            <AssessmentDiscoveryPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/dashboard/assessments/:assessmentId"
+        element={
+          <ProtectedRoute>
+            <AssessmentDetailPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/dashboard/assessments/:assessmentId/take"
+        element={
+          <ProtectedRoute>
+            <AssessmentTakePage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin"
+        element={
+          <AdminRoute>
+            <AdminJobsPage />
+          </AdminRoute>
+        }
+      />
+
+      <Route
+        path="/admin/jobs/new"
+        element={
+          <AdminRoute>
+            <AdminJobFormPage />
+          </AdminRoute>
+        }
+      />
+
+      <Route
+        path="/admin/jobs/:slug"
+        element={
+          <AdminRoute>
+            <AdminJobDetailPage />
+          </AdminRoute>
+        }
+      />
+
+      <Route
+        path="/admin/jobs/:slug/edit"
+        element={
+          <AdminRoute>
+            <AdminJobFormPage />
+          </AdminRoute>
+        }
+      />
+
+      <Route
+        path="/admin/jobs/:slug/test"
+        element={
+          <AdminRoute>
+            <AdminTestPage />
+          </AdminRoute>
+        }
+      />
+
+      <Route
+        path="/admin/applicants"
+        element={
+          <AdminRoute>
+            <AdminApplicantsPage />
+          </AdminRoute>
+        }
+      />
+
+      <Route
+        path="/admin/tests"
+        element={
+          <AdminRoute>
+            <AdminTestsPage />
+          </AdminRoute>
+        }
+      />
+
+      <Route
+        path="/verify-email"
+        element={<EmailActionPage action="verify" />}
+      />
+      <Route
+        path="/reset-password"
+        element={<EmailActionPage action="forgot" />}
+      />
+      <Route
+        path="/reset-password/confirm"
+        element={<EmailActionPage action="reset" />}
+      />
+
+      <Route path="/about" element={<AboutPage />} />
+      <Route path="/stories" element={<StoriesPage />} />
+      <Route path="/companies" element={<BrowseCompaniesPage />} />
+      <Route path="/jobs" element={<BrowseJobsPage />} />
+      <Route path="/jobs/:slug" element={<JobDetailPage />} />
+
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
+  );
 }
