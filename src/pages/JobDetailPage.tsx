@@ -4,15 +4,15 @@ import { JobBodySection } from "../components/JobDetail/JobBodySection";
 import { JobHero } from "../components/JobDetail/JobHero";
 import { Navbar } from "../components/Navbar";
 import { AuthModal } from "../components/site/AuthModal";
-import { getStoredUser } from "../lib/auth";
+import { useAuth } from "../stores/useAuth";
 
 export default function JobDetailPage() {
+  const user = useAuth((state) => state.user);
   const [saved, setSaved] = useState(false);
   const [applied, setApplied] = useState(false);
   const [applyOpen, setApplyOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const openApply = () => {
-    const user = getStoredUser();
     if (!user) {
       sessionStorage.setItem("authReturnTo", window.location.pathname);
       setAuthOpen(true);

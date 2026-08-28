@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, Briefcase, MapPin, Search } from "../site/Icons";
 import { Stars } from "../site/Stars";
-import { getDashboardOverview, type DashboardOverview } from "../../lib/auth";
+import { getDashboardOverview } from "../../services/auth.service";
+import type { DashboardOverview } from "../../types/auth";
 
 export function HeroSection() {
   const [overview, setOverview] = useState<DashboardOverview | null>(null);
