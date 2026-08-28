@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Navigate, useLocation, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
@@ -10,7 +11,10 @@ import type {
   SubmitAssessmentData,
 } from "../types/assessment";
 
-import { submitAssessment } from "../lib/assessment-api";
+import {
+  submitAssessment,
+  fetchAssessmentResultDetail,
+} from "../lib/assessment-api";
 
 export default function AssessmentTakePage() {
   const { assessmentId } = useParams();
@@ -27,6 +31,46 @@ export default function AssessmentTakePage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [result, setResult] = useState<SubmitAssessmentData | null>(null);
+
+  const [checkingResult, setCheckingResult] = useState(true);
+
+  useEffect(() => {
+    if (!assessmentData) {
+      setCheckingResult(false);
+      return;
+    }
+
+    const checkExistingResult = async () => {
+      try {
+        const response = await fetchAssessmentResultDetail(
+          assessmentData.resultId,
+        );
+
+        const detail = response.data;
+
+        const correctAnswers = detail.answers.filter(
+          (answer: { isCorrect: boolean }) => answer.isCorrect,
+        ).length;
+
+        setResult({
+          resultId: detail.resultId,
+          score: detail.score,
+          isPassed: detail.isPassed,
+          badgeName: detail.badgeName,
+          completedAt: detail.completedAt,
+          correctAnswers,
+          totalQuestions: detail.answers.length,
+        });
+      } catch {
+        // 404 means the attempt is still unfinished.
+        // That's fine — keep showing the assessment.
+      } finally {
+        setCheckingResult(false);
+      }
+    };
+
+    checkExistingResult();
+  }, [assessmentData]);
 
   useEffect(() => {
     if (!assessmentData) return;
@@ -60,6 +104,20 @@ export default function AssessmentTakePage() {
       "0",
     )}`;
   }, [remainingSeconds]);
+
+  if (checkingResult) {
+    return (
+      <div className="workspace-dashboard">
+        <Navbar />
+        <main>
+          <section className="role-panel">
+            <p>Checking assessment status...</p>
+          </section>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!assessmentData) {
     return <Navigate replace to={`/dashboard/assessments/${assessmentId}`} />;
@@ -172,12 +230,12 @@ export default function AssessmentTakePage() {
                 </p>
               )}
 
-              <a
+              <Link
                 className="button button-primary"
-                href="/dashboard/assessments"
+                to="/dashboard/assessments"
               >
                 Back to assessments
-              </a>
+              </Link>
             </article>
           </section>
         </main>
