@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { forgotPassword, resetPassword, verifyEmail } from "../lib/auth";
+import { forgotPassword, resetPassword, verifyEmail } from "../services/auth.service";
 
 type EmailAction = "verify" | "forgot" | "reset";
 
@@ -77,7 +77,7 @@ export default function EmailActionPage({ action }: { action: EmailAction }) {
             ) : (
               <label>
                 New password
-                <input type="password" name="password" minLength={8} required />
+                <input type="password" name="password" minLength={6} required />
               </label>
             )}
             {message && <p className="profile-notice">{message}</p>}

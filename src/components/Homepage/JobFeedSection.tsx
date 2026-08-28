@@ -1,153 +1,49 @@
 import { useEffect, useState } from "react";
-import { ArrowRight, Bookmark, MapPin, Sparkles } from "../site/Icons";
+import { getPublicJobs, type PublicJob } from "../../services/job.service";
 import { Reveal } from "../../hooks/useReveal";
-const jobs = [
-  {
-    role: "Senior Product Designer",
-    company: "Fieldnote",
-    city: "Jakarta Selatan",
-    distance: "4 km",
-    pay: "Rp 22–30 jt",
-    type: "Hybrid",
-  },
-  {
-    role: "Frontend Engineer",
-    company: "Halden Labs",
-    city: "Jakarta Pusat",
-    distance: "7 km",
-    pay: "Rp 18–26 jt",
-    type: "On-site",
-  },
-  {
-    role: "Product Manager",
-    company: "Kessel",
-    city: "Tangerang Selatan",
-    distance: "12 km",
-    pay: "Rp 25–35 jt",
-    type: "Hybrid",
-  },
-  {
-    role: "UX Researcher",
-    company: "Wren",
-    city: "Depok",
-    distance: "16 km",
-    pay: "Rp 15–21 jt",
-    type: "Remote ID",
-  },
-];
-const matches = [
-  ["Design Lead", "Tidewell", "Matches design systems + 0→1 experience", "94%"],
-  [
-    "Senior UI Designer",
-    "Bright Harbor",
-    "Same stack as your last two roles",
-    "88%",
-  ],
-  [
-    "Product Designer, Growth",
-    "Nusantara Pay",
-    "Salary above your stated range",
-    "85%",
-  ],
-];
+import { ArrowRight, Bookmark, MapPin, Sparkles } from "../site/Icons";
+
+const matches = [["Design Lead", "Tidewell", "Matches design systems + 0→1 experience", "94%"], ["Senior UI Designer", "Bright Harbor", "Same stack as your last two roles", "88%"], ["Product Designer, Growth", "Nusantara Pay", "Salary above your stated range", "85%"]];
+
+function salary(job: PublicJob) {
+  if (job.salaryMin === null && job.salaryMax === null) return "Salary not listed";
+  const format = (amount: number | null) => amount === null ? "" : `Rp ${(amount / 1_000_000).toLocaleString("id-ID")} jt`;
+  return [format(job.salaryMin), format(job.salaryMax)].filter(Boolean).join("–");
+}
+
 export function JobFeedSection() {
-  const [location, setLocation] = useState("Jakarta, Indonesia");
+  const [jobs, setJobs] = useState<PublicJob[]>([]);
+  const [location, setLocation] = useState("latest roles");
+  const [manualCity, setManualCity] = useState("");
   const [locating, setLocating] = useState(false);
   const [granted, setGranted] = useState(false);
-  useEffect(() => {
-    navigator.permissions
-      ?.query({ name: "geolocation" as PermissionName })
-      .then((permission) => setGranted(permission.state === "granted"))
-      .catch(() => undefined);
-  }, []);
+
+  const loadJobs = (options: { latitude?: number; longitude?: number; city?: string } = {}) => getPublicJobs({ ...options, limit: 4 }).then(setJobs).catch(() => setJobs([]));
+
+  useEffect(() => { loadJobs(); }, []);
+
   const useLocation = () => {
     if (!navigator.geolocation) return;
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        setLocation(
-          `Near ${position.coords.latitude.toFixed(2)}, ${position.coords.longitude.toFixed(2)}`,
-        );
+        const { latitude, longitude } = position.coords;
+        setLocation("your area");
         setGranted(true);
-        setLocating(false);
+        loadJobs({ latitude, longitude }).finally(() => setLocating(false));
       },
       () => setLocating(false),
       { timeout: 8000 },
     );
   };
-  return (
-    <section id="feed" className="dashboard-feed">
-      <div className="feed-main">
-        <Reveal>
-          <div className="feed-heading">
-            <div>
-              <p className="eyebrow">Near you</p>
-              <h2>Jobs around {location.split(",")[0]}</h2>
-            </div>
-            <button onClick={useLocation}>
-              <MapPin />
-              {locating
-                ? "Locating…"
-                : granted
-                  ? "Refresh location"
-                  : "Use my location"}
-            </button>
-          </div>
-          {!granted && (
-            <p className="location-note">
-              Location access is off, so we&rsquo;re showing roles for your
-              saved city. Turn it on for a closer feed.
-            </p>
-          )}
-        </Reveal>
-        <div className="nearby-grid">
-          {jobs.map((job, index) => (
-            <Reveal key={job.role} delay={index * 80}>
-              <article className="nearby-card">
-                <div>
-                  <b>{job.company[0]}</b>
-                  <button aria-label={`Save ${job.role}`}>
-                    <Bookmark />
-                  </button>
-                </div>
-                <h3>{job.role}</h3>
-                <p>
-                  {job.company} · {job.city} · {job.distance}
-                </p>
-                <aside>
-                  <span>{job.type}</span>
-                  <span>{job.pay}</span>
-                </aside>
-                <a href="#feed">
-                  View role <ArrowRight />
-                </a>
-              </article>
-            </Reveal>
-          ))}
-        </div>
-        <Reveal className="matches-title">
-          <p className="eyebrow">Picked for you</p>
-          <h2>Based on your profile</h2>
-        </Reveal>
-        <ul className="match-list">
-          {matches.map(([role, company, why, score], index) => (
-            <Reveal key={role} delay={index * 70}>
-              <li>
-                <a href="#feed">
-                  <Sparkles />
-                  <span>
-                    <b>
-                      {role} · <em>{company}</em>
-                    </b>
-                    <small>{why}</small>
-                  </span>
-                  <strong>{score}</strong>
-                </a>
-              </li>
-            </Reveal>
-          ))}
-        </ul>
-      </div>
-    </section>
-  );
+
+  const useManualCity = () => {
+    const city = manualCity.trim();
+    if (!city) return;
+    setLocation(city);
+    setGranted(false);
+    loadJobs({ city });
+  };
+
+  return <section id="feed" className="dashboard-feed"><div className="feed-main"><Reveal><div className="feed-heading"><div><p className="eyebrow">{granted ? "Near you" : "Discover roles"}</p><h2>{granted ? "Jobs around you" : `Latest jobs in ${location}`}</h2></div><button onClick={useLocation}><MapPin />{locating ? "Locating…" : granted ? "Refresh location" : "Use my location"}</button></div>{!granted && <div className="location-note"><span>Location access is off. Choose a city or browse the newest roles.</span><div className="location-manual"><input value={manualCity} onChange={(event) => setManualCity(event.target.value)} placeholder="Choose a city" /><button type="button" onClick={useManualCity}>Show jobs</button></div></div>}</Reveal><div className="nearby-grid">{jobs.map((job, index) => <Reveal key={job.id} delay={index * 80}><article className="nearby-card"><div><b>{job.company.companyName[0]}</b><button aria-label={`Save ${job.title}`}><Bookmark /></button></div><h3>{job.title}</h3><p>{job.company.companyName} · {job.cityLocation}{job.distance !== null && job.distance !== undefined ? ` · ${job.distance.toFixed(1)} km` : ""}</p><aside><span>{job.category.replaceAll("_", " ")}</span><span>{salary(job)}</span></aside><a href={`/jobs/${job.slug}`}>View role <ArrowRight /></a></article></Reveal>)}</div>{!jobs.length && <p className="location-note">No published jobs found for this location.</p>}<Reveal className="matches-title"><p className="eyebrow">Picked for you</p><h2>Based on your profile</h2></Reveal><ul className="match-list">{matches.map(([role, company, why, score], index) => <Reveal key={role} delay={index * 70}><li><a href="/jobs"><Sparkles /><span><b>{role} · <em>{company}</em></b><small>{why}</small></span><strong>{score}</strong></a></li></Reveal>)}</ul></div></section>;
 }

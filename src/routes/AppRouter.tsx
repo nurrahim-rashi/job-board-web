@@ -1,5 +1,14 @@
 import { Link, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import AboutPage from "../pages/AboutPage";
+import AdminApplicantsPage from "../pages/AdminApplicantsPage";
+import AdminJobDetailPage from "../pages/AdminJobDetailPage";
+import AdminJobFormPage from "../pages/AdminJobFormPage";
+import AdminJobsPage from "../pages/AdminJobsPage";
+import AdminTestPage from "../pages/AdminTestPage";
+import AdminTestsPage from "../pages/AdminTestsPage";
+import AssessmentDetailPage from "../pages/AssessmentDetailPage";
+import AssessmentDiscoveryPage from "../pages/AssessmentDiscoveryPage";
+import AssessmentTakePage from "../pages/AssessmentTakePage";
 import BrowseCompaniesPage from "../pages/BrowseCompaniesPage";
 import BrowseJobsPage from "../pages/BrowseJobsPage";
 import DashboardPage from "../pages/DashboardPage";
@@ -9,17 +18,17 @@ import JobDetailPage from "../pages/JobDetailPage";
 import LandingPage from "../pages/LandingPage";
 import ProfilePage from "../pages/ProfilePage";
 import StoriesPage from "../pages/StoriesPage";
-import AssessmentDiscoveryPage from "../pages/AssessmentDiscoveryPage";
-import AssessmentDetailPage from "../pages/AssessmentDetailPage";
-import AssessmentTakePage from "../pages/AssessmentTakePage";
+import { useAuth } from "../stores/useAuth";
 
 function hasSession(search: string) {
   const preview = new URLSearchParams(search).get("loggedIn");
+  return preview === "true" || Boolean(useAuth.getState().token);
+}
+
+function isCompanyAdmin(search: string) {
+  const preview = new URLSearchParams(search).get("role");
   return (
-    preview === "true" ||
-    ["accessToken", "authToken", "token"].some((key) =>
-      Boolean(localStorage.getItem(key)),
-    )
+    preview === "admin" || useAuth.getState().user?.role === "COMPANY_ADMIN"
   );
 }
 
@@ -31,6 +40,30 @@ function HomeRoute() {
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { search } = useLocation();
   return hasSession(search) ? children : <Navigate replace to="/" />;
+}
+
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { search } = useLocation();
+
+  if (!hasSession(search)) {
+    return <Navigate replace to="/" />;
+  }
+
+  return isCompanyAdmin(search) ? (
+    children
+  ) : (
+    <Navigate replace to={{ pathname: "/dashboard", search }} />
+  );
+}
+
+function DashboardRoute() {
+  const { search } = useLocation();
+
+  return isCompanyAdmin(search) ? (
+    <Navigate replace to={{ pathname: "/admin", search }} />
+  ) : (
+    <DashboardPage />
+  );
 }
 
 function NotFoundPage() {
@@ -50,6 +83,7 @@ export function AppRouter() {
     <Routes>
       <Route path="/" element={<HomeRoute />} />
       <Route path="/home" element={<HomeRoute />} />
+
       <Route
         path="/profile"
         element={
@@ -58,31 +92,15 @@ export function AppRouter() {
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/dashboard"
         element={
           <ProtectedRoute>
-            <DashboardPage />
+            <DashboardRoute />
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/verify-email"
-        element={<EmailActionPage action="verify" />}
-      />
-      <Route
-        path="/reset-password"
-        element={<EmailActionPage action="forgot" />}
-      />
-      <Route
-        path="/reset-password/confirm"
-        element={<EmailActionPage action="reset" />}
-      />
-      <Route path="/about" element={<AboutPage />} />
-      <Route path="/stories" element={<StoriesPage />} />
-      <Route path="/companies" element={<BrowseCompaniesPage />} />
-      <Route path="/jobs" element={<BrowseJobsPage />} />
-      <Route path="/jobs/:slug" element={<JobDetailPage />} />
 
       <Route
         path="/dashboard/assessments"
@@ -110,6 +128,88 @@ export function AppRouter() {
           </ProtectedRoute>
         }
       />
+
+      <Route
+        path="/admin"
+        element={
+          <AdminRoute>
+            <AdminJobsPage />
+          </AdminRoute>
+        }
+      />
+
+      <Route
+        path="/admin/jobs/new"
+        element={
+          <AdminRoute>
+            <AdminJobFormPage />
+          </AdminRoute>
+        }
+      />
+
+      <Route
+        path="/admin/jobs/:slug"
+        element={
+          <AdminRoute>
+            <AdminJobDetailPage />
+          </AdminRoute>
+        }
+      />
+
+      <Route
+        path="/admin/jobs/:slug/edit"
+        element={
+          <AdminRoute>
+            <AdminJobFormPage />
+          </AdminRoute>
+        }
+      />
+
+      <Route
+        path="/admin/jobs/:slug/test"
+        element={
+          <AdminRoute>
+            <AdminTestPage />
+          </AdminRoute>
+        }
+      />
+
+      <Route
+        path="/admin/applicants"
+        element={
+          <AdminRoute>
+            <AdminApplicantsPage />
+          </AdminRoute>
+        }
+      />
+
+      <Route
+        path="/admin/tests"
+        element={
+          <AdminRoute>
+            <AdminTestsPage />
+          </AdminRoute>
+        }
+      />
+
+      <Route
+        path="/verify-email"
+        element={<EmailActionPage action="verify" />}
+      />
+      <Route
+        path="/reset-password"
+        element={<EmailActionPage action="forgot" />}
+      />
+      <Route
+        path="/reset-password/confirm"
+        element={<EmailActionPage action="reset" />}
+      />
+
+      <Route path="/about" element={<AboutPage />} />
+      <Route path="/stories" element={<StoriesPage />} />
+      <Route path="/companies" element={<BrowseCompaniesPage />} />
+      <Route path="/jobs" element={<BrowseJobsPage />} />
+      <Route path="/jobs/:slug" element={<JobDetailPage />} />
 
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

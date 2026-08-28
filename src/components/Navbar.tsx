@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AuthModal } from "./site/AuthModal";
-import { getToken, logout } from "../lib/auth";
+import { logout } from "../services/auth.service";
+import { useAuth } from "../stores/useAuth";
 
 const links = [
   { label: "Jobs", href: "/jobs" },
@@ -12,21 +13,13 @@ const links = [
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
-  const [loggedIn, setLoggedIn] = useState(() => Boolean(getToken()));
+  const loggedIn = useAuth((state) => Boolean(state.token));
+  const isAdmin = useAuth((state) => state.user?.role === "COMPANY_ADMIN");
   useEffect(() => {
     const update = () => setScrolled(window.scrollY > 24);
     update();
     window.addEventListener("scroll", update, { passive: true });
     return () => window.removeEventListener("scroll", update);
-  }, []);
-  useEffect(() => {
-    const updateAuth = () => setLoggedIn(Boolean(getToken()));
-    window.addEventListener("authchange", updateAuth);
-    window.addEventListener("storage", updateAuth);
-    return () => {
-      window.removeEventListener("authchange", updateAuth);
-      window.removeEventListener("storage", updateAuth);
-    };
   }, []);
   async function handleLogout() {
     await logout();
@@ -47,7 +40,7 @@ export function Navbar() {
         </ul>
         {loggedIn ? (
           <>
-            <a className="nav-profile" href="/dashboard">
+            <a className="nav-profile" href={isAdmin ? "/admin" : "/dashboard"}>
               Dashboard
             </a>
             <button type="button" className="nav-cta" onClick={handleLogout}>

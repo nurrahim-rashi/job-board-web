@@ -1,6 +1,7 @@
 import { useState, type FormEvent, type MouseEvent } from "react";
 import { Close, Eye } from "./Icons";
-import { login, register, saveSession } from "../../lib/auth";
+import { login, register } from "../../services/auth.service";
+import { useAuth } from "../../stores/useAuth";
 
 type AuthModalProps = {
   open: boolean;
@@ -39,7 +40,7 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
             ...(role === "COMPANY_ADMIN" ? { companyName, phone, city } : {}),
           })
         : await login(email, password);
-      saveSession(session);
+      useAuth.getState().login(session);
       window.location.assign(sessionStorage.getItem("authReturnTo") ?? "/");
       sessionStorage.removeItem("authReturnTo");
     } catch (requestError) {
