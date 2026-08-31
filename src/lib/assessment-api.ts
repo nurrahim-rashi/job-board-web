@@ -50,3 +50,22 @@ export const submitAssessment = async (
 
   return response.data;
 };
+
+export const generateAssessmentCertificate = async (resultId: number) => {
+  const response = await axiosInstance.post(
+    `/assessment/results/${resultId}/certificate`,
+  );
+
+  return response.data;
+};
+
+export const downloadAssessmentCertificate = async (resultId: number) => {
+  const response = await axiosInstance.get(
+    `/assessment/results/${resultId}/certificate/pdf`,
+    {
+      responseType: "blob",
+    },
+  );
+
+  return response.data as Blob;
+};

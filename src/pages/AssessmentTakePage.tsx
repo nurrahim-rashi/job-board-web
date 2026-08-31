@@ -14,6 +14,8 @@ import type {
 import {
   submitAssessment,
   fetchAssessmentResultDetail,
+  generateAssessmentCertificate,
+  downloadAssessmentCertificate,
 } from "../lib/assessment-api";
 
 export default function AssessmentTakePage() {
@@ -33,6 +35,9 @@ export default function AssessmentTakePage() {
   const [result, setResult] = useState<SubmitAssessmentData | null>(null);
 
   const [checkingResult, setCheckingResult] = useState(true);
+  const [downloadingCertificate, setDownloadingCertificate] = useState(false);
+
+  const [certificateError, setCertificateError] = useState("");
 
   useEffect(() => {
     if (!assessmentData) {
@@ -191,6 +196,39 @@ export default function AssessmentTakePage() {
     }
   };
 
+  const handleDownloadCertificate = async () => {
+    if (!result || !result.isPassed) return;
+
+    try {
+      setDownloadingCertificate(true);
+      setCertificateError("");
+
+      await generateAssessmentCertificate(result.resultId);
+
+      const blob = await downloadAssessmentCertificate(result.resultId);
+
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `certificate-${result.resultId}.pdf`;
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      setCertificateError(
+        error instanceof Error
+          ? error.message
+          : "Failed to download certificate",
+      );
+    } finally {
+      setDownloadingCertificate(false);
+    }
+  };
+
   if (result) {
     return (
       <div className="workspace-dashboard">
@@ -229,6 +267,21 @@ export default function AssessmentTakePage() {
                   Badge earned: <strong>{result.badgeName}</strong>
                 </p>
               )}
+
+              {result.isPassed && (
+                <button
+                  type="button"
+                  className="button button-primary"
+                  onClick={handleDownloadCertificate}
+                  disabled={downloadingCertificate}
+                >
+                  {downloadingCertificate
+                    ? "Preparing certificate..."
+                    : "Download certificate"}
+                </button>
+              )}
+
+              {certificateError && <p>{certificateError}</p>}
 
               <Link
                 className="button button-primary"
