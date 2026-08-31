@@ -3,6 +3,9 @@ import type {
   StartAssessmentResponse,
   SubmitAssessmentAnswer,
   SubmitAssessmentResponse,
+  AssessmentResultsResponse,
+  AssessmentResultDetailResponse,
+  AssessmentBadgesResponse,
 } from "../types/assessment";
 
 export const fetchAssessments = async () => {
@@ -19,8 +22,12 @@ export const fetchAssessmentDetail = async (assessmentId: number) => {
   return response.data;
 };
 
-export const fetchAssessmentResultDetail = async (resultId: number) => {
-  const response = await axiosInstance.get(`/assessment/results/${resultId}`);
+export const fetchAssessmentResultDetail = async (
+  resultId: number,
+): Promise<AssessmentResultDetailResponse> => {
+  const response = await axiosInstance.get<AssessmentResultDetailResponse>(
+    `/assessment/results/${resultId}`,
+  );
 
   return response.data;
 };
@@ -69,3 +76,20 @@ export const downloadAssessmentCertificate = async (resultId: number) => {
 
   return response.data as Blob;
 };
+
+export const fetchAssessmentResults =
+  async (): Promise<AssessmentResultsResponse> => {
+    const response = await axiosInstance.get<AssessmentResultsResponse>(
+      "/assessment/results",
+    );
+
+    return response.data;
+  };
+
+export const fetchAssessmentBadges =
+  async (): Promise<AssessmentBadgesResponse> => {
+    const response =
+      await axiosInstance.get<AssessmentBadgesResponse>("/assessment/badges");
+
+    return response.data;
+  };

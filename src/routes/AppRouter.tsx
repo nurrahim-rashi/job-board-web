@@ -18,6 +18,8 @@ import JobDetailPage from "../pages/JobDetailPage";
 import LandingPage from "../pages/LandingPage";
 import ProfilePage from "../pages/ProfilePage";
 import StoriesPage from "../pages/StoriesPage";
+import AssessmentResultsPage from "../pages/AssessmentResultsPage";
+import AssessmentResultDetailPage from "../pages/AssessmentResultDetailPage";
 import { useAuth } from "../stores/useAuth";
 
 function hasSession(search: string) {
@@ -112,6 +114,15 @@ export function AppRouter() {
       />
 
       <Route
+        path="/dashboard/assessments/results"
+        element={
+          <ProtectedRoute>
+            <AssessmentResultsPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
         path="/dashboard/assessments/:assessmentId"
         element={
           <ProtectedRoute>
@@ -125,6 +136,15 @@ export function AppRouter() {
         element={
           <ProtectedRoute>
             <AssessmentTakePage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/dashboard/assessments/results/:resultId"
+        element={
+          <ProtectedRoute>
+            <AssessmentResultDetailPage />
           </ProtectedRoute>
         }
       />

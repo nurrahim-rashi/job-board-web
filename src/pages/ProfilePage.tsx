@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useEffect, useState, type FormEvent } from "react";
 import { Navbar } from "../components/Navbar";
 import {
@@ -9,12 +10,16 @@ import {
 } from "../services/auth.service";
 import { useAuth } from "../stores/useAuth";
 import type { AuthUser } from "../types/auth";
+import { fetchAssessmentBadges } from "../lib/assessment-api";
+import type { AssessmentBadge } from "../types/assessment";
 
 export default function ProfilePage() {
   const storedUser = useAuth((state) => state.user);
   const [user, setUser] = useState<AuthUser | null>(storedUser);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
+  const [badges, setBadges] = useState<AssessmentBadge[]>([]);
+  const [badgesLoading, setBadgesLoading] = useState(true);
 
   useEffect(() => {
     getProfile()
@@ -23,6 +28,24 @@ export default function ProfilePage() {
         window.location.assign("/");
       });
   }, []);
+
+  useEffect(() => {
+    if (storedUser?.role !== "JOB_SEEKER") {
+      setBadgesLoading(false);
+      return;
+    }
+
+    fetchAssessmentBadges()
+      .then((response) => {
+        setBadges(response.data);
+      })
+      .catch(() => {
+        setBadges([]);
+      })
+      .finally(() => {
+        setBadgesLoading(false);
+      });
+  }, [storedUser?.role]);
 
   if (!user) return null;
   const isCompany = user.role === "COMPANY_ADMIN";
@@ -38,7 +61,8 @@ export default function ProfilePage() {
         email: String(form.get("email") ?? ""),
         birthDate: String(form.get("birthDate") ?? "") || undefined,
         gender: (String(form.get("gender") ?? "") || undefined) as
-          AuthUser["gender"] | undefined,
+          | AuthUser["gender"]
+          | undefined,
         lastEducation: String(form.get("lastEducation") ?? "") || undefined,
         address: String(form.get("address") ?? "") || undefined,
         city: String(form.get("city") ?? "") || undefined,
@@ -154,6 +178,57 @@ export default function ProfilePage() {
           </label>
           <button className="profile-submit">Upload photo</button>
         </form>
+
+        {!isCompany && (
+          <section className="profile-card">
+            <h2>Earned skill badges</h2>
+
+            {badgesLoading ? (
+              <p>Loading badges...</p>
+            ) : badges.length === 0 ? (
+              <>
+                <p>You haven't earned any skill assessment badges yet.</p>
+
+                <Link
+                  className="button button-primary"
+                  to="/dashboard/assessments"
+                >
+                  Browse assessments
+                </Link>
+              </>
+            ) : (
+              <div className="panel-grid">
+                {badges.map((badge) => (
+                  <article className="panel-card" key={badge.assessmentId}>
+                    <p className="eyebrow">{badge.skillName}</p>
+
+                    <h2>{badge.badgeName}</h2>
+
+                    <p>
+                      Assessment: <strong>{badge.assessmentTitle}</strong>
+                    </p>
+
+                    <p>
+                      Score: <strong>{badge.score}</strong>
+                    </p>
+
+                    <p>
+                      Earned: {new Date(badge.earnedAt).toLocaleDateString()}
+                    </p>
+
+                    <Link
+                      className="button button-primary"
+                      to={`/dashboard/assessments/results/${badge.resultId}`}
+                    >
+                      View result
+                    </Link>
+                  </article>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+
         <form className="profile-card" onSubmit={saveProfile}>
           <h2>Personal information</h2>
           <div className="profile-fields">

@@ -57,6 +57,10 @@ export default function AssessmentTakePage() {
           (answer: { isCorrect: boolean }) => answer.isCorrect,
         ).length;
 
+        if (!detail.completedAt) {
+          return;
+        }
+
         setResult({
           resultId: detail.resultId,
           score: detail.score,
