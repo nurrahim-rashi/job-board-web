@@ -72,3 +72,61 @@ export interface SubmitAssessmentResponse {
   message: string;
   data: SubmitAssessmentData;
 }
+
+export interface AssessmentResultSummary {
+  resultId: number;
+  assessmentId: number;
+  skillName: string;
+  title: string;
+  score: number;
+  isPassed: boolean;
+  badgeName: string | null;
+  startedAt: string;
+  completedAt: string | null;
+}
+
+export interface AssessmentResultsResponse {
+  message: string;
+  data: AssessmentResultSummary[];
+}
+
+export interface AssessmentResultAnswer {
+  questionId: number;
+  question: string;
+  questionOrder: number;
+  answer: AnswerOption;
+  isCorrect: boolean;
+}
+
+export interface AssessmentResultDetail {
+  resultId: number;
+  assessmentId: number;
+  skillName: string;
+  title: string;
+  score: number;
+  isPassed: boolean;
+  badgeName: string | null;
+  startedAt: string;
+  completedAt: string | null;
+  answers: AssessmentResultAnswer[];
+}
+
+export interface AssessmentResultDetailResponse {
+  message: string;
+  data: AssessmentResultDetail;
+}
+
+export interface AssessmentBadge {
+  resultId: number;
+  assessmentId: number;
+  skillName: string;
+  assessmentTitle: string;
+  badgeName: string;
+  score: number;
+  earnedAt: string;
+}
+
+export interface AssessmentBadgesResponse {
+  message: string;
+  data: AssessmentBadge[];
+}
