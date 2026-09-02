@@ -130,3 +130,68 @@ export interface AssessmentBadgesResponse {
   message: string;
   data: AssessmentBadge[];
 }
+
+export interface DeveloperAssessment extends Assessment {
+  createdAt: string;
+  updatedAt: string;
+  _count: {
+    questions: number;
+  };
+}
+
+export interface DeveloperAssessmentsResponse {
+  message: string;
+  data: DeveloperAssessment[];
+}
+
+export interface CreateAssessmentInput {
+  skillName: string;
+  title: string;
+  description?: string;
+}
+
+export interface CreateAssessmentResponse {
+  message: string;
+  data: Assessment;
+}
+
+export interface DeveloperAssessmentQuestion {
+  id: number;
+  assessmentId: number;
+  question: string;
+  options: {
+    A: string;
+    B: string;
+    C: string;
+    D: string;
+  };
+  correctAnswer: AnswerOption;
+  questionOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AssessmentQuestionsResponse {
+  message: string;
+  data: DeveloperAssessmentQuestion[];
+}
+
+export interface AssessmentQuestionResponse {
+  message: string;
+  data: DeveloperAssessmentQuestion;
+}
+
+export interface CreateAssessmentQuestionInput {
+  question: string;
+  options: {
+    A: string;
+    B: string;
+    C: string;
+    D: string;
+  };
+  correctAnswer: AnswerOption;
+  questionOrder: number;
+}
+
+export type UpdateAssessmentQuestionInput =
+  Partial<CreateAssessmentQuestionInput>;

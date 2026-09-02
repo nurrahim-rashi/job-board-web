@@ -20,6 +20,8 @@ import ProfilePage from "../pages/ProfilePage";
 import StoriesPage from "../pages/StoriesPage";
 import AssessmentResultsPage from "../pages/AssessmentResultsPage";
 import AssessmentResultDetailPage from "../pages/AssessmentResultDetailPage";
+import AssessmentManagementPage from "../pages/AssessmentManagementPage";
+import AssessmentQuestionsManagementPage from "../pages/AssessmentQuestionsManagementPage";
 import { useAuth } from "../stores/useAuth";
 
 function hasSession(search: string) {
@@ -232,6 +234,24 @@ export function AppRouter() {
       <Route path="/jobs/:slug" element={<JobDetailPage />} />
 
       <Route path="*" element={<NotFoundPage />} />
+
+      <Route
+        path="/dashboard/developer/assessments"
+        element={
+          <ProtectedRoute>
+            <AssessmentManagementPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/dashboard/developer/assessments/:assessmentId"
+        element={
+          <ProtectedRoute>
+            <AssessmentQuestionsManagementPage />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }
