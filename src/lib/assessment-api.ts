@@ -6,6 +6,13 @@ import type {
   AssessmentResultsResponse,
   AssessmentResultDetailResponse,
   AssessmentBadgesResponse,
+  DeveloperAssessmentsResponse,
+  CreateAssessmentResponse,
+  CreateAssessmentInput,
+  AssessmentQuestionResponse,
+  UpdateAssessmentQuestionInput,
+  AssessmentQuestionsResponse,
+  CreateAssessmentQuestionInput,
 } from "../types/assessment";
 
 export const fetchAssessments = async () => {
@@ -93,3 +100,70 @@ export const fetchAssessmentBadges =
 
     return response.data;
   };
+
+export const fetchDeveloperAssessments =
+  async (): Promise<DeveloperAssessmentsResponse> => {
+    const response =
+      await axiosInstance.get<DeveloperAssessmentsResponse>(
+        "/assessment/manage",
+      );
+
+    return response.data;
+  };
+
+export const createAssessment = async (
+  data: CreateAssessmentInput,
+): Promise<CreateAssessmentResponse> => {
+  const response = await axiosInstance.post<CreateAssessmentResponse>(
+    "/assessment",
+    data,
+  );
+
+  return response.data;
+};
+
+export const fetchAssessmentQuestions = async (
+  assessmentId: number,
+): Promise<AssessmentQuestionsResponse> => {
+  const response = await axiosInstance.get<AssessmentQuestionsResponse>(
+    `/assessment/${assessmentId}/questions`,
+  );
+
+  return response.data;
+};
+
+export const createAssessmentQuestion = async (
+  assessmentId: number,
+  data: CreateAssessmentQuestionInput,
+): Promise<AssessmentQuestionResponse> => {
+  const response = await axiosInstance.post<AssessmentQuestionResponse>(
+    `/assessment/${assessmentId}/questions`,
+    data,
+  );
+
+  return response.data;
+};
+
+export const updateAssessmentQuestion = async (
+  assessmentId: number,
+  questionId: number,
+  data: UpdateAssessmentQuestionInput,
+): Promise<AssessmentQuestionResponse> => {
+  const response = await axiosInstance.patch<AssessmentQuestionResponse>(
+    `/assessment/${assessmentId}/questions/${questionId}`,
+    data,
+  );
+
+  return response.data;
+};
+
+export const deleteAssessmentQuestion = async (
+  assessmentId: number,
+  questionId: number,
+) => {
+  const response = await axiosInstance.delete(
+    `/assessment/${assessmentId}/questions/${questionId}`,
+  );
+
+  return response.data;
+};
