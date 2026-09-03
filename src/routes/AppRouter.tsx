@@ -10,6 +10,7 @@ import AssessmentDetailPage from "../pages/AssessmentDetailPage";
 import AssessmentDiscoveryPage from "../pages/AssessmentDiscoveryPage";
 import AssessmentTakePage from "../pages/AssessmentTakePage";
 import BrowseCompaniesPage from "../pages/BrowseCompaniesPage";
+import CompanyDetailPage from "../pages/CompanyDetailPage";
 import BrowseJobsPage from "../pages/BrowseJobsPage";
 import DashboardPage from "../pages/DashboardPage";
 import EmailActionPage from "../pages/EmailActionPage";
@@ -230,6 +231,7 @@ export function AppRouter() {
       <Route path="/about" element={<AboutPage />} />
       <Route path="/stories" element={<StoriesPage />} />
       <Route path="/companies" element={<BrowseCompaniesPage />} />
+      <Route path="/companies/:companyId" element={<CompanyDetailPage />} />
       <Route path="/jobs" element={<BrowseJobsPage />} />
       <Route path="/jobs/:slug" element={<JobDetailPage />} />
 

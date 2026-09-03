@@ -1,0 +1,7 @@
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { Footer } from "../components/Footer";
+import { Navbar } from "../components/Navbar";
+import { getPublicCompany, type PublicCompanyDetail } from "../services/company.service";
+
+export default function CompanyDetailPage() { const { companyId = "" } = useParams(); const [company, setCompany] = useState<PublicCompanyDetail | null>(null); const [error, setError] = useState(""); useEffect(() => { getPublicCompany(companyId).then(setCompany).catch((requestError) => setError(requestError.message)); }, [companyId]); return <div className="browse-companies-page"><Navbar /><main className="company-results"><div>{error && <div className="company-empty"><h1>Company unavailable</h1><p>{error}</p></div>}{!company && !error && <p>Loading company…</p>}{company && <><section className="company-results"><h1>{company.companyName}</h1><p>{company.city} · Member since {new Date(company.createdAt).getFullYear()}</p><p className="company-about">{company.profileContent}</p></section><section className="browse-results"><h2>Open roles</h2><div className="browse-job-grid">{company.jobPostings.map((job) => <article className="browse-job-card" key={job.slug}><h2>{job.title}</h2><p>{job.category.replaceAll("_", " ")} · {job.cityLocation}</p><a href={`/jobs/${job.slug}`}>View role</a></article>)}{!company.jobPostings.length && <p>No open roles right now.</p>}</div></section></>}</div></main><Footer /></div>; }
