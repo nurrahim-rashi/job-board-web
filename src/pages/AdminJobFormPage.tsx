@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { AdminShell } from "../components/Admin/AdminShell";
 import { useJobPosting } from "../hooks/api/job-posting/useJobPosting";
 import { useCreateJobPosting } from "../hooks/api/job-posting/useCreateJobPosting";
@@ -34,7 +34,6 @@ const draft: FormState = {
 
 export default function AdminJobFormPage() {
   const { slug } = useParams();
-  const { search } = useLocation();
   const navigate = useNavigate();
   const existing = useJobPosting(slug);
   const createJob = useCreateJobPosting();
@@ -97,7 +96,7 @@ export default function AdminJobFormPage() {
       if (form.published !== job.isPublished) {
         await togglePublish.mutateAsync({ slug: job.slug, isPublished: form.published }).catch(() => null);
       }
-      navigate({ pathname: `/admin/jobs/${job.slug}`, search });
+      navigate(`/admin/jobs/${job.slug}`);
       return;
     }
 
@@ -106,7 +105,7 @@ export default function AdminJobFormPage() {
     if (form.published) {
       await togglePublish.mutateAsync({ slug: created.data.slug, isPublished: true }).catch(() => null);
     }
-    navigate({ pathname: `/admin/jobs/${created.data.slug}`, search });
+    navigate(`/admin/jobs/${created.data.slug}`);
   }
 
   if (editing && existing.isPending) {
@@ -124,7 +123,7 @@ export default function AdminJobFormPage() {
       <AdminShell eyebrow="Job postings" title="Posting not found">
         <div className="admin-empty">
           <h2>{existing.error.message}</h2>
-          <Link className="admin-btn ghost" to={{ pathname: "/admin", search }}>
+          <Link className="admin-btn ghost" to="/admin">
             Back to job postings
           </Link>
         </div>
@@ -138,7 +137,7 @@ export default function AdminJobFormPage() {
       title={editing ? form.title : "Create a job posting"}
       lead="Fields marked optional can be filled in later — drafts are only visible to your team."
       actions={
-        <Link className="admin-btn ghost" to={{ pathname: "/admin", search }}>
+        <Link className="admin-btn ghost" to="/admin">
           <ArrowLeft /> Back
         </Link>
       }
@@ -237,7 +236,7 @@ export default function AdminJobFormPage() {
             <span>{form.published ? "Publish immediately" : "Save as draft"}</span>
           </label>
           <div>
-            <Link className="admin-btn ghost" to={{ pathname: "/admin", search }}>
+            <Link className="admin-btn ghost" to="/admin">
               Cancel
             </Link>
             <button type="submit" className="admin-btn primary" disabled={saving}>

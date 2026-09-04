@@ -10,7 +10,7 @@ export const usePreSelectionTest = (slug: string | undefined) =>
     enabled: Boolean(slug),
     queryFn: async () => {
       const response = await axiosInstance.get<ApiResponse<PreSelectionTest>>(
-        `/jobs/${slug}/pre-selection-test`,
+        `/job-posting/${slug}/pre-selection-test`,
       );
       if (!response.data.data) throw new Error("Invalid pre-selection test response");
       return response.data.data;

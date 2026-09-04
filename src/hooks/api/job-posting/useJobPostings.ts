@@ -8,7 +8,7 @@ export const useJobPostings = (query: JobListQuery = {}) =>
   useQuery({
     queryKey: ["jobs", query],
     queryFn: async () => {
-      const response = await axiosInstance.get<PagedResponse<JobPostingListItem>>("/jobs", {
+      const response = await axiosInstance.get<PagedResponse<JobPostingListItem>>("/job-posting", {
         params: query,
       });
       return { jobs: response.data.data ?? [], meta: response.data.meta };

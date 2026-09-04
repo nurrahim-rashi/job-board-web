@@ -14,7 +14,7 @@ const menu = [
 type AdminShellProps = { eyebrow: string; title: string; lead?: string; actions?: ReactNode; children: ReactNode };
 
 export function AdminShell({ eyebrow, title, lead, actions, children }: AdminShellProps) {
-  const { pathname, search } = useLocation();
+  const { pathname } = useLocation();
   const company = useAuth((state) => state.user?.company);
   const isActive = (to: string) => (to === "/admin" ? pathname === "/admin" || pathname.startsWith("/admin/jobs") : pathname.startsWith(to));
   return (
@@ -25,7 +25,7 @@ export function AdminShell({ eyebrow, title, lead, actions, children }: AdminShe
           <p className="eyebrow">Company admin</p>
           <nav>
             {menu.map((item) => (
-              <Link key={item.to} to={{ pathname: item.to, search }} className={isActive(item.to) ? "active" : ""}>
+              <Link key={item.to} to={item.to} className={isActive(item.to) ? "active" : ""}>
                 <item.icon />
                 {item.label}
               </Link>

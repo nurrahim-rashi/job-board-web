@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { AdminShell } from "../components/Admin/AdminShell";
 import { questionCount } from "../components/Admin/adminData";
 import { useJobPosting } from "../hooks/api/job-posting/useJobPosting";
@@ -16,7 +16,6 @@ const blankTest = () => Array.from({ length: questionCount }, blankQuestion);
 
 export default function AdminTestPage() {
   const { slug = "" } = useParams();
-  const { search } = useLocation();
   const navigate = useNavigate();
   const job = useJobPosting(slug);
   const test = usePreSelectionTest(slug);
@@ -56,7 +55,7 @@ export default function AdminTestPage() {
       <AdminShell eyebrow="Pre-selection test" title="Posting not found">
         <div className="admin-empty">
           <h2>{test.error?.message ?? job.error?.message ?? "That posting is no longer in your dashboard."}</h2>
-          <Link className="admin-btn ghost" to={{ pathname: "/admin", search }}>
+          <Link className="admin-btn ghost" to="/admin">
             Back to job postings
           </Link>
         </div>
@@ -97,7 +96,7 @@ export default function AdminTestPage() {
       correctAnswer: answerOptions[item.answer],
     }));
     const result = await saveQuestions.mutateAsync(payload).catch(() => null);
-    if (result) navigate({ pathname: `/admin/jobs/${slug}`, search });
+    if (result) navigate(`/admin/jobs/${slug}`);
   }
 
   function toggleActivation() {
@@ -120,7 +119,7 @@ export default function AdminTestPage() {
       lead={`Write up to ${questionCount} multiple choice questions. Applicants must pass through this before their application continues.`}
       actions={
         <>
-          <Link className="admin-btn ghost" to={{ pathname: `/admin/jobs/${slug}`, search }}>
+          <Link className="admin-btn ghost" to={`/admin/jobs/${slug}`}>
             <ArrowLeft /> Back
           </Link>
           <button type="button" className="admin-btn primary" onClick={submit} disabled={busy || locked}>

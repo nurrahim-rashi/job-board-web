@@ -12,7 +12,7 @@ export const useCreateJobPosting = () => {
   return useMutation({
     mutationFn: async (payload: CreateJobPayload) => {
       const response = await axiosInstance.post<ApiResponse<JobPosting>>(
-        "/jobs",
+        "/job-posting",
         toJobFormData(payload),
         multipart,
       );

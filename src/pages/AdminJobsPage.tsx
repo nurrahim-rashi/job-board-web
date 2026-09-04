@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { AdminShell } from "../components/Admin/AdminShell";
 import { ConfirmDialog } from "../components/Admin/ConfirmDialog";
 import { daysLeft, formatDate, formatSalary } from "../components/Admin/adminData";
@@ -19,7 +19,6 @@ const sorting: Record<Exclude<SortKey, "applicants">, Pick<JobListQuery, "sortBy
 };
 
 export default function AdminJobsPage() {
-  const { search } = useLocation();
   const [query, setQuery] = useState("");
   const [term, setTerm] = useState("");
   const [category, setCategory] = useState("all");
@@ -70,7 +69,7 @@ export default function AdminJobsPage() {
       title="Manage your roles"
       lead="Create, publish and retire the roles your company is hiring for."
       actions={
-        <Link className="admin-btn primary" to={{ pathname: "/admin/jobs/new", search }}>
+        <Link className="admin-btn primary" to="/admin/jobs/new">
           New job posting
         </Link>
       }
@@ -173,7 +172,7 @@ export default function AdminJobsPage() {
                 </button>
               </span>
               <span className="admin-row-actions">
-                <Link to={{ pathname: `/admin/jobs/${job.slug}`, search }}>
+                <Link to={`/admin/jobs/${job.slug}`}>
                   Detail <ArrowRight />
                 </Link>
                 <button type="button" onClick={() => setPendingDelete(job.slug)}>

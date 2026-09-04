@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { AdminShell } from "../components/Admin/AdminShell";
 import { ConfirmDialog } from "../components/Admin/ConfirmDialog";
 import { daysLeft, formatDate, formatSalary, questionCount } from "../components/Admin/adminData";
@@ -14,7 +14,6 @@ type ApplicantSort = "newest" | "score" | "salary";
 
 export default function AdminJobDetailPage() {
   const { slug = "" } = useParams();
-  const { search } = useLocation();
   const navigate = useNavigate();
   const { data: job, isPending, isError, error } = useJobPosting(slug);
   const applicants = useApplicants(slug);
@@ -48,7 +47,7 @@ export default function AdminJobDetailPage() {
       <AdminShell eyebrow="Job postings" title="Posting not found">
         <div className="admin-empty">
           <h2>{error?.message ?? "That posting is no longer in your dashboard."}</h2>
-          <Link className="admin-btn ghost" to={{ pathname: "/admin", search }}>
+          <Link className="admin-btn ghost" to="/admin">
             Back to job postings
           </Link>
         </div>
@@ -67,10 +66,10 @@ export default function AdminJobDetailPage() {
       lead={`${job.cityLocation} · ${formatSalary(job)}`}
       actions={
         <>
-          <Link className="admin-btn ghost" to={{ pathname: "/admin", search }}>
+          <Link className="admin-btn ghost" to="/admin">
             <ArrowLeft /> Back
           </Link>
-          <Link className="admin-btn ghost" to={{ pathname: `/admin/jobs/${job.slug}/edit`, search }}>
+          <Link className="admin-btn ghost" to={`/admin/jobs/${job.slug}/edit`}>
             Edit
           </Link>
           <button type="button" className="admin-btn danger" onClick={() => setConfirmDelete(true)}>
@@ -134,7 +133,7 @@ export default function AdminJobDetailPage() {
             <i style={{ width: `${(written / questionCount) * 100}%` }} />
           </div>
           {average != null ? <p className="admin-note">Average score so far: {average}/{questionCount}</p> : null}
-          <Link className="admin-btn primary block" to={{ pathname: `/admin/jobs/${job.slug}/test`, search }}>
+          <Link className="admin-btn primary block" to={`/admin/jobs/${job.slug}/test`}>
             <Clipboard /> {written ? "Edit test questions" : "Build the test"}
           </Link>
         </section>
@@ -210,7 +209,7 @@ export default function AdminJobDetailPage() {
         onCancel={() => setConfirmDelete(false)}
         onConfirm={async () => {
           await deleteJob.mutateAsync(job.slug).catch(() => null);
-          navigate({ pathname: "/admin", search });
+          navigate("/admin");
         }}
       />
     </AdminShell>
