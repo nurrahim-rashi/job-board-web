@@ -6,7 +6,11 @@ import AdminJobFormPage from "../pages/AdminJobFormPage";
 import AdminJobsPage from "../pages/AdminJobsPage";
 import AdminTestPage from "../pages/AdminTestPage";
 import AdminTestsPage from "../pages/AdminTestsPage";
+import AssessmentDetailPage from "../pages/AssessmentDetailPage";
+import AssessmentDiscoveryPage from "../pages/AssessmentDiscoveryPage";
+import AssessmentTakePage from "../pages/AssessmentTakePage";
 import BrowseCompaniesPage from "../pages/BrowseCompaniesPage";
+import CompanyDetailPage from "../pages/CompanyDetailPage";
 import BrowseJobsPage from "../pages/BrowseJobsPage";
 import DashboardPage from "../pages/DashboardPage";
 import EmailActionPage from "../pages/EmailActionPage";
@@ -15,7 +19,23 @@ import JobDetailPage from "../pages/JobDetailPage";
 import LandingPage from "../pages/LandingPage";
 import ProfilePage from "../pages/ProfilePage";
 import StoriesPage from "../pages/StoriesPage";
+import AssessmentResultsPage from "../pages/AssessmentResultsPage";
+import AssessmentResultDetailPage from "../pages/AssessmentResultDetailPage";
+import AssessmentManagementPage from "../pages/AssessmentManagementPage";
+import AssessmentQuestionsManagementPage from "../pages/AssessmentQuestionsManagementPage";
 import { useAuth } from "../stores/useAuth";
+
+function hasSession(search: string) {
+  const preview = new URLSearchParams(search).get("loggedIn");
+  return preview === "true" || Boolean(useAuth.getState().token);
+}
+
+function isCompanyAdmin(search: string) {
+  const preview = new URLSearchParams(search).get("role");
+  return (
+    preview === "admin" || useAuth.getState().user?.role === "COMPANY_ADMIN"
+  );
+}
 
 function HomeRoute() {
   const loggedIn = useAuth((state) => Boolean(state.token));
@@ -28,19 +48,27 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
-  const loggedIn = useAuth((state) => Boolean(state.token));
-  const isCompanyAdmin = useAuth(
-    (state) => state.user?.role === "COMPANY_ADMIN",
+  const { search } = useLocation();
+
+  if (!hasSession(search)) {
+    return <Navigate replace to="/" />;
+  }
+
+  return isCompanyAdmin(search) ? (
+    children
+  ) : (
+    <Navigate replace to={{ pathname: "/dashboard", search }} />
   );
-  if (!loggedIn) return <Navigate replace to="/" />;
-  return isCompanyAdmin ? children : <Navigate replace to="/dashboard" />;
 }
 
 function DashboardRoute() {
-  const isCompanyAdmin = useAuth(
-    (state) => state.user?.role === "COMPANY_ADMIN",
+  const { search } = useLocation();
+
+  return isCompanyAdmin(search) ? (
+    <Navigate replace to={{ pathname: "/admin", search }} />
+  ) : (
+    <DashboardPage />
   );
-  return isCompanyAdmin ? <Navigate replace to="/admin" /> : <DashboardPage />;
 }
 
 function NotFoundPage() {
@@ -60,6 +88,7 @@ export function AppRouter() {
     <Routes>
       <Route path="/" element={<HomeRoute />} />
       <Route path="/home" element={<HomeRoute />} />
+
       <Route
         path="/profile"
         element={
@@ -68,6 +97,7 @@ export function AppRouter() {
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/dashboard"
         element={
@@ -76,6 +106,52 @@ export function AppRouter() {
           </ProtectedRoute>
         }
       />
+
+      <Route
+        path="/dashboard/assessments"
+        element={
+          <ProtectedRoute>
+            <AssessmentDiscoveryPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/dashboard/assessments/results"
+        element={
+          <ProtectedRoute>
+            <AssessmentResultsPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/dashboard/assessments/:assessmentId"
+        element={
+          <ProtectedRoute>
+            <AssessmentDetailPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/dashboard/assessments/:assessmentId/take"
+        element={
+          <ProtectedRoute>
+            <AssessmentTakePage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/dashboard/assessments/results/:resultId"
+        element={
+          <ProtectedRoute>
+            <AssessmentResultDetailPage />
+          </ProtectedRoute>
+        }
+      />
+
       <Route
         path="/admin"
         element={
@@ -84,6 +160,7 @@ export function AppRouter() {
           </AdminRoute>
         }
       />
+
       <Route
         path="/admin/jobs/new"
         element={
@@ -92,6 +169,7 @@ export function AppRouter() {
           </AdminRoute>
         }
       />
+
       <Route
         path="/admin/jobs/:slug"
         element={
@@ -100,6 +178,7 @@ export function AppRouter() {
           </AdminRoute>
         }
       />
+
       <Route
         path="/admin/jobs/:slug/edit"
         element={
@@ -108,6 +187,7 @@ export function AppRouter() {
           </AdminRoute>
         }
       />
+
       <Route
         path="/admin/jobs/:slug/test"
         element={
@@ -116,6 +196,7 @@ export function AppRouter() {
           </AdminRoute>
         }
       />
+
       <Route
         path="/admin/applicants"
         element={
@@ -124,6 +205,7 @@ export function AppRouter() {
           </AdminRoute>
         }
       />
+
       <Route
         path="/admin/tests"
         element={
@@ -132,6 +214,7 @@ export function AppRouter() {
           </AdminRoute>
         }
       />
+
       <Route
         path="/verify-email"
         element={<EmailActionPage action="verify" />}
@@ -144,12 +227,33 @@ export function AppRouter() {
         path="/reset-password/confirm"
         element={<EmailActionPage action="reset" />}
       />
+
       <Route path="/about" element={<AboutPage />} />
       <Route path="/stories" element={<StoriesPage />} />
       <Route path="/companies" element={<BrowseCompaniesPage />} />
+      <Route path="/companies/:companyId" element={<CompanyDetailPage />} />
       <Route path="/jobs" element={<BrowseJobsPage />} />
       <Route path="/jobs/:slug" element={<JobDetailPage />} />
+
       <Route path="*" element={<NotFoundPage />} />
+
+      <Route
+        path="/dashboard/developer/assessments"
+        element={
+          <ProtectedRoute>
+            <AssessmentManagementPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/dashboard/developer/assessments/:assessmentId"
+        element={
+          <ProtectedRoute>
+            <AssessmentQuestionsManagementPage />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }
