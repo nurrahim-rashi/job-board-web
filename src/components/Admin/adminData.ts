@@ -1,17 +1,4 @@
-export type AdminApplicant = {
-  id: string;
-  jobId: string;
-  name: string;
-  education: string;
-  expectedSalary: string;
-  appliedAt: string;
-  status: "Pending" | "In review" | "Interview" | "Accepted" | "Rejected";
-  testScore: number | null;
-};
-
 export const questionCount = 25;
-
-export const seedApplicants: AdminApplicant[] = [];
 
 export function formatSalary(job: { salaryMin: number | null; salaryMax: number | null }) {
   if (!job.salaryMin && !job.salaryMax) return "Not disclosed";

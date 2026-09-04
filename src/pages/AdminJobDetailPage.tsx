@@ -1,36 +1,22 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AdminShell } from "../components/Admin/AdminShell";
 import { ConfirmDialog } from "../components/Admin/ConfirmDialog";
+import { ApplicantSection } from "../components/Admin/Applicants/ApplicantSection";
 import { daysLeft, formatDate, formatSalary, questionCount } from "../components/Admin/adminData";
-import { useApplicants } from "../components/Admin/adminStore";
 import { useJobPosting } from "../hooks/api/job-posting/useJobPosting";
 import { useDeleteJobPosting } from "../hooks/api/job-posting/useDeleteJobPosting";
 import { useTogglePublishJobPosting } from "../hooks/api/job-posting/useTogglePublishJobPosting";
 import { categoryLabel } from "../types/job-posting";
-import { ArrowLeft, ArrowRight, Clipboard, FileText } from "../components/site/Icons";
-
-type ApplicantSort = "newest" | "score" | "salary";
+import { ArrowLeft, Clipboard } from "../components/site/Icons";
 
 export default function AdminJobDetailPage() {
   const { slug = "" } = useParams();
   const navigate = useNavigate();
   const { data: job, isPending, isError, error } = useJobPosting(slug);
-  const applicants = useApplicants(slug);
   const togglePublish = useTogglePublishJobPosting();
   const deleteJob = useDeleteJobPosting();
-  const [sort, setSort] = useState<ApplicantSort>("newest");
   const [confirmDelete, setConfirmDelete] = useState(false);
-
-  const ranked = useMemo(
-    () =>
-      [...applicants].sort((left, right) => {
-        if (sort === "score") return (right.testScore ?? -1) - (left.testScore ?? -1);
-        if (sort === "salary") return Number(left.expectedSalary) - Number(right.expectedSalary);
-        return +new Date(right.appliedAt) - +new Date(left.appliedAt);
-      }),
-    [applicants, sort],
-  );
 
   if (isPending) {
     return (
@@ -56,8 +42,6 @@ export default function AdminJobDetailPage() {
   }
 
   const written = job.totalQuestionPreSelectionTest;
-  const scored = applicants.filter((applicant) => applicant.testScore != null);
-  const average = scored.length ? Math.round(scored.reduce((sum, applicant) => sum + (applicant.testScore ?? 0), 0) / scored.length) : null;
 
   return (
     <AdminShell
@@ -132,74 +116,13 @@ export default function AdminJobDetailPage() {
           <div className="admin-progress">
             <i style={{ width: `${(written / questionCount) * 100}%` }} />
           </div>
-          {average != null ? <p className="admin-note">Average score so far: {average}/{questionCount}</p> : null}
           <Link className="admin-btn primary block" to={`/admin/jobs/${job.slug}/test`}>
             <Clipboard /> {written ? "Edit test questions" : "Build the test"}
           </Link>
         </section>
       </div>
 
-      <section className="admin-card">
-        <div className="admin-detail-head">
-          <div>
-            <p className="eyebrow">Applicants</p>
-            <h2>{job.totalApplicant} people applied</h2>
-          </div>
-          <div className="admin-sort">
-            <label htmlFor="applicant-sort">Sort</label>
-            <select id="applicant-sort" value={sort} onChange={(event) => setSort(event.target.value as ApplicantSort)}>
-              <option value="newest">Newest first</option>
-              <option value="score">Highest test score</option>
-              <option value="salary">Lowest expected salary</option>
-            </select>
-          </div>
-        </div>
-        {ranked.length ? (
-          <div className="admin-table applicants">
-            <div className="admin-row admin-row-head">
-              <span>Applicant</span>
-              <span>Expected salary</span>
-              <span>Applied</span>
-              <span>Test score</span>
-              <span>Status</span>
-              <span />
-            </div>
-            {ranked.map((applicant) => (
-              <div key={applicant.id} className="admin-row">
-                <span className="admin-role">
-                  <b>{applicant.name}</b>
-                  <small>{applicant.education}</small>
-                </span>
-                <span>Rp {Number(applicant.expectedSalary).toLocaleString("id-ID")}</span>
-                <span>{formatDate(applicant.appliedAt)}</span>
-                <span>
-                  {applicant.testScore == null ? (
-                    <em className="admin-chip">No test</em>
-                  ) : (
-                    <em className={`admin-chip ${applicant.testScore >= 18 ? "good" : "wait"}`}>
-                      {applicant.testScore}/{questionCount}
-                    </em>
-                  )}
-                </span>
-                <span>{applicant.status}</span>
-                <span className="admin-row-actions">
-                  <a href="#cv">
-                    <FileText /> CV
-                  </a>
-                  <a href="#profile">
-                    Profile <ArrowRight />
-                  </a>
-                </span>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="admin-empty">
-            <h2>No applications yet.</h2>
-            <p className="admin-note">Publish the posting and share the link to start receiving applicants.</p>
-          </div>
-        )}
-      </section>
+      <ApplicantSection slug={job.slug} />
 
       <ConfirmDialog
         open={confirmDelete}
