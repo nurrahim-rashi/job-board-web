@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { AdminShell } from "../components/Admin/AdminShell";
 import { formatDate, questionCount } from "../components/Admin/adminData";
 import { useApplicants } from "../components/Admin/adminStore";
@@ -7,7 +7,6 @@ import { useJobPostings } from "../hooks/api/job-posting/useJobPostings";
 import { ArrowRight, Search } from "../components/site/Icons";
 
 export default function AdminApplicantsPage() {
-  const { search } = useLocation();
   const jobs = useJobPostings({ limit: 50 }).data?.jobs ?? [];
   const applicants = useApplicants();
   const [query, setQuery] = useState("");
@@ -70,7 +69,7 @@ export default function AdminApplicantsPage() {
               </span>
               <span>{applicant.status}</span>
               <span className="admin-row-actions">
-                <Link to={{ pathname: `/admin/jobs/${applicant.jobId}`, search }}>
+                <Link to={`/admin/jobs/${applicant.jobId}`}>
                   Posting <ArrowRight />
                 </Link>
               </span>

@@ -12,7 +12,7 @@ export const useSetTestActivation = (slug: string) => {
   return useMutation({
     mutationFn: async (payload: ActivationPayload) => {
       const response = await axiosInstance.patch<ApiResponse<JobPosting>>(
-        `/jobs/${slug}/pre-selection-test/activation`,
+        `/job-posting/${slug}/pre-selection-test/activation`,
         payload,
       );
       return response.data;

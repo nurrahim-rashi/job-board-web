@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { AdminShell } from "../components/Admin/AdminShell";
 import { questionCount } from "../components/Admin/adminData";
 import { useJobPostings } from "../hooks/api/job-posting/useJobPostings";
@@ -7,7 +7,6 @@ import { ArrowRight, Clipboard } from "../components/site/Icons";
 import { TestSummary } from "../components/Admin/TestSummary";
 
 export default function AdminTestsPage() {
-  const { search } = useLocation();
   const { data, isPending } = useJobPostings({ limit: 50 });
   const jobs = data?.jobs ?? [];
   return (
@@ -28,7 +27,7 @@ export default function AdminTestsPage() {
                 <em className={`admin-chip ${job.hasPreSelectionTest ? "good" : ""}`}>{job.hasPreSelectionTest ? "Test on" : "Test off"}</em>
               </div>
               <TestSummary saved={job.questionCount} />
-              <Link className="admin-btn ghost" to={{ pathname: `/admin/jobs/${job.slug}/test`, search }}>
+              <Link className="admin-btn ghost" to={`/admin/jobs/${job.slug}/test`}>
                 <Clipboard /> Open test builder <ArrowRight />
               </Link>
             </article>

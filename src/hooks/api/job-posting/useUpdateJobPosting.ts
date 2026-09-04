@@ -12,7 +12,7 @@ export const useUpdateJobPosting = (slug: string) => {
   return useMutation({
     mutationFn: async (payload: UpdateJobPayload) => {
       const response = await axiosInstance.put<ApiResponse<JobPosting>>(
-        `/jobs/${slug}`,
+        `/job-posting/${slug}`,
         toJobFormData(payload),
         multipart,
       );

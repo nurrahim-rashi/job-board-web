@@ -1,4 +1,4 @@
-import { Link, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Link, Navigate, Route, Routes } from "react-router-dom";
 import AboutPage from "../pages/AboutPage";
 import AdminApplicantsPage from "../pages/AdminApplicantsPage";
 import AdminJobDetailPage from "../pages/AdminJobDetailPage";
@@ -38,13 +38,13 @@ function isCompanyAdmin(search: string) {
 }
 
 function HomeRoute() {
-  const { search } = useLocation();
-  return hasSession(search) ? <Homepage /> : <LandingPage />;
+  const loggedIn = useAuth((state) => Boolean(state.token));
+  return loggedIn ? <Homepage /> : <LandingPage />;
 }
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { search } = useLocation();
-  return hasSession(search) ? children : <Navigate replace to="/" />;
+  const loggedIn = useAuth((state) => Boolean(state.token));
+  return loggedIn ? children : <Navigate replace to="/" />;
 }
 
 function AdminRoute({ children }: { children: React.ReactNode }) {

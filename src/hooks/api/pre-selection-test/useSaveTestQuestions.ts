@@ -11,7 +11,7 @@ export const useSaveTestQuestions = (slug: string) => {
   return useMutation({
     mutationFn: async (questions: TestQuestionInput[]) => {
       const response = await axiosInstance.put<ApiResponse<{ totalQuestions: number }>>(
-        `/jobs/${slug}/pre-selection-test/questions`,
+        `/job-posting/${slug}/pre-selection-test/questions`,
         { questions },
       );
       return response.data;

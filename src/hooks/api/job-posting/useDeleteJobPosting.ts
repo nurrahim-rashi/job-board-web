@@ -9,7 +9,7 @@ export const useDeleteJobPosting = () => {
 
   return useMutation({
     mutationFn: async (slug: string) => {
-      const response = await axiosInstance.delete<ApiResponse<never>>(`/jobs/${slug}`);
+      const response = await axiosInstance.delete<ApiResponse<never>>(`/job-posting/${slug}`);
       return response.data;
     },
     onSuccess: (response) => {

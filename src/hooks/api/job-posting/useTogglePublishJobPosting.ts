@@ -13,7 +13,7 @@ export const useTogglePublishJobPosting = () => {
   return useMutation({
     mutationFn: async ({ slug, isPublished }: TogglePublishInput) => {
       const response = await axiosInstance.patch<ApiResponse<JobPosting>>(
-        `/jobs/${slug}/publish`,
+        `/job-posting/${slug}/publish`,
         { isPublished },
       );
       return response.data;

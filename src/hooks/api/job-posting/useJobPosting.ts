@@ -9,7 +9,7 @@ export const useJobPosting = (slug: string | undefined) =>
     queryKey: ["jobs", slug],
     enabled: Boolean(slug),
     queryFn: async () => {
-      const response = await axiosInstance.get<ApiResponse<JobPostingDetail>>(`/jobs/${slug}`);
+      const response = await axiosInstance.get<ApiResponse<JobPostingDetail>>(`/job-posting/${slug}`);
       if (!response.data.data) throw new Error("Invalid job detail response");
       return response.data.data;
     },
