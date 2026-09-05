@@ -61,6 +61,32 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
   );
 }
 
+function DeveloperRoute({ children }: { children: React.ReactNode }) {
+  const loggedIn = useAuth((state) => Boolean(state.token));
+  const role = useAuth((state) => state.user?.role);
+
+  if (!loggedIn) {
+    return <Navigate replace to="/" />;
+  }
+
+  return role === "DEVELOPER" ? children : <Navigate replace to="/dashboard" />;
+}
+
+function JobSeekerRoute({ children }: { children: React.ReactNode }) {
+  const loggedIn = useAuth((state) => Boolean(state.token));
+  const role = useAuth((state) => state.user?.role);
+
+  if (!loggedIn) {
+    return <Navigate replace to="/" />;
+  }
+
+  return role === "JOB_SEEKER" ? (
+    children
+  ) : (
+    <Navigate replace to="/dashboard" />
+  );
+}
+
 function DashboardRoute() {
   const { search } = useLocation();
 
@@ -110,45 +136,45 @@ export function AppRouter() {
       <Route
         path="/dashboard/assessments"
         element={
-          <ProtectedRoute>
+          <JobSeekerRoute>
             <AssessmentDiscoveryPage />
-          </ProtectedRoute>
+          </JobSeekerRoute>
         }
       />
 
       <Route
         path="/dashboard/assessments/results"
         element={
-          <ProtectedRoute>
+          <JobSeekerRoute>
             <AssessmentResultsPage />
-          </ProtectedRoute>
+          </JobSeekerRoute>
         }
       />
 
       <Route
         path="/dashboard/assessments/:assessmentId"
         element={
-          <ProtectedRoute>
+          <JobSeekerRoute>
             <AssessmentDetailPage />
-          </ProtectedRoute>
+          </JobSeekerRoute>
         }
       />
 
       <Route
         path="/dashboard/assessments/:assessmentId/take"
         element={
-          <ProtectedRoute>
+          <JobSeekerRoute>
             <AssessmentTakePage />
-          </ProtectedRoute>
+          </JobSeekerRoute>
         }
       />
 
       <Route
         path="/dashboard/assessments/results/:resultId"
         element={
-          <ProtectedRoute>
+          <JobSeekerRoute>
             <AssessmentResultDetailPage />
-          </ProtectedRoute>
+          </JobSeekerRoute>
         }
       />
 
@@ -240,18 +266,18 @@ export function AppRouter() {
       <Route
         path="/dashboard/developer/assessments"
         element={
-          <ProtectedRoute>
+          <DeveloperRoute>
             <AssessmentManagementPage />
-          </ProtectedRoute>
+          </DeveloperRoute>
         }
       />
 
       <Route
         path="/dashboard/developer/assessments/:assessmentId"
         element={
-          <ProtectedRoute>
+          <DeveloperRoute>
             <AssessmentQuestionsManagementPage />
-          </ProtectedRoute>
+          </DeveloperRoute>
         }
       />
     </Routes>

@@ -183,6 +183,12 @@ export default function AssessmentQuestionsManagementPage() {
     }
   }
 
+  const nextAvailableQuestionOrder =
+    Array.from({ length: 25 }, (_, index) => index + 1).find(
+      (order) =>
+        !questions.some((question) => question.questionOrder === order),
+    ) ?? 25;
+
   return (
     <div className="workspace-dashboard">
       <Navbar />
@@ -256,7 +262,7 @@ export default function AssessmentQuestionsManagementPage() {
                     type="number"
                     min={1}
                     max={25}
-                    defaultValue={questions.length + 1}
+                    defaultValue={nextAvailableQuestionOrder}
                     required
                   />
                 </label>
