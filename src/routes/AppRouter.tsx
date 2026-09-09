@@ -23,6 +23,7 @@ import AssessmentResultsPage from "../pages/AssessmentResultsPage";
 import AssessmentResultDetailPage from "../pages/AssessmentResultDetailPage";
 import AssessmentManagementPage from "../pages/AssessmentManagementPage";
 import AssessmentQuestionsManagementPage from "../pages/AssessmentQuestionsManagementPage";
+import CvGeneratorPage from "../pages/CvGeneratorPage";
 import { useAuth } from "../stores/useAuth";
 
 function hasSession(search: string) {
@@ -121,6 +122,15 @@ export function AppRouter() {
           <ProtectedRoute>
             <ProfilePage />
           </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/profile/cv-generator"
+        element={
+          <JobSeekerRoute>
+            <CvGeneratorPage />
+          </JobSeekerRoute>
         }
       />
 

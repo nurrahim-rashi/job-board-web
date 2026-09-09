@@ -345,7 +345,16 @@ p {
 .avatar-card img { border-radius: 50%; display: block; height: 84px; object-fit: cover; width: 84px; }.avatar-card label { color: #67656c; display: block; font-size: 13px; margin-top: 16px; }.avatar-card input { display: block; margin-top: 7px; }
 .profile-fields { display: grid; gap: 18px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .profile-fields label { color: #67656c; display: block; font-size: 13px; }
-.profile-fields input, .profile-fields select, .profile-fields textarea { background: #fcfaf4; border: 1px solid #ded9cf; border-radius: 12px; color: #202129; display: block; font: 14px "DM Sans", sans-serif; margin-top: 7px; min-height: 45px; padding: 11px; width: 100%; }
+.profile-fields input:not([type="checkbox"]),
+.profile-fields select,
+.profile-fields textarea { background: #fcfaf4; border: 1px solid #ded9cf; border-radius: 12px; color: #202129; display: block; font: 14px "DM Sans", sans-serif; margin-top: 7px; min-height: 45px; padding: 11px; width: 100%; }
+.profile-fields input[type="checkbox"] {
+  display: inline-block;
+  margin: 0 8px 0 0;
+  min-height: auto;
+  padding: 0;
+  width: auto;
+}
 .profile-fields textarea { min-height: 120px; resize: vertical; }
 .profile-wide { grid-column: 1 / -1; }
 .profile-submit { margin-top: 25px; }

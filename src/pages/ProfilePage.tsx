@@ -229,6 +229,21 @@ export default function ProfilePage() {
           </section>
         )}
 
+        {user.role === "JOB_SEEKER" && (
+          <section className="profile-card">
+            <p className="eyebrow">CV Generator</p>
+            <h2>Create your CV</h2>
+            <p>
+              Create and download an ATS-friendly CV using your profile
+              information and additional professional details.
+            </p>
+
+            <Link className="button button-primary" to="/profile/cv-generator">
+              Generate CV
+            </Link>
+          </section>
+        )}
+
         <form className="profile-card" onSubmit={saveProfile}>
           <h2>Personal information</h2>
           <div className="profile-fields">
