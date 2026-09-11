@@ -9,12 +9,8 @@ const menu = [
   { label: "Applicants", to: "/admin/applicants", icon: Users },
   { label: "Interviews", to: "/admin/interviews", icon: Calendar },
   { label: "Pre-selection tests", to: "/admin/tests", icon: Clipboard },
-<<<<<<< Updated upstream
   { label: "Website analytics", to: "/admin/analytics", icon: Gauge },
-  { label: "Company profile", to: "/profile", icon: Building },
-=======
   { label: "Company profile", to: "/company/profile/edit", icon: Building },
->>>>>>> Stashed changes
 ];
 
 type AdminShellProps = { eyebrow: string; title: string; lead?: string; actions?: ReactNode; children: ReactNode };
