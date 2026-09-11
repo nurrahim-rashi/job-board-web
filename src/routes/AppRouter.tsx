@@ -30,6 +30,7 @@ import AssessmentQuestionsManagementPage from "../pages/AssessmentQuestionsManag
 import CvGeneratorPage from "../pages/CvGeneratorPage";
 import DeveloperAnalyticsPage from "../pages/DeveloperAnalyticsPage";
 import DeveloperSubscriptionsPage from "../pages/DeveloperSubscriptionsPage";
+import SubscriptionPlansPage from "../pages/SubscriptionPlansPage";
 import { useAuth } from "../stores/useAuth";
 
 function hasPreviewSession(search: string) {
@@ -162,6 +163,15 @@ export function AppRouter() {
           <ProtectedRoute>
             <DashboardRoute />
           </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/dashboard/subscriptions"
+        element={
+          <JobSeekerRoute>
+            <SubscriptionPlansPage />
+          </JobSeekerRoute>
         }
       />
 
