@@ -16,3 +16,17 @@ export async function getMyApplications() {
   const response = await axiosInstance.get<ApiResponse<Application[]>>("/applications/me");
   return response.data.data ?? [];
 }
+
+export type JobApplicationStatus = {
+  id: number;
+  status: string;
+  createdAt: string;
+  rejectionReason: string | null;
+};
+
+export async function getMyJobApplication(slug: string) {
+  const response = await axiosInstance.get<ApiResponse<JobApplicationStatus | null>>(
+    `/jobs/${slug}/application`,
+  );
+  return response.data.data ?? null;
+}

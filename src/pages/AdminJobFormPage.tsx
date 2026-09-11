@@ -180,11 +180,11 @@ export default function AdminJobFormPage() {
           <div className="admin-fields">
             <label>
               Salary minimum <small>optional</small>
-              <input inputMode="numeric" value={form.salaryMin} onChange={(event) => set("salaryMin", event.target.value)} placeholder="18000000" />
+              <input type="number" inputMode="numeric" min="1" max="2147483647" value={form.salaryMin} onChange={(event) => set("salaryMin", event.target.value)} placeholder="18000000" />
             </label>
             <label>
               Salary maximum <small>optional</small>
-              <input inputMode="numeric" value={form.salaryMax} onChange={(event) => set("salaryMax", event.target.value)} placeholder="26000000" />
+              <input type="number" inputMode="numeric" min="1" max="2147483647" value={form.salaryMax} onChange={(event) => set("salaryMax", event.target.value)} placeholder="26000000" />
             </label>
             <label className="wide">
               Tags

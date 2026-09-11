@@ -1,70 +1,102 @@
 import { ArrowRight, Building, FileText } from "../site/Icons";
 import { Reveal } from "../../hooks/useReveal";
-const applications = [
-  ["Senior Product Designer", "Fieldnote", "Interview", "good"],
-  ["Design Lead", "Tidewell", "In review", "wait"],
-  ["UI Designer", "Kessel", "CV screening", "wait"],
-  ["Product Designer", "Wren", "Not selected", "bad"],
-];
-const companies = [
-  ["Fieldnote", "Fintech", "4"],
-  ["Halden Labs", "Healthtech", "6"],
-  ["Kessel", "Logistics", "3"],
-  ["Wren", "Design studio", "2"],
-];
-export function Sidebar() {
+import type { HomepageData } from "../../types/auth";
+
+const statusDetails: Record<string, { label: string; tone: string }> = {
+  DRAFT: { label: "Draft", tone: "wait" },
+  PENDING: { label: "CV screening", tone: "wait" },
+  TEST_ASSIGNED: { label: "Test assigned", tone: "wait" },
+  PROCESS: { label: "In review", tone: "wait" },
+  INTERVIEW: { label: "Interview", tone: "good" },
+  ACCEPTED: { label: "Accepted", tone: "good" },
+  REJECTED: { label: "Not selected", tone: "bad" },
+};
+
+type SidebarProps = Pick<
+  HomepageData,
+  "applications" | "profileCompletion" | "followedCompanies"
+>;
+
+export function Sidebar({
+  applications,
+  profileCompletion,
+  followedCompanies,
+}: SidebarProps) {
   return (
     <aside className="dashboard-side">
       <Reveal>
         <article id="applications">
           <p className="eyebrow">Your applications</p>
-          <ul>
-            {applications.map(([role, company, status, tone]) => (
-              <li key={role}>
-                <FileText />
-                <span>
-                  <b>{role}</b>
-                  <small>{company}</small>
-                </span>
-                <em className={tone}>{status}</em>
-              </li>
-            ))}
-          </ul>
-          <a href="#feed">
+          {applications.length ? (
+            <ul>
+              {applications.map((application) => {
+                const status = statusDetails[application.status] ?? {
+                  label: application.status.replaceAll("_", " "),
+                  tone: "wait",
+                };
+                return (
+                  <li key={application.id}>
+                    <FileText />
+                    <span>
+                      <b>{application.job.title}</b>
+                      <small>{application.job.company.companyName}</small>
+                    </span>
+                    <em className={status.tone}>{status.label}</em>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <p>You have not submitted any applications yet.</p>
+          )}
+          <a href="/dashboard">
             Open dashboard <ArrowRight />
           </a>
         </article>
       </Reveal>
+
       <Reveal delay={80}>
         <article>
           <p className="eyebrow">Profile</p>
-          <p>Add your latest CV to apply in one click.</p>
+          <p>
+            {profileCompletion === 100
+              ? "Your profile is complete."
+              : "Complete your profile to get better job matches."}
+          </p>
           <div className="profile-progress">
-            <i />
+            <i style={{ width: `${profileCompletion}%` }} />
           </div>
-          <small>80% complete</small>
-          <a className="fill-action" href="#feed">
-            Complete profile
+          <small>{profileCompletion}% complete</small>
+          <a className="fill-action" href="/profile">
+            {profileCompletion === 100 ? "View profile" : "Complete profile"}
           </a>
         </article>
       </Reveal>
+
       <Reveal delay={140}>
         <article id="companies">
           <p className="eyebrow">Companies you follow</p>
-          <ul className="company-list">
-            {companies.map(([name, industry, count]) => (
-              <li key={name}>
-                <b>
-                  <Building />
-                </b>
-                <span>
-                  <strong>{name}</strong>
-                  <small>{industry}</small>
-                </span>
-                <em>{count} jobs</em>
-              </li>
-            ))}
-          </ul>
+          {followedCompanies.length ? (
+            <ul className="company-list">
+              {followedCompanies.map((company) => (
+                <li key={company.id}>
+                  <b>
+                    <Building />
+                  </b>
+                  <span>
+                    <strong>{company.companyName}</strong>
+                    <small>{company.city}</small>
+                  </span>
+                  <em>{company.openJobs} jobs</em>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>You are not following any companies yet.</p>
+          )}
+          <a href="/companies">
+            Browse companies <ArrowRight />
+          </a>
         </article>
       </Reveal>
     </aside>

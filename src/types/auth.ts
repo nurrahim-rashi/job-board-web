@@ -13,12 +13,27 @@ export type AuthUser = {
   address: string | null;
   city: string | null;
   province: string | null;
+  professionalRole: string;
+  availability: string;
+  profileIntro: string;
+  salaryExpectation: string;
+  profileStory: string;
+  lookingFor: string[];
+  skills: string[];
+  profileLinks: { label: string; url: string }[] | null;
+  experiences: { title: string; company: string; period: string; note: string }[] | null;
+  selectedWork: { name: string; note: string }[] | null;
   authProvider: "EMAIL" | "GOOGLE";
   company: {
     id: number;
     companyName: string;
     phone: string;
     profileContent: string;
+    tagline: string;
+    size: string;
+    founded: number | null;
+    values: string[];
+    perks: string[];
     logo: string | null;
     city: string;
   } | null;
@@ -41,6 +56,11 @@ export type UpdateProfileInput = Partial<AuthUser> & {
   phone?: string;
   companyCity?: string;
   profileContent?: string;
+  companyTagline?: string;
+  companySize?: string;
+  companyFounded?: number;
+  companyValues?: string[];
+  companyPerks?: string[];
 };
 
 export type DashboardOverview = {
@@ -48,4 +68,34 @@ export type DashboardOverview = {
   city: string | null;
   newJobs: number;
   stats: { label: string; value: string; note: string }[];
+};
+
+export type HomepageData = {
+  overview: DashboardOverview;
+  profileCompletion: number;
+  applications: {
+    id: number;
+    status: string;
+    job: {
+      slug: string;
+      title: string;
+      company: { companyName: string };
+    };
+  }[];
+  recommendations: {
+    id: number;
+    slug: string;
+    title: string;
+    cityLocation: string;
+    category: string;
+    score: number;
+    reason: string;
+    company: { companyName: string };
+  }[];
+  followedCompanies: {
+    id: number;
+    companyName: string;
+    city: string;
+    openJobs: number;
+  }[];
 };

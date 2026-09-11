@@ -41,7 +41,10 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
           })
         : await login(email, password);
       useAuth.getState().login(session);
-      window.location.assign(sessionStorage.getItem("authReturnTo") ?? "/");
+      const returnTo = sessionStorage.getItem("authReturnTo");
+      const defaultDestination =
+        session.user.role === "COMPANY_ADMIN" ? "/admin" : "/";
+      window.location.assign(returnTo ?? defaultDestination);
       sessionStorage.removeItem("authReturnTo");
     } catch (requestError) {
       setError(

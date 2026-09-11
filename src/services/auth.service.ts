@@ -4,6 +4,7 @@ import type {
   AuthSession,
   AuthUser,
   DashboardOverview,
+  HomepageData,
   RegisterInput,
   UpdateProfileInput,
 } from "../types/auth";
@@ -34,6 +35,20 @@ export async function getProfile() {
 export async function getDashboardOverview() {
   const response = await axiosInstance.get<ApiResponse<DashboardOverview>>("/auth/dashboard-overview");
   return getData(response, "Unable to load dashboard overview");
+}
+
+export async function getHomepageData() {
+  const response = await axiosInstance.get<ApiResponse<HomepageData>>(
+    "/auth/homepage",
+  );
+  return getData(response, "Unable to load homepage");
+}
+
+export async function getSubscriptionStatus() {
+  const response = await axiosInstance.get<ApiResponse<{ active: boolean }>>(
+    "/auth/subscription-status",
+  );
+  return getData(response, "Unable to check subscription status");
 }
 
 export async function updateProfile(input: UpdateProfileInput) {

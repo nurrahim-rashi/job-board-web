@@ -15,6 +15,13 @@ export function Navbar() {
   const [authOpen, setAuthOpen] = useState(false);
   const loggedIn = useAuth((state) => Boolean(state.token));
   const isAdmin = useAuth((state) => state.user?.role === "COMPANY_ADMIN");
+  const companyId = useAuth((state) => state.user?.company?.id);
+  const userId = useAuth((state) => state.user?.id);
+  const companyAdminLinks = [
+    { label: "Dashboard", href: "/admin" },
+    { label: "My Company", href: companyId ? `/companies/${companyId}` : "/profile" },
+    { label: "My Profile", href: userId ? `/profile/${userId}` : "/profile" },
+  ];
   useEffect(() => {
     const update = () => setScrolled(window.scrollY > 24);
     update();
@@ -28,11 +35,22 @@ export function Navbar() {
   return (
     <header className={`site-nav ${scrolled ? "is-scrolled" : ""}`}>
       <nav>
-        <a href="/" className="nav-mark" aria-label="Polaris home">
+        <a href={isAdmin ? "/admin" : "/"} className="nav-mark" aria-label="Polaris home">
           ✦ Polaris
         </a>
         <ul>
-          {links.filter((link) => !loggedIn || !["Stories", "About"].includes(link.label)).map((link) => (
+          {(isAdmin
+            ? companyAdminLinks
+            : [
+                ...links.filter(
+                  (link) =>
+                    !loggedIn || !["Stories", "About"].includes(link.label),
+                ),
+                ...(loggedIn && userId
+                  ? [{ label: "My Profile", href: `/profile/${userId}` }]
+                  : []),
+              ]
+          ).map((link) => (
             <li key={link.label}>
               <a href={link.href}>{link.label}</a>
             </li>
@@ -40,9 +58,11 @@ export function Navbar() {
         </ul>
         {loggedIn ? (
           <>
-            <a className="nav-profile" href={isAdmin ? "/admin" : "/dashboard"}>
-              Dashboard
-            </a>
+            {!isAdmin && (
+              <a className="nav-profile" href="/dashboard">
+                Dashboard
+              </a>
+            )}
             <button type="button" className="nav-cta" onClick={handleLogout}>
               Sign out
             </button>

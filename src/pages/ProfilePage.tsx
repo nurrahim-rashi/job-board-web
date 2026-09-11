@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState, type FormEvent } from "react";
+import toast from "react-hot-toast";
 import { Navbar } from "../components/Navbar";
 import {
   changePassword,
@@ -13,24 +14,29 @@ import type { AuthUser } from "../types/auth";
 import { fetchAssessmentBadges } from "../lib/assessment-api";
 import type { AssessmentBadge } from "../types/assessment";
 
+const lines = (value: FormDataEntryValue | null) =>
+  String(value ?? "").split("\n").map((item) => item.trim()).filter(Boolean);
+
+const columns = (value: FormDataEntryValue | null) =>
+  lines(value).map((item) => item.split("|").map((part) => part.trim()));
+
 export default function ProfilePage() {
-  const storedUser = useAuth((state) => state.user);
-  const [user, setUser] = useState<AuthUser | null>(storedUser);
-  const [notice, setNotice] = useState("");
+  const user = useAuth((state) => state.user);
+  const [profileLoading, setProfileLoading] = useState(true);
   const [error, setError] = useState("");
   const [badges, setBadges] = useState<AssessmentBadge[]>([]);
   const [badgesLoading, setBadgesLoading] = useState(true);
 
   useEffect(() => {
     getProfile()
-      .then(setUser)
       .catch(() => {
         window.location.assign("/");
-      });
+      })
+      .finally(() => setProfileLoading(false));
   }, []);
 
   useEffect(() => {
-    if (storedUser?.role !== "JOB_SEEKER") {
+    if (user?.role !== "JOB_SEEKER") {
       setBadgesLoading(false);
       return;
     }
@@ -45,35 +51,39 @@ export default function ProfilePage() {
       .finally(() => {
         setBadgesLoading(false);
       });
-  }, [storedUser?.role]);
+  }, [user?.role]);
 
-  if (!user) return null;
+  if (!user || profileLoading) return null;
   const isCompany = user.role === "COMPANY_ADMIN";
 
   async function saveProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
-    setNotice("");
     const form = new FormData(event.currentTarget);
     try {
       const updated = await updateProfile({
         name: String(form.get("name") ?? ""),
         email: String(form.get("email") ?? ""),
-        birthDate: String(form.get("birthDate") ?? "") || undefined,
-        gender: (String(form.get("gender") ?? "") || undefined) as
-          | AuthUser["gender"]
-          | undefined,
-        lastEducation: String(form.get("lastEducation") ?? "") || undefined,
-        address: String(form.get("address") ?? "") || undefined,
         city: String(form.get("city") ?? "") || undefined,
         province: String(form.get("province") ?? "") || undefined,
-        companyName: String(form.get("companyName") ?? "") || undefined,
-        phone: String(form.get("phone") ?? "") || undefined,
-        companyCity: String(form.get("companyCity") ?? "") || undefined,
-        profileContent: String(form.get("profileContent") ?? "") || undefined,
+        professionalRole: String(form.get("professionalRole") ?? "") || undefined,
+        profileIntro: String(form.get("profileIntro") ?? "") || undefined,
+        profileLinks: columns(form.get("profileLinks")).map(([label, url]) => ({ label, url })).filter((item) => item.label && item.url),
+        ...(!isCompany ? {
+          birthDate: String(form.get("birthDate") ?? "") || undefined,
+          gender: (String(form.get("gender") ?? "") || undefined) as AuthUser["gender"] | undefined,
+          lastEducation: String(form.get("lastEducation") ?? "") || undefined,
+          address: String(form.get("address") ?? "") || undefined,
+          availability: String(form.get("availability") ?? "") || undefined,
+          salaryExpectation: String(form.get("salaryExpectation") ?? "") || undefined,
+          profileStory: String(form.get("profileStory") ?? "") || undefined,
+          lookingFor: lines(form.get("lookingFor")),
+          skills: String(form.get("skills") ?? "").split(/[,\n]/).map((item) => item.trim()).filter(Boolean),
+          experiences: columns(form.get("experiences")).map(([title, company, period = "", note = ""]) => ({ title, company, period, note })).filter((item) => item.title && item.company),
+          selectedWork: columns(form.get("selectedWork")).map(([name, note = ""]) => ({ name, note })).filter((item) => item.name),
+        } : {}),
       });
-      setUser(updated);
-      setNotice(
+      toast.success(
         updated.emailVerifiedAt
           ? "Profile updated."
           : "Profile updated. Please verify your email.",
@@ -90,7 +100,6 @@ export default function ProfilePage() {
   async function updatePassword(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
-    setNotice("");
     const form = new FormData(event.currentTarget);
     try {
       await changePassword(
@@ -98,7 +107,7 @@ export default function ProfilePage() {
         String(form.get("newPassword")),
       );
       event.currentTarget.reset();
-      setNotice("Password updated.");
+      toast.success("Password updated.");
     } catch (requestError) {
       setError(
         requestError instanceof Error
@@ -113,9 +122,8 @@ export default function ProfilePage() {
     const file = new FormData(event.currentTarget).get("avatar");
     if (!(file instanceof File) || !file.size) return;
     try {
-      const updated = await uploadAvatar(file);
-      setUser(updated);
-      setNotice("Profile photo updated.");
+      await uploadAvatar(file);
+      toast.success("Profile photo updated.");
     } catch (requestError) {
       setError(
         requestError instanceof Error
@@ -136,6 +144,9 @@ export default function ProfilePage() {
             Keep your details current so applications and company information
             stay accurate.
           </p>
+          <Link className="button button-primary" to={`/profile/${user.id}`}>
+            View public profile
+          </Link>
         </header>
         {!user.emailVerifiedAt && (
           <aside className="verification-banner">
@@ -149,7 +160,7 @@ export default function ProfilePage() {
               type="button"
               onClick={() =>
                 resendVerification(user.email)
-                  .then(() => setNotice("Verification email sent."))
+                  .then(() => toast.success("Verification email sent."))
                   .catch((requestError) => setError(requestError.message))
               }
             >
@@ -157,7 +168,6 @@ export default function ProfilePage() {
             </button>
           </aside>
         )}
-        {notice && <p className="profile-notice">{notice}</p>}
         {error && <p className="profile-error">{error}</p>}
         <form className="profile-card avatar-card" onSubmit={uploadPhoto}>
           <h2>Profile photo</h2>
@@ -260,6 +270,41 @@ export default function ProfilePage() {
                 required
               />
             </label>
+            {isCompany && (
+              <>
+                <label>
+                  Role at company
+                  <input
+                    name="professionalRole"
+                    defaultValue={user.professionalRole}
+                    placeholder="Hiring Manager"
+                  />
+                </label>
+                <label>
+                  City
+                  <input name="city" defaultValue={user.city ?? ""} />
+                </label>
+                <label>
+                  Province
+                  <input name="province" defaultValue={user.province ?? ""} />
+                </label>
+                <label className="profile-wide">
+                  Profile intro
+                  <textarea
+                    name="profileIntro"
+                    defaultValue={user.profileIntro}
+                    placeholder="Tell people about your role at the company."
+                  />
+                </label>
+                <label className="profile-wide">
+                  Profile links <small>one per line: Label | URL</small>
+                  <textarea
+                    name="profileLinks"
+                    defaultValue={(user.profileLinks ?? []).map((item) => `${item.label} | ${item.url}`).join("\n")}
+                  />
+                </label>
+              </>
+            )}
             {!isCompany && (
               <>
                 <label>
@@ -297,41 +342,45 @@ export default function ProfilePage() {
                   Address
                   <textarea name="address" defaultValue={user.address ?? ""} />
                 </label>
-              </>
-            )}
-            {isCompany && (
-              <>
                 <label>
-                  Company name
-                  <input
-                    name="companyName"
-                    defaultValue={user.company?.companyName ?? ""}
-                    required
-                  />
+                  Professional role
+                  <input name="professionalRole" defaultValue={user.professionalRole} placeholder="Senior Product Designer" />
                 </label>
                 <label>
-                  Phone
-                  <input
-                    name="phone"
-                    defaultValue={user.company?.phone ?? ""}
-                    required
-                  />
+                  Availability
+                  <input name="availability" defaultValue={user.availability} placeholder="Open to opportunities" />
                 </label>
                 <label>
-                  Company city
-                  <input
-                    name="companyCity"
-                    defaultValue={user.company?.city ?? ""}
-                    required
-                  />
+                  Salary expectation
+                  <input name="salaryExpectation" defaultValue={user.salaryExpectation} placeholder="Rp 25–35 juta / month" />
                 </label>
                 <label className="profile-wide">
-                  Company profile content
-                  <textarea
-                    name="profileContent"
-                    defaultValue={user.company?.profileContent ?? ""}
-                    placeholder="Write your company profile…"
-                  />
+                  Profile intro
+                  <textarea name="profileIntro" defaultValue={user.profileIntro} placeholder="A short introduction shown at the top of your public profile." />
+                </label>
+                <label className="profile-wide">
+                  My story
+                  <textarea name="profileStory" defaultValue={user.profileStory} placeholder="Tell companies about your journey and the work you care about." />
+                </label>
+                <label className="profile-wide">
+                  Looking for <small>one item per line</small>
+                  <textarea name="lookingFor" defaultValue={user.lookingFor.join("\n")} placeholder={"Product-led team\nRemote-friendly role"} />
+                </label>
+                <label className="profile-wide">
+                  Skills <small>separate with commas</small>
+                  <textarea name="skills" defaultValue={user.skills.join(", ")} placeholder="Product design, Figma, Design systems" />
+                </label>
+                <label className="profile-wide">
+                  Experience <small>one per line: Title | Company | Period | Note</small>
+                  <textarea name="experiences" defaultValue={(user.experiences ?? []).map((item) => `${item.title} | ${item.company} | ${item.period} | ${item.note}`).join("\n")} />
+                </label>
+                <label className="profile-wide">
+                  Selected work <small>one per line: Name | Note</small>
+                  <textarea name="selectedWork" defaultValue={(user.selectedWork ?? []).map((item) => `${item.name} | ${item.note}`).join("\n")} />
+                </label>
+                <label className="profile-wide">
+                  Profile links <small>one per line: Label | URL</small>
+                  <textarea name="profileLinks" defaultValue={(user.profileLinks ?? []).map((item) => `${item.label} | ${item.url}`).join("\n")} placeholder={"Portfolio | https://example.com\nEmail | mailto:you@example.com"} />
                 </label>
               </>
             )}
