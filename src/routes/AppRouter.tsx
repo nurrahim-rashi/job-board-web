@@ -1,6 +1,7 @@
 import { Link, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import AboutPage from "../pages/AboutPage";
 import AdminApplicantsPage from "../pages/AdminApplicantsPage";
+import AdminInterviewsPage from "../pages/AdminInterviewsPage";
 import AdminJobDetailPage from "../pages/AdminJobDetailPage";
 import AdminJobFormPage from "../pages/AdminJobFormPage";
 import AdminJobsPage from "../pages/AdminJobsPage";
@@ -238,6 +239,15 @@ export function AppRouter() {
         element={
           <AdminRoute>
             <AdminApplicantsPage />
+          </AdminRoute>
+        }
+      />
+
+      <Route
+        path="/admin/interviews"
+        element={
+          <AdminRoute>
+            <AdminInterviewsPage />
           </AdminRoute>
         }
       />
