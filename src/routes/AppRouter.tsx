@@ -1,5 +1,6 @@
 import { Link, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import AboutPage from "../pages/AboutPage";
+import AdminAnalyticsPage from "../pages/AdminAnalyticsPage";
 import AdminApplicantsPage from "../pages/AdminApplicantsPage";
 import AdminInterviewsPage from "../pages/AdminInterviewsPage";
 import AdminJobDetailPage from "../pages/AdminJobDetailPage";
@@ -25,6 +26,7 @@ import AssessmentResultDetailPage from "../pages/AssessmentResultDetailPage";
 import AssessmentManagementPage from "../pages/AssessmentManagementPage";
 import AssessmentQuestionsManagementPage from "../pages/AssessmentQuestionsManagementPage";
 import CvGeneratorPage from "../pages/CvGeneratorPage";
+import DeveloperAnalyticsPage from "../pages/DeveloperAnalyticsPage";
 import { useAuth } from "../stores/useAuth";
 
 function hasSession(search: string) {
@@ -262,6 +264,15 @@ export function AppRouter() {
       />
 
       <Route
+        path="/admin/analytics"
+        element={
+          <AdminRoute>
+            <AdminAnalyticsPage />
+          </AdminRoute>
+        }
+      />
+
+      <Route
         path="/verify-email"
         element={<EmailActionPage action="verify" />}
       />
@@ -282,6 +293,15 @@ export function AppRouter() {
       <Route path="/jobs/:slug" element={<JobDetailPage />} />
 
       <Route path="*" element={<NotFoundPage />} />
+
+      <Route
+        path="/dashboard/developer/analytics"
+        element={
+          <DeveloperRoute>
+            <DeveloperAnalyticsPage />
+          </DeveloperRoute>
+        }
+      />
 
       <Route
         path="/dashboard/developer/assessments"
