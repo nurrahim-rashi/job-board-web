@@ -46,6 +46,9 @@ export function DeveloperPanel() {
           <Link to="/dashboard/developer/assessments">
             Manage skill assessments <ArrowRight />
           </Link>
+          <Link to="/dashboard/developer/analytics">
+            Open website analytics <ArrowRight />
+          </Link>
           <a href="/jobs">
             Open review queue <ArrowRight />
           </a>
