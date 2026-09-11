@@ -29,6 +29,7 @@ import AssessmentManagementPage from "../pages/AssessmentManagementPage";
 import AssessmentQuestionsManagementPage from "../pages/AssessmentQuestionsManagementPage";
 import CvGeneratorPage from "../pages/CvGeneratorPage";
 import DeveloperAnalyticsPage from "../pages/DeveloperAnalyticsPage";
+import DeveloperSubscriptionsPage from "../pages/DeveloperSubscriptionsPage";
 import { useAuth } from "../stores/useAuth";
 
 function hasPreviewSession(search: string) {
@@ -336,6 +337,15 @@ export function AppRouter() {
         element={
           <DeveloperRoute>
             <AssessmentQuestionsManagementPage />
+          </DeveloperRoute>
+        }
+      />
+
+      <Route
+        path="/dashboard/developer/subscriptions"
+        element={
+          <DeveloperRoute>
+            <DeveloperSubscriptionsPage />
           </DeveloperRoute>
         }
       />
