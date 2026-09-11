@@ -13,6 +13,7 @@ import AssessmentDiscoveryPage from "../pages/AssessmentDiscoveryPage";
 import AssessmentTakePage from "../pages/AssessmentTakePage";
 import BrowseCompaniesPage from "../pages/BrowseCompaniesPage";
 import CompanyDetailPage from "../pages/CompanyDetailPage";
+import CompanyEditProfilePage from "../pages/CompanyEditProfilePage";
 import BrowseJobsPage from "../pages/BrowseJobsPage";
 import DashboardPage from "../pages/DashboardPage";
 import EmailActionPage from "../pages/EmailActionPage";
@@ -20,6 +21,7 @@ import Homepage from "../pages/Homepage";
 import JobDetailPage from "../pages/JobDetailPage";
 import LandingPage from "../pages/LandingPage";
 import ProfilePage from "../pages/ProfilePage";
+import PublicProfilePage from "../pages/PublicProfilePage";
 import StoriesPage from "../pages/StoriesPage";
 import AssessmentResultsPage from "../pages/AssessmentResultsPage";
 import AssessmentResultDetailPage from "../pages/AssessmentResultDetailPage";
@@ -29,20 +31,24 @@ import CvGeneratorPage from "../pages/CvGeneratorPage";
 import DeveloperAnalyticsPage from "../pages/DeveloperAnalyticsPage";
 import { useAuth } from "../stores/useAuth";
 
-function hasSession(search: string) {
+function hasPreviewSession(search: string) {
   const preview = new URLSearchParams(search).get("loggedIn");
-  return preview === "true" || Boolean(useAuth.getState().token);
+  return preview === "true";
 }
 
-function isCompanyAdmin(search: string) {
+function hasAdminPreview(search: string) {
   const preview = new URLSearchParams(search).get("role");
-  return (
-    preview === "admin" || useAuth.getState().user?.role === "COMPANY_ADMIN"
-  );
+  return preview === "admin";
 }
 
 function HomeRoute() {
   const loggedIn = useAuth((state) => Boolean(state.token));
+  const role = useAuth((state) => state.user?.role);
+
+  if (role === "COMPANY_ADMIN") {
+    return <Navigate replace to="/admin" />;
+  }
+
   return loggedIn ? <Homepage /> : <LandingPage />;
 }
 
@@ -53,12 +59,14 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const { search } = useLocation();
+  const loggedIn = useAuth((state) => Boolean(state.token));
+  const role = useAuth((state) => state.user?.role);
 
-  if (!hasSession(search)) {
+  if (!loggedIn && !hasPreviewSession(search)) {
     return <Navigate replace to="/" />;
   }
 
-  return isCompanyAdmin(search) ? (
+  return role === "COMPANY_ADMIN" || hasAdminPreview(search) ? (
     children
   ) : (
     <Navigate replace to={{ pathname: "/dashboard", search }} />
@@ -93,8 +101,9 @@ function JobSeekerRoute({ children }: { children: React.ReactNode }) {
 
 function DashboardRoute() {
   const { search } = useLocation();
+  const role = useAuth((state) => state.user?.role);
 
-  return isCompanyAdmin(search) ? (
+  return role === "COMPANY_ADMIN" || hasAdminPreview(search) ? (
     <Navigate replace to={{ pathname: "/admin", search }} />
   ) : (
     <DashboardPage />
@@ -125,6 +134,15 @@ export function AppRouter() {
           <ProtectedRoute>
             <ProfilePage />
           </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/company/profile/edit"
+        element={
+          <AdminRoute>
+            <CompanyEditProfilePage />
+          </AdminRoute>
         }
       />
 
@@ -289,6 +307,7 @@ export function AppRouter() {
       <Route path="/stories" element={<StoriesPage />} />
       <Route path="/companies" element={<BrowseCompaniesPage />} />
       <Route path="/companies/:companyId" element={<CompanyDetailPage />} />
+      <Route path="/profile/:userId" element={<PublicProfilePage />} />
       <Route path="/jobs" element={<BrowseJobsPage />} />
       <Route path="/jobs/:slug" element={<JobDetailPage />} />
 

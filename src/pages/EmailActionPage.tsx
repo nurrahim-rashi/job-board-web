@@ -1,21 +1,33 @@
-import { useEffect, useState, type FormEvent } from "react";
-import { forgotPassword, resetPassword, verifyEmail } from "../services/auth.service";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import {
+  forgotPassword,
+  getProfile,
+  resetPassword,
+  verifyEmail,
+} from "../services/auth.service";
+import { useAuth } from "../stores/useAuth";
 
 type EmailAction = "verify" | "forgot" | "reset";
 
 export default function EmailActionPage({ action }: { action: EmailAction }) {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const verificationStarted = useRef(false);
   const token = new URLSearchParams(window.location.search).get("token") ?? "";
 
   useEffect(() => {
-    if (action !== "verify" || !token) return;
+    if (action !== "verify" || !token || verificationStarted.current) return;
+    verificationStarted.current = true;
+
     verifyEmail(token)
-      .then(() =>
+      .then(async () => {
+        if (useAuth.getState().token) {
+          await getProfile();
+        }
         setMessage(
           "Email verified. You can now sign in and use protected features.",
-        ),
-      )
+        );
+      })
       .catch((requestError) => setError(requestError.message));
   }, [action, token]);
 

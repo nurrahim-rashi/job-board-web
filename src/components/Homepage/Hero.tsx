@@ -1,21 +1,14 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, Briefcase, MapPin, Search } from "../site/Icons";
 import { Stars } from "../site/Stars";
-import { getDashboardOverview } from "../../services/auth.service";
 import type { DashboardOverview } from "../../types/auth";
 
-export function HeroSection() {
-  const [overview, setOverview] = useState<DashboardOverview | null>(null);
+export function HeroSection({ overview }: { overview: DashboardOverview | null }) {
   const [location, setLocation] = useState("");
 
   useEffect(() => {
-    getDashboardOverview()
-      .then((data) => {
-        setOverview(data);
-        setLocation(data.city ?? "");
-      })
-      .catch(() => undefined);
-  }, []);
+    setLocation(overview?.city ?? "");
+  }, [overview]);
 
   return (
     <section className="dashboard-hero">
