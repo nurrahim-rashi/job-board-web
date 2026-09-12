@@ -105,6 +105,18 @@ export function ApplicantPanel() {
         </article>
       </div>
       <article className="panel-card">
+        <p className="eyebrow">Subscriptions</p>
+        <h2>Unlock premium tools</h2>
+        <p>
+          Get access to the CV Generator, skill assessments, and priority
+          features.
+        </p>
+
+        <Link to="/dashboard/subscriptions">
+          View subscription plans <ArrowRight />
+        </Link>
+      </article>
+      <article className="panel-card">
         <p className="eyebrow">Skill assessment</p>
         <h2>Prove your skills</h2>
         <p>Take skill assessments, earn badges, and strengthen your profile.</p>
