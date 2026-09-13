@@ -61,6 +61,7 @@ export interface ApplicantListItem {
   expectedSalary: string | number;
   cvFile: string;
   appliedAt: string;
+  priorityReview: boolean;
   applicant: {
     id: number;
     name: string;
