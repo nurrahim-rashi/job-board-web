@@ -28,6 +28,7 @@ export function ApplicantList({ applicants, onOpen, onPreviewCv }: ApplicantList
           <span className="applicant-identity">
             <ApplicantAvatar name={item.applicant.name} avatar={item.applicant.avatar} />
             <b>{item.applicant.name}</b>
+            {item.priorityReview && <em className="admin-chip good">Priority</em>}
           </span>
           <span>{item.applicant.age ?? "—"}</span>
           <span>{educationLabel(item.applicant.lastEducation)}</span>
