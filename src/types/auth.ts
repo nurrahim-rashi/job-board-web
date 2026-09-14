@@ -49,6 +49,7 @@ export type AuthUser = {
     values: string[];
     perks: string[];
     logo: string | null;
+    banner?: string | null;
     city: string;
   } | null;
 };
@@ -104,6 +105,7 @@ export type HomepageData = {
     title: string;
     cityLocation: string;
     category: string;
+    createdAt: string;
     score: number;
     reason: string;
     company: { companyName: string };

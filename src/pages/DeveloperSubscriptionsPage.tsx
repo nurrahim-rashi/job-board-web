@@ -5,7 +5,7 @@ import {
   fetchDeveloperSubscriptions,
   updateSubscriptionPlan,
 } from "../lib/subscription-api";
-import type { SubscriptionPlan } from "../types/subscription";
+import { subscriptionNameLabel, type SubscriptionPlan } from "../types/subscription";
 
 export default function DeveloperSubscriptionsPage() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
@@ -71,7 +71,7 @@ export default function DeveloperSubscriptionsPage() {
         ),
       );
 
-      setMessage(`${plan.name} subscription updated successfully.`);
+      setMessage(`${subscriptionNameLabel(plan.name)} subscription updated successfully.`);
     } catch (err) {
       setError(
         err instanceof Error
@@ -108,7 +108,7 @@ export default function DeveloperSubscriptionsPage() {
               {plans.map((plan) => (
                 <article className="panel-card" key={plan.id}>
                   <p className="eyebrow">Subscription plan</p>
-                  <h2>{plan.name}</h2>
+                  <h2>{subscriptionNameLabel(plan.name)}</h2>
 
                   <label>
                     Price (IDR)

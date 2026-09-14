@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 import { useApplicantDetail } from "../../../hooks/api/applicant/useApplicantDetail";
 import { useAssignTest } from "../../../hooks/api/pre-selection-test/useAssignTest";
@@ -10,6 +11,7 @@ import { TestAnswerSheet } from "./TestAnswerSheet";
 import { educationLabel, formatDateTime, formatRupiah } from "./applicantHelpers";
 import { formatDate } from "../adminData";
 import { statusLabels, statusTones } from "../../../types/applicant";
+import { axiosInstance } from "../../../lib/axios";
 
 export type DetailTab = "profile" | "cv" | "test";
 
@@ -23,8 +25,23 @@ type ApplicantDetailModalProps = {
 
 export function ApplicantDetailModal({ slug, applicationId, hasPreSelectionTest, initialTab = "profile", onClose }: ApplicantDetailModalProps) {
   const [tab, setTab] = useState<DetailTab>(initialTab);
-  const { data, isPending, isError, error } = useApplicantDetail(slug, applicationId);
+  const { data, isPending, isError, error, refetch } = useApplicantDetail(slug, applicationId);
   const assignTest = useAssignTest(slug);
+  const [requestingSalary, setRequestingSalary] = useState(false);
+
+  const requestExpectedSalary = async () => {
+    if (applicationId == null) return;
+    setRequestingSalary(true);
+    try {
+      const response = await axiosInstance.patch<{ message?: string }>(`/job-posting/${slug}/applicants/${applicationId}/request-expected-salary`);
+      toast.success(response.data.message ?? "Expected salary requested");
+      await refetch();
+    } catch (requestError) {
+      toast.error(requestError instanceof Error ? requestError.message : "Unable to request expected salary");
+    } finally {
+      setRequestingSalary(false);
+    }
+  };
 
   useEffect(() => setTab(initialTab), [initialTab, applicationId]);
 
@@ -108,6 +125,17 @@ export function ApplicantDetailModal({ slug, applicationId, hasPreSelectionTest,
                     <dd>{address || "Not stated"}</dd>
                   </div>
                 </dl>
+
+                {data.expectedSalary == null || data.expectedSalary === "" ? (
+                  <div className="applicant-salary-nudge">
+                    <span className="application-alert-icon" aria-hidden="true">!</span>
+                    <div>
+                      <b>Expected salary not provided</b>
+                      <small>{data.expectedSalaryRequestedAt ? "The applicant has already been nudged." : "Ask the applicant to complete their expected salary."}</small>
+                    </div>
+                    <button type="button" className="admin-btn ghost" disabled={requestingSalary || Boolean(data.expectedSalaryRequestedAt)} onClick={() => void requestExpectedSalary()}>{requestingSalary ? "Sending…" : data.expectedSalaryRequestedAt ? "Request sent" : "Request salary"}</button>
+                  </div>
+                ) : null}
 
                 {data.interview ? (
                   <div className="applicant-interview">
