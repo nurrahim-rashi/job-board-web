@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { AuthModal } from "./site/AuthModal";
 import { logout } from "../services/auth.service";
 import { useAuth } from "../stores/useAuth";
+import { useProfileView } from "../stores/useProfileView";
 
 const links = [
   { label: "Jobs", href: "/jobs" },
@@ -18,10 +19,11 @@ export function Navbar() {
   const isAdmin = useAuth((state) => state.user?.role === "COMPANY_ADMIN");
   const companyId = useAuth((state) => state.user?.company?.id);
   const userId = useAuth((state) => state.user?.id);
+  const openProfile = useProfileView((state) => state.openProfile);
   const companyAdminLinks = [
     { label: "Dashboard", href: "/admin" },
     { label: "My Company", href: companyId ? `/companies/${companyId}` : "/profile" },
-    { label: "My Profile", href: userId ? `/profile/${userId}` : "/profile" },
+    { label: "My Profile", href: userId ? "/profile/view" : "/profile" },
   ];
   useEffect(() => {
     const update = () => setScrolled(window.scrollY > 24);
@@ -62,14 +64,14 @@ export function Navbar() {
               ]
           ).map((link) => (
             <li key={link.label}>
-              <a href={link.href}>{link.label}</a>
+              <a href={link.href} onClick={() => link.label === "My Profile" && userId && openProfile(userId)}>{link.label}</a>
             </li>
           ))}
         </ul>
         {loggedIn ? (
           <>
             {!isAdmin && (
-              <a className="nav-profile" href={userId ? `/profile/${userId}` : "/profile"}>
+              <a className="nav-profile" href={userId ? "/profile/view" : "/profile"} onClick={() => userId && openProfile(userId)}>
                 My Profile
               </a>
             )}

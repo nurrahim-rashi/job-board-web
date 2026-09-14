@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { Navbar } from "../components/Navbar";
 import {
@@ -14,6 +13,8 @@ import {
   QuickExperienceModal,
   SelectedWorkModal,
 } from "../components/Profile/ProfileEntryModals";
+import { useParams } from "react-router-dom";
+import { AnimatedMetric } from "../components/site/AnimatedMetric";
 
 const experienceTime = (period: string) => {
   const [start = "", end = ""] = period.split(/\s+[–-]\s+/);
@@ -31,8 +32,9 @@ const workDateLabel = (value?: string) => {
 };
 
 export default function PublicProfilePage() {
-  const { userId = "" } = useParams();
   const currentUser = useAuth((state) => state.user);
+  const { userId: publicUserId } = useParams();
+  const userId = publicUserId ?? String(currentUser?.id ?? "");
   const [profile, setProfile] = useState<PublicSeekerProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -112,9 +114,6 @@ export default function PublicProfilePage() {
   const isCompanyAdmin = profile.role === "COMPANY_ADMIN";
   const roleLine = profile.professionalRole ||
     (profile.company ? "Company admin" : "Job seeker");
-  const hasCareerContent = Boolean(
-    profile.profileStory || experiences.length || selectedWork.length,
-  );
   const apiUrl = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
   return (
@@ -135,7 +134,7 @@ export default function PublicProfilePage() {
             />
           )}
           <p>{profile.availability || "Job seeker profile"}</p>
-          <h1>{profile.name}</h1>
+          <h1>{profile.name}{profile.emailVerifiedAt && <span className="verified-profile-badge" title="Verified email" aria-label="Verified email">✓</span>}</h1>
           <h2>{roleLine}</h2>
           <div className="seeker-profile-pills">
             {location && <span>{location}</span>}
@@ -153,6 +152,11 @@ export default function PublicProfilePage() {
       </section>
 
       <section className="seeker-profile-content">
+        {!isCompanyAdmin && <article className="seeker-paper-card profile-response-card">
+          <div><span>Interview response rate</span><AnimatedMetric value={profile.applicationInsights.interviewResponseRate} suffix="%" /></div>
+          <div><span>Letter response rate</span><AnimatedMetric value={profile.applicationInsights.letterResponseRate} suffix="%" /></div>
+          <div className="profile-applied-roles"><span>Applied for</span><p>{profile.applicationInsights.appliedRoles.length ? profile.applicationInsights.appliedRoles.map((application, index) => <span key={`${application.slug}-${index}`}>{application.title}{index < profile.applicationInsights.appliedRoles.length - 1 ? ", " : ""}</span>) : "No roles yet"}</p></div>
+        </article>}
         {!isCompanyAdmin && <article className="seeker-paper-card seeker-experience-card">
           <section>
             <div className="seeker-section-heading">
@@ -255,7 +259,7 @@ export default function PublicProfilePage() {
             )}
           </section>
         </article>}
-        <article className="seeker-paper-card">
+        <article className="seeker-paper-card profile-about-card">
           <div className="seeker-profile-main">
             <div>
               {profile.company && (
@@ -273,39 +277,29 @@ export default function PublicProfilePage() {
                   </div>
                 </section>
               )}
-              {!profile.company && !hasCareerContent && (
-                <section>
-                  <h2>About</h2>
-                  <p>
-                    {profile.lastEducation
-                      ? `Education: ${profile.lastEducation}`
-                      : "This job seeker has not added their career story yet."}
-                  </p>
-                </section>
-              )}
-              {!isCompanyAdmin && (profile.profileStory || isOwnProfile) && (
+              {!isCompanyAdmin && (
                 <section>
                   <div className="seeker-section-heading">
                     <h2>My story</h2>
                     {isOwnProfile && <button type="button" aria-label="Edit my story" onClick={() => { setStoryDraft(profile.profileStory); setStoryModalOpen(true); }}><Pencil /></button>}
                   </div>
-                  <p>{profile.profileStory || "Add your story so companies can get to know you."}</p>
+                  {profile.profileStory
+                    ? <p>{profile.profileStory}</p>
+                    : <div className="seeker-profile-empty compact"><p>No story has been added yet.</p></div>}
                 </section>
               )}
             </div>
 
             <aside>
-              {!isCompanyAdmin && (profile.skills.length > 0 || isOwnProfile) && (
+              {!isCompanyAdmin && (
                 <section>
                   <div className="seeker-section-heading">
                     <h2>Skills</h2>
                     {isOwnProfile && <a href="/profile" aria-label="Add skills"><Plus /></a>}
                   </div>
-                  <div className="seeker-profile-tags">
-                    {profile.skills.map((skill) => (
-                      <span key={skill}>{skill}</span>
-                    ))}
-                  </div>
+                  {profile.skills.length > 0
+                    ? <div className="seeker-profile-tags">{profile.skills.map((skill) => <span key={skill}>{skill}</span>)}</div>
+                    : <div className="seeker-profile-empty compact"><p>No skills have been added yet.</p></div>}
                 </section>
               )}
               {links.length > 0 && (

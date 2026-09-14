@@ -3,15 +3,8 @@ import { ArrowRight, Briefcase, MapPin, Search } from "../site/Icons";
 import { Stars } from "../site/Stars";
 import type { DashboardOverview } from "../../types/auth";
 
-const emptyStats: DashboardOverview["stats"] = [
-  { label: "Applications", value: "—", note: "Total submitted" },
-  { label: "Interviews", value: "—", note: "Currently scheduled" },
-  { label: "Profile", value: "—", note: "Complete" },
-];
-
 export function HeroSection({
   overview,
-  loading,
 }: {
   overview: DashboardOverview | null;
   loading: boolean;
@@ -53,15 +46,6 @@ export function HeroSection({
             Search <ArrowRight />
           </a>
         </div>
-        <dl className={loading ? "is-loading" : undefined} aria-busy={loading}>
-          {(overview?.stats ?? emptyStats).map((stat) => (
-            <div key={stat.label}>
-              <dt>{stat.label}</dt>
-              <dd>{stat.value}</dd>
-              <small>{stat.note}</small>
-            </div>
-          ))}
-        </dl>
       </div>
     </section>
   );

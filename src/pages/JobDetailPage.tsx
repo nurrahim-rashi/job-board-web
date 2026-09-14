@@ -3,23 +3,14 @@ import { useParams } from "react-router-dom";
 import { ApplicationModal } from "../components/JobDetail/ApplicationModal";
 import { Navbar } from "../components/Navbar";
 import { AuthModal } from "../components/site/AuthModal";
-import { getMyJobApplication } from "../services/application.service";
+import { getMyJobApplication, type JobApplicationStatus } from "../services/application.service";
 import { getPublicJob, type PublicJobDetail } from "../services/job.service";
 import { useAuth } from "../stores/useAuth";
 import { isNewJob } from "../lib/job-age";
 import { categoryLabel } from "../types/job-posting";
 import { ShareJobModal } from "../components/JobDetail/ShareJobModal";
-import { Calendar, MapPin, Share, Wallet } from "../components/site/Icons";
-
-const statusLabels: Record<string, string> = {
-  DRAFT: "Draft",
-  PENDING: "CV screening",
-  TEST_ASSIGNED: "Test assigned",
-  PROCESS: "In review",
-  INTERVIEW: "Interview",
-  ACCEPTED: "Accepted",
-  REJECTED: "Not selected",
-};
+import { Bookmark, Calendar, MapPin, Share, Wallet } from "../components/site/Icons";
+import { applicationStatusLabel } from "../lib/application-status";
 
 const salary = (job: PublicJobDetail) =>
   job.salaryMin || job.salaryMax
@@ -34,8 +25,24 @@ export default function JobDetailPage() {
   const [applyOpen, setApplyOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
-  const [applicationStatus, setApplicationStatus] = useState<string | null>(null);
+  const [application, setApplication] = useState<JobApplicationStatus | null>(null);
   const [checkingApplication, setCheckingApplication] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    if (!user || user.role !== "JOB_SEEKER") return setSaved(false);
+    const savedJobs = JSON.parse(localStorage.getItem(`polaris-saved-jobs-${user.id}`) ?? "[]") as string[];
+    setSaved(savedJobs.includes(slug));
+  }, [slug, user]);
+
+  const toggleSaved = () => {
+    if (!user || user.role !== "JOB_SEEKER") return;
+    const key = `polaris-saved-jobs-${user.id}`;
+    const savedJobs = JSON.parse(localStorage.getItem(key) ?? "[]") as string[];
+    const next = savedJobs.includes(slug) ? savedJobs.filter((item) => item !== slug) : [...savedJobs, slug];
+    localStorage.setItem(key, JSON.stringify(next));
+    setSaved(next.includes(slug));
+  };
 
   useEffect(() => {
     getPublicJob(slug).then(setJob).catch((requestError) => setError(requestError.message));
@@ -43,20 +50,27 @@ export default function JobDetailPage() {
 
   useEffect(() => {
     if (user?.role !== "JOB_SEEKER") {
-      setApplicationStatus(null);
+      setApplication(null);
       setCheckingApplication(false);
       return;
     }
     setCheckingApplication(true);
     getMyJobApplication(slug)
-      .then((application) => setApplicationStatus(application?.status ?? null))
-      .catch(() => setApplicationStatus(null))
+      .then(setApplication)
+      .catch(() => setApplication(null))
       .finally(() => setCheckingApplication(false));
   }, [slug, user?.role]);
+
+  useEffect(() => {
+    if (user?.role !== "JOB_SEEKER" || sessionStorage.getItem("postAuthAction") !== `apply:${slug}`) return;
+    sessionStorage.removeItem("postAuthAction");
+    if (user.emailVerifiedAt) setApplyOpen(true);
+  }, [slug, user]);
 
   const apply = () => {
     if (!user) {
       sessionStorage.setItem("authReturnTo", window.location.pathname);
+      sessionStorage.setItem("postAuthAction", `apply:${slug}`);
       setAuthOpen(true);
       return;
     }
@@ -65,11 +79,13 @@ export default function JobDetailPage() {
       window.location.assign("/profile");
       return;
     }
-    if (!applicationStatus && !checkingApplication) setApplyOpen(true);
+    if (!application && !checkingApplication) setApplyOpen(true);
   };
 
+  const applicationStatus = application?.status ?? null;
+
   const applicationLabel = applicationStatus
-    ? `Application: ${statusLabels[applicationStatus] ?? applicationStatus.replaceAll("_", " ")}`
+    ? `Application: ${applicationStatusLabel(applicationStatus)}`
     : checkingApplication
       ? "Checking application…"
       : "Apply now";
@@ -96,7 +112,8 @@ export default function JobDetailPage() {
               <span><h1>{job.title} {isNewJob(job.createdAt) && <i className="new-job-badge">NEW</i>}</h1><p>{job.company.companyName} · {job.cityLocation}</p></span>
             </section>
             <aside>
-              <button className="button button-light" onClick={apply} disabled={applyDisabled}>{applicationLabel}</button>
+              {user?.role !== "COMPANY_ADMIN" && <button className="button button-light" onClick={apply} disabled={applyDisabled}>{applicationLabel}</button>}
+              {user?.role === "JOB_SEEKER" && <button type="button" onClick={toggleSaved}><Bookmark />{saved ? "Saved" : "Save job"}</button>}
               <button type="button" onClick={() => setShareOpen(true)}><Share />Share</button>
             </aside>
           </div>
@@ -119,11 +136,11 @@ export default function JobDetailPage() {
               {job.hasPreSelectionTest && <section className="test-card"><b>Pre-selection test required</b><p>{job.testDurationMinutes ?? 30} minutes. You can start it after the company assigns your application.</p></section>}
             </article>
             <aside className="job-rail">
-              <section>
+              {user?.role !== "COMPANY_ADMIN" && <section>
                 <p className="eyebrow">{applicationStatus ? "Your application" : "Apply"}</p>
-                {applicationStatus ? <p>Current status: <strong>{statusLabels[applicationStatus] ?? applicationStatus}</strong></p> : <p>{job.applicantCount} people have applied so far.</p>}
+                {application ? <><p>Current status: <strong>{applicationStatusLabel(applicationStatus!)}</strong></p><ApplicationTimeline application={application} /></> : <p>{job.applicantCount} people have applied so far.</p>}
                 <button className="rail-apply" onClick={apply} disabled={applyDisabled}>{applicationLabel}</button>
-              </section>
+              </section>}
               <section>
                 <p className="eyebrow">About {job.company.companyName}</p>
                 <p>{job.company.profileContent}</p>
@@ -138,9 +155,40 @@ export default function JobDetailPage() {
           </div>
         </section>
       </main>
-      <ApplicationModal open={applyOpen} title={job.title} slug={job.slug} onClose={() => setApplyOpen(false)} onSubmitted={() => { setApplicationStatus("PENDING"); setApplyOpen(false); }} />
+      <ApplicationModal open={applyOpen} title={job.title} slug={job.slug} onClose={() => setApplyOpen(false)} onSubmitted={() => { void getMyJobApplication(slug).then(setApplication); setApplyOpen(false); }} />
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
       <ShareJobModal open={shareOpen} title={job.title} company={job.company.companyName} url={window.location.href} onClose={() => setShareOpen(false)} />
     </div>
   );
+}
+
+function ApplicationTimeline({ application }: { application: JobApplicationStatus }) {
+  const terminal = application.status === "ACCEPTED" || application.status === "REJECTED";
+  const pastReview = ["INTERVIEW", "ACCEPTED"].includes(application.status);
+  const formatDate = (date?: string | null) => date ? new Date(date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : null;
+  const steps = [
+    { label: "Application submitted", detail: formatDate(application.createdAt), state: "done" },
+    ...(application.job.hasPreSelectionTest ? [{
+      label: application.testResult?.submittedAt ? "Pre-selection test completed" : "Pre-selection test",
+      detail: application.testResult?.submittedAt ? formatDate(application.testResult.submittedAt) : application.status === "TEST_ASSIGNED" ? "Ready to take" : "Waiting for assignment",
+      state: application.testResult?.submittedAt ? "done" : application.status === "TEST_ASSIGNED" ? "current" : "upcoming",
+    }] : []),
+    {
+      label: "Application review",
+      detail: application.status === "PROCESS" ? "Being reviewed by the company" : null,
+      state: application.status === "PROCESS" ? "current" : pastReview ? "done" : "upcoming",
+    },
+    {
+      label: "Interview",
+      detail: application.interview ? `${formatDate(application.interview.interviewDate)} · ${application.interview.locationOrLink}` : application.status === "INTERVIEW" ? "Schedule is being prepared" : null,
+      state: application.status === "INTERVIEW" ? "current" : terminal && application.interview ? "done" : "upcoming",
+    },
+    {
+      label: application.status === "ACCEPTED" ? "Application accepted" : application.status === "REJECTED" ? "Application closed" : "Final decision",
+      detail: terminal ? formatDate(application.updatedAt) : null,
+      state: terminal ? (application.status === "ACCEPTED" ? "done" : "rejected") : "upcoming",
+    },
+  ];
+
+  return <ol className="application-timeline">{steps.map((step) => <li className={step.state} key={step.label}><i aria-hidden="true" /><div><b>{step.label}</b>{step.detail && <small>{step.detail}</small>}</div></li>)}</ol>;
 }

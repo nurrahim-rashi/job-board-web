@@ -22,12 +22,12 @@ export const nextStatuses: Record<ApplicationStatus, DecisionStatus[]> = {
 };
 
 export const statusLabels: Record<ApplicationStatus, string> = {
-  PENDING: "Pending",
-  TEST_ASSIGNED: "Test assigned",
-  PROCESS: "In process",
-  INTERVIEW: "Interview",
-  ACCEPTED: "Accepted",
-  REJECTED: "Rejected",
+  PENDING: applicationStatusLabel("PENDING"),
+  TEST_ASSIGNED: applicationStatusLabel("TEST_ASSIGNED"),
+  PROCESS: applicationStatusLabel("PROCESS"),
+  INTERVIEW: applicationStatusLabel("INTERVIEW"),
+  ACCEPTED: applicationStatusLabel("ACCEPTED"),
+  REJECTED: applicationStatusLabel("REJECTED"),
 };
 
 /** Maps to the .admin-chip modifiers in index.css. */
@@ -46,13 +46,16 @@ export const statusTones: Record<ApplicationStatus, string> = {
  * might have typed ("SMA" catches SMA_SMK, SMA/SMK and SMA alike).
  */
 export const educationOptions = [
-  { label: "SD", query: "SD" },
-  { label: "SMP", query: "SMP" },
-  { label: "SMA / SMK", query: "SMA" },
-  { label: "D3", query: "D3" },
-  { label: "S1", query: "S1" },
-  { label: "S2", query: "S2" },
-  { label: "S3", query: "S3" },
+  { label: "Elementary School", query: "Elementary School" },
+  { label: "Middle School", query: "Middle School" },
+  { label: "High School", query: "High School" },
+  { label: "Vocational High School", query: "Vocational High School" },
+  { label: "Diploma", query: "Diploma" },
+  { label: "Associate Degree", query: "Associate Degree" },
+  { label: "Bachelor", query: "Bachelor" },
+  { label: "Master", query: "Master" },
+  { label: "Doctorate", query: "Doctorate" },
+  { label: "Other", query: "Other" },
 ];
 
 export interface ApplicantListItem {
@@ -101,6 +104,8 @@ export interface ApplicantDetail {
     locationOrLink: string;
     notes: string | null;
     status: "SCHEDULED" | "COMPLETED" | "CANCELLED";
+    proposedDate?: string | null;
+    proposalNote?: string | null;
   } | null;
 }
 
@@ -122,3 +127,4 @@ export interface UpdateStatusInput {
   status: DecisionStatus;
   rejectionReason?: string;
 }
+import { applicationStatusLabel } from "../lib/application-status";

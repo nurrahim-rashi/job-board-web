@@ -8,6 +8,7 @@ import {
 import { useAuth } from "../stores/useAuth";
 import { isNewJob } from "../lib/job-age";
 import { categoryLabel } from "../types/job-posting";
+import { AnimatedMetric } from "../components/site/AnimatedMetric";
 
 function formatSalary(minimum: number | null, maximum: number | null) {
   if (!minimum && !maximum) return "Salary not disclosed";
@@ -78,7 +79,6 @@ export default function CompanyDetailPage() {
           </p>
           <h1>{company.companyName}</h1>
           <p className="company-profile-tagline">{tagline}</p>
-          <p className="company-profile-about">{company.profileContent}</p>
           {company.website && (
             <a className="company-profile-website" href={company.website} target="_blank" rel="noreferrer">
               Visit website ↗
@@ -94,44 +94,35 @@ export default function CompanyDetailPage() {
 
       <section className="company-profile-content">
         <div>
-          {(company.values.length > 0 || company.perks.length > 0) && (
-            <article className="company-paper-card company-culture-card">
-              {company.values.length > 0 && (
-                <section>
-                  <h2>What they believe</h2>
-                  <ul>
-                    {company.values.map((value) => (
-                      <li key={value}>
-                        <i />
-                        <span>{value}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              )}
-              {company.perks.length > 0 && (
-                <section>
-                  <h2>Perks &amp; life there</h2>
-                  <ul>
-                    {company.perks.map((perk) => (
-                      <li key={perk}>
-                        <i />
-                        <span>{perk}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              )}
-            </article>
-          )}
+          <article className="company-paper-card company-metrics-card">
+            <div><span>Response rate</span><AnimatedMetric value={company.metrics.responseRate} suffix="%" /></div>
+            <div><span>Acceptance rate</span><AnimatedMetric value={company.metrics.acceptanceRate} suffix="%" /></div>
+            <div><span>Usually responds within</span>{company.metrics.respondsWithinDays ? <AnimatedMetric value={company.metrics.respondsWithinDays} suffix={company.metrics.respondsWithinDays === 1 ? " day" : " days"} /> : <strong>No data yet</strong>}</div>
+            {user?.role === "JOB_SEEKER" && company.viewerApplications.length > 0 && <p>You applied for {company.viewerApplications.map((application, index) => <span key={application.slug}>{application.title}{index < company.viewerApplications.length - 1 ? ", " : ""}</span>)}</p>}
+          </article>
+          <article className="company-paper-card company-culture-card">
+            <section>
+              <h2>About the company</h2>
+              {company.profileContent
+                ? <p>{company.profileContent}</p>
+                : <div className="company-profile-empty"><p>No company profile has been added yet.</p></div>}
+            </section>
+            <section>
+              <h2>Perks &amp; life there</h2>
+              {company.perks.length > 0 ? <ul>
+                {company.perks.map((perk) => (
+                  <li key={perk}><i /><span>{perk}</span></li>
+                ))}
+              </ul> : <div className="company-profile-empty"><p>No perks have been added yet.</p></div>}
+            </section>
+          </article>
 
-          {products.length > 0 && (
-            <article className="company-paper-card company-products-card">
+          <article className="company-paper-card company-products-card">
               <header>
                 <h2>Products</h2>
                 <span>{products.length} product{products.length === 1 ? "" : "s"}</span>
               </header>
-              <div className="company-products-grid">
+              {products.length > 0 ? <div className="company-products-grid">
                 {products.map((product, index) => (
                   <section key={`${product.name}-${index}`}>
                     <h3>
@@ -142,9 +133,8 @@ export default function CompanyDetailPage() {
                     {product.description && <p>{product.description}</p>}
                   </section>
                 ))}
-              </div>
-            </article>
-          )}
+              </div> : <div className="company-profile-empty"><p>No products have been added yet.</p></div>}
+          </article>
 
           <article className="company-paper-card company-open-roles">
             <header>

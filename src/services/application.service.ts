@@ -1,7 +1,7 @@
 import { axiosInstance } from "../lib/axios";
 import type { ApiResponse } from "../types/api";
 
-export type Application = { id: number; status: string; cvFile: string; expectedSalary: number | null; expectedSalaryRequestedAt: string | null; rejectionReason: string | null; createdAt: string; updatedAt: string; job: { slug: string; title: string; cityLocation: string; category: string; salaryMin: number | null; salaryMax: number | null; deadline: string; company: { id: number; companyName: string; logo: string | null } }; interview: { interviewDate: string; locationOrLink: string; notes: string | null; status: string } | null };
+export type Application = { id: number; status: string; cvFile: string; expectedSalary: number | null; expectedSalaryRequestedAt: string | null; rejectionReason: string | null; createdAt: string; updatedAt: string; job: { slug: string; title: string; cityLocation: string; category: string; salaryMin: number | null; salaryMax: number | null; deadline: string; company: { id: number; companyName: string; logo: string | null } }; interview: { interviewDate: string; locationOrLink: string; notes: string | null; status: string; proposedDate?: string | null; proposalNote?: string | null; alternativeSlots?: string[] } | null };
 
 export async function submitApplication(slug: string, cv: File, expectedSalary?: number) {
   if (cv.type !== "application/pdf") throw new Error("CV must be a PDF file.");
@@ -17,6 +17,13 @@ export async function getMyApplications() {
   return response.data.data ?? [];
 }
 
+export type ApplicationPage = { items: Application[]; pagination: { page: number; limit: number; total: number; totalPages: number } };
+export async function getMyApplicationsPage(page: number, view?: "interviews" | "tests" | "closed") {
+  const response = await axiosInstance.get<ApiResponse<ApplicationPage>>("/applications/me/page", { params: { page, limit: 8, view } });
+  if (!response.data.data) throw new Error(response.data.message ?? "Unable to load applications");
+  return response.data.data;
+}
+
 export async function getMyApplicationDetail(applicationId: number) {
   const response = await axiosInstance.get<ApiResponse<Application>>(`/applications/me/${applicationId}`);
   if (!response.data.data) throw new Error(response.data.message ?? "Unable to load application");
@@ -29,11 +36,21 @@ export async function submitExpectedSalary(applicationId: number, expectedSalary
   return response.data.data;
 }
 
+export async function proposeInterviewSchedule(applicationId: number, proposedDate: string, proposalNote: string) {
+  const response = await axiosInstance.patch<ApiResponse<{ id: number; proposedDate: string }>>(`/applications/me/${applicationId}/interview-proposal`, { proposedDate, proposalNote });
+  if (!response.data.data) throw new Error(response.data.message ?? "Unable to propose interview schedule");
+  return response.data.data;
+}
+
 export type JobApplicationStatus = {
   id: number;
   status: string;
   createdAt: string;
+  updatedAt: string;
   rejectionReason: string | null;
+  job: { hasPreSelectionTest: boolean };
+  testResult: { startedAt: string; submittedAt: string | null; score: number | null } | null;
+  interview: { interviewDate: string; locationOrLink: string; status: string; createdAt: string } | null;
 };
 
 export async function getMyJobApplication(slug: string) {

@@ -1,4 +1,5 @@
 import type { ApplicationStatus, MetricKey } from "../../types/analytics";
+import { applicationStatusLabel } from "../../lib/application-status";
 
 export const metricCards: Array<{ key: MetricKey; label: string; hint: string }> = [
   { key: "jobSeekers", label: "New job seekers", hint: "Accounts created" },
@@ -10,12 +11,12 @@ export const metricCards: Array<{ key: MetricKey; label: string; hint: string }>
 ];
 
 export const statusLabels: Record<ApplicationStatus, string> = {
-  PENDING: "Waiting for review",
-  TEST_ASSIGNED: "Pre-selection test sent",
-  PROCESS: "In process",
-  INTERVIEW: "Interview stage",
-  ACCEPTED: "Hired",
-  REJECTED: "Rejected",
+  PENDING: applicationStatusLabel("PENDING"),
+  TEST_ASSIGNED: applicationStatusLabel("TEST_ASSIGNED"),
+  PROCESS: applicationStatusLabel("PROCESS"),
+  INTERVIEW: applicationStatusLabel("INTERVIEW"),
+  ACCEPTED: applicationStatusLabel("ACCEPTED"),
+  REJECTED: applicationStatusLabel("REJECTED"),
 };
 
 export const genderLabels: Record<string, string> = {

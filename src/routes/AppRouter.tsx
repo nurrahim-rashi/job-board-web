@@ -36,6 +36,8 @@ import DeveloperHomePage from "../pages/DeveloperHomePage";
 import CertificateVerificationPage from "../pages/CertificateVerificationPage";
 import { useAuth } from "../stores/useAuth";
 import { SignedInFooter } from "../components/SignedInFooter";
+import SeekerApplicationsPage from "../pages/SeekerApplicationsPage";
+import SavedJobsPage from "../pages/SavedJobsPage";
 
 function hasPreviewSession(search: string) {
   const preview = new URLSearchParams(search).get("loggedIn");
@@ -160,6 +162,7 @@ export function AppRouter() {
           }
         />
 
+<<<<<<< Updated upstream
         <Route
           path="/company/profile/edit"
           element={
@@ -168,6 +171,21 @@ export function AppRouter() {
             </AdminRoute>
           }
         />
+=======
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <DashboardRoute />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="/dashboard/applications" element={<JobSeekerRoute><SeekerApplicationsPage /></JobSeekerRoute>} />
+      <Route path="/dashboard/saved-jobs" element={<JobSeekerRoute><SavedJobsPage /></JobSeekerRoute>} />
+      <Route path="/dashboard/interviews" element={<JobSeekerRoute><SeekerApplicationsPage view="interviews" /></JobSeekerRoute>} />
+      <Route path="/dashboard/tests" element={<JobSeekerRoute><SeekerApplicationsPage view="tests" /></JobSeekerRoute>} />
+      <Route path="/dashboard/closed-jobs" element={<JobSeekerRoute><SeekerApplicationsPage view="closed" /></JobSeekerRoute>} />
+>>>>>>> Stashed changes
 
         <Route
           path="/profile/cv-generator"
@@ -304,6 +322,7 @@ export function AppRouter() {
           }
         />
 
+<<<<<<< Updated upstream
         <Route
           path="/admin/analytics"
           element={
@@ -312,6 +331,17 @@ export function AppRouter() {
             </AdminRoute>
           }
         />
+=======
+      <Route path="/about" element={<AboutPage />} />
+      <Route path="/stories" element={<StoriesPage />} />
+      <Route path="/pricing" element={<PricingPage />} />
+      <Route path="/companies" element={<BrowseCompaniesPage />} />
+      <Route path="/companies/:companyId" element={<CompanyDetailPage />} />
+      <Route path="/profile/view" element={<ProtectedRoute><PublicProfilePage /></ProtectedRoute>} />
+      <Route path="/profile/:userId" element={<PublicProfilePage />} />
+      <Route path="/jobs" element={<BrowseJobsPage />} />
+      <Route path="/jobs/:slug" element={<JobDetailPage />} />
+>>>>>>> Stashed changes
 
         <Route
           path="/verify-email"

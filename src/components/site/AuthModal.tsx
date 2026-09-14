@@ -6,11 +6,14 @@ import { useAuth } from "../../stores/useAuth";
 type AuthModalProps = {
   open: boolean;
   onClose: () => void;
+  initialRole?: "JOB_SEEKER" | "COMPANY_ADMIN";
+  initialMode?: "signIn" | "register";
 };
 
-export function AuthModal({ open, onClose }: AuthModalProps) {
+export function AuthModal({ open, onClose, initialRole = "JOB_SEEKER", initialMode = "signIn" }: AuthModalProps) {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState<"JOB_SEEKER" | "COMPANY_ADMIN">(
@@ -25,6 +28,12 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
   const googleButton = useRef<HTMLDivElement>(null);
   const registering = mode === "register";
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+  useEffect(() => {
+    if (!open) return;
+    setRole(initialRole);
+    setMode(initialMode);
+  }, [initialMode, initialRole, open]);
 
   useEffect(() => {
     if (!open || !googleClientId || (registering && role === "COMPANY_ADMIN")) return;
@@ -93,7 +102,7 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
     try {
       const session = registering
         ? await register({
-            name,
+            name: [name.trim(), lastName.trim()].filter(Boolean).join(" "),
             email,
             password,
             role,
@@ -157,15 +166,17 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
         )}
         {registering && (
           <>
-            <label htmlFor="register-name">Name</label>
+            <label htmlFor="register-name">First name</label>
             <input
               id="register-name"
               type="text"
               value={name}
               onChange={(event) => setName(event.target.value)}
               required
-              placeholder="Your name"
+              placeholder="First name"
             />
+            <label htmlFor="register-last-name">Last name</label>
+            <input id="register-last-name" type="text" value={lastName} onChange={(event) => setLastName(event.target.value)} placeholder="Last name" />
             <label htmlFor="register-role">Register as</label>
             <select
               id="register-role"
