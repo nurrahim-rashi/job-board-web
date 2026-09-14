@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowRight, FileText, Sparkles } from "../site/Icons";
+import { ArrowRight, Clipboard, FileText, Sparkles } from "../site/Icons";
 import { Link } from "react-router-dom";
 import {
   getMyApplications,
@@ -24,6 +24,9 @@ export function ApplicantPanel() {
     ["PENDING", "PROCESS", "INTERVIEW", "TEST_ASSIGNED"].includes(
       application.status,
     ),
+  );
+  const assigned = applications.filter(
+    (application) => application.status === "TEST_ASSIGNED",
   );
   return (
     <section className="role-panel">
@@ -112,6 +115,39 @@ export function ApplicantPanel() {
             Get access to the CV Generator, skill assessments, and priority
             features.
           </p>
+      {assigned.length > 0 && (
+        <article className="panel-card">
+          <p className="eyebrow">Pre-selection test</p>
+          <h2>Waiting on your answers</h2>
+          <ul className="workspace-list">
+            {assigned.map((application) => (
+              <li key={application.id}>
+                <Clipboard />
+                <span>
+                  <b>{application.job.title}</b>
+                  <small>
+                    {application.job.company.companyName} · multiple choice,
+                    timed, one attempt
+                  </small>
+                </span>
+                <Link
+                  className="pretest-start"
+                  to={`/jobs/${application.job.slug}/pre-selection-test`}
+                >
+                  Start test
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </article>
+      )}
+      <article className="panel-card">
+        <p className="eyebrow">Subscriptions</p>
+        <h2>Unlock premium tools</h2>
+        <p>
+          Get access to the CV Generator, skill assessments, and priority
+          features.
+        </p>
 
           <Link to="/pricing">
             View subscription plans <ArrowRight />

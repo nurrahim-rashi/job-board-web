@@ -1,5 +1,7 @@
 export const questionCount = 25;
 
+export const goodScore = 72;
+
 export function formatSalary(job: { salaryMin: number | null; salaryMax: number | null }) {
   if (!job.salaryMin && !job.salaryMax) return "Not disclosed";
   const short = (value: number) => `${Math.round(value / 1_000_000)} jt`;

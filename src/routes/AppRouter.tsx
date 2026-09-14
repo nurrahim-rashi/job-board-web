@@ -20,6 +20,7 @@ import EmailActionPage from "../pages/EmailActionPage";
 import Homepage from "../pages/Homepage";
 import JobDetailPage from "../pages/JobDetailPage";
 import LandingPage from "../pages/LandingPage";
+import PreSelectionTestPage from "../pages/PreSelectionTestPage";
 import ProfilePage from "../pages/ProfilePage";
 import PricingPage from "../pages/PricingPage";
 import PublicProfilePage from "../pages/PublicProfilePage";
@@ -317,6 +318,15 @@ export function AppRouter() {
       <Route path="/profile/:userId" element={<PublicProfilePage />} />
       <Route path="/jobs" element={<BrowseJobsPage />} />
       <Route path="/jobs/:slug" element={<JobDetailPage />} />
+
+      <Route
+        path="/jobs/:slug/pre-selection-test"
+        element={
+          <JobSeekerRoute>
+            <PreSelectionTestPage />
+          </JobSeekerRoute>
+        }
+      />
 
       <Route path="*" element={<NotFoundPage />} />
 
