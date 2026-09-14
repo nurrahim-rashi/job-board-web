@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useParams } from "react-router-dom";
 
-import { Footer } from "../components/Footer";
-import { Navbar } from "../components/Navbar";
+import { DeveloperShell } from "../components/Developer/DeveloperShell";
 
 import {
   fetchAssessmentQuestions,
@@ -190,265 +189,252 @@ export default function AssessmentQuestionsManagementPage() {
     ) ?? 25;
 
   return (
-    <div className="workspace-dashboard">
-      <Navbar />
+    <DeveloperShell
+      eyebrow="Developer tools"
+      title="Manage questions"
+      lead={`Questions: ${questions.length}/25`}
+    >
+      <section className="role-panel">
+        <Link to="/dashboard/developer/assessments">← Back to assessments</Link>
 
-      <main>
-        <section className="role-panel">
-          <Link to="/dashboard/developer/assessments">
-            ← Back to assessments
-          </Link>
+        {loading && <p>Loading questions...</p>}
 
+        {error && <p>{error}</p>}
+
+        {!loading && !error && questions.length < 25 && (
+          <form className="profile-card" onSubmit={handleCreateQuestion}>
+            <p className="eyebrow">New question</p>
+            <h2>Add assessment question</h2>
+
+            <div className="profile-fields">
+              <label className="profile-wide">
+                Question
+                <textarea
+                  name="question"
+                  placeholder="Enter the question..."
+                  required
+                />
+              </label>
+
+              <label>
+                Option A
+                <input name="optionA" required />
+              </label>
+
+              <label>
+                Option B
+                <input name="optionB" required />
+              </label>
+
+              <label>
+                Option C
+                <input name="optionC" required />
+              </label>
+
+              <label>
+                Option D
+                <input name="optionD" required />
+              </label>
+
+              <label>
+                Correct answer
+                <select name="correctAnswer" defaultValue="A" required>
+                  <option value="A">A</option>
+                  <option value="B">B</option>
+                  <option value="C">C</option>
+                  <option value="D">D</option>
+                </select>
+              </label>
+
+              <label>
+                Question order
+                <input
+                  name="questionOrder"
+                  type="number"
+                  min={1}
+                  max={25}
+                  defaultValue={nextAvailableQuestionOrder}
+                  required
+                />
+              </label>
+            </div>
+
+            {createError && <p className="profile-error">{createError}</p>}
+
+            <button
+              type="submit"
+              className="profile-submit"
+              disabled={creating}
+            >
+              {creating ? "Adding..." : "Add question"}
+            </button>
+          </form>
+        )}
+
+        {!loading && !error && questions.length === 0 && (
+          <article className="panel-card">
+            <h2>No questions yet</h2>
+            <p>Add the first question to this assessment.</p>
+          </article>
+        )}
+
+        {!loading && !error && questions.length > 0 && (
           <div>
-            <p className="eyebrow">Developer tools</p>
-            <h1>Manage questions</h1>
+            {questions.map((question) => (
+              <article className="panel-card" key={question.id}>
+                <p className="eyebrow">Question {question.questionOrder}</p>
 
-            <p>Questions: {questions.length}/25</p>
-          </div>
+                <h2>{question.question}</h2>
 
-          {loading && <p>Loading questions...</p>}
+                <p>A. {question.options.A}</p>
+                <p>B. {question.options.B}</p>
+                <p>C. {question.options.C}</p>
+                <p>D. {question.options.D}</p>
 
-          {error && <p>{error}</p>}
+                <p>
+                  Correct answer: <strong>{question.correctAnswer}</strong>
+                </p>
 
-          {!loading && !error && questions.length < 25 && (
-            <form className="profile-card" onSubmit={handleCreateQuestion}>
-              <p className="eyebrow">New question</p>
-              <h2>Add assessment question</h2>
-
-              <div className="profile-fields">
-                <label className="profile-wide">
-                  Question
-                  <textarea
-                    name="question"
-                    placeholder="Enter the question..."
-                    required
-                  />
-                </label>
-
-                <label>
-                  Option A
-                  <input name="optionA" required />
-                </label>
-
-                <label>
-                  Option B
-                  <input name="optionB" required />
-                </label>
-
-                <label>
-                  Option C
-                  <input name="optionC" required />
-                </label>
-
-                <label>
-                  Option D
-                  <input name="optionD" required />
-                </label>
-
-                <label>
-                  Correct answer
-                  <select name="correctAnswer" defaultValue="A" required>
-                    <option value="A">A</option>
-                    <option value="B">B</option>
-                    <option value="C">C</option>
-                    <option value="D">D</option>
-                  </select>
-                </label>
-
-                <label>
-                  Question order
-                  <input
-                    name="questionOrder"
-                    type="number"
-                    min={1}
-                    max={25}
-                    defaultValue={nextAvailableQuestionOrder}
-                    required
-                  />
-                </label>
-              </div>
-
-              {createError && <p className="profile-error">{createError}</p>}
-
-              <button
-                type="submit"
-                className="profile-submit"
-                disabled={creating}
-              >
-                {creating ? "Adding..." : "Add question"}
-              </button>
-            </form>
-          )}
-
-          {!loading && !error && questions.length === 0 && (
-            <article className="panel-card">
-              <h2>No questions yet</h2>
-              <p>Add the first question to this assessment.</p>
-            </article>
-          )}
-
-          {!loading && !error && questions.length > 0 && (
-            <div>
-              {questions.map((question) => (
-                <article className="panel-card" key={question.id}>
-                  <p className="eyebrow">Question {question.questionOrder}</p>
-
-                  <h2>{question.question}</h2>
-
-                  <p>A. {question.options.A}</p>
-                  <p>B. {question.options.B}</p>
-                  <p>C. {question.options.C}</p>
-                  <p>D. {question.options.D}</p>
-
-                  <p>
-                    Correct answer: <strong>{question.correctAnswer}</strong>
-                  </p>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "12px",
-                      marginTop: "20px",
-                    }}
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "12px",
+                    marginTop: "20px",
+                  }}
+                >
+                  <button
+                    type="button"
+                    className="button button-primary"
+                    onClick={() => setEditingQuestionId(question.id)}
                   >
-                    <button
-                      type="button"
-                      className="button button-primary"
-                      onClick={() => setEditingQuestionId(question.id)}
+                    Edit
+                  </button>
+
+                  <button
+                    type="button"
+                    className="button"
+                    onClick={() => handleDeleteQuestion(question.id)}
+                    disabled={deletingQuestionId === question.id}
+                  >
+                    {deletingQuestionId === question.id
+                      ? "Deleting..."
+                      : "Delete"}
+                  </button>
+                </div>
+
+                {editingQuestionId === question.id && (
+                  <form
+                    onSubmit={(event) =>
+                      handleUpdateQuestion(event, question.id)
+                    }
+                  >
+                    <div className="profile-fields">
+                      <label className="profile-wide">
+                        Question
+                        <textarea
+                          name="question"
+                          defaultValue={question.question}
+                          required
+                        />
+                      </label>
+
+                      <label>
+                        Option A
+                        <input
+                          name="optionA"
+                          defaultValue={question.options.A}
+                          required
+                        />
+                      </label>
+
+                      <label>
+                        Option B
+                        <input
+                          name="optionB"
+                          defaultValue={question.options.B}
+                          required
+                        />
+                      </label>
+
+                      <label>
+                        Option C
+                        <input
+                          name="optionC"
+                          defaultValue={question.options.C}
+                          required
+                        />
+                      </label>
+
+                      <label>
+                        Option D
+                        <input
+                          name="optionD"
+                          defaultValue={question.options.D}
+                          required
+                        />
+                      </label>
+
+                      <label>
+                        Correct answer
+                        <select
+                          name="correctAnswer"
+                          defaultValue={question.correctAnswer}
+                        >
+                          <option value="A">A</option>
+                          <option value="B">B</option>
+                          <option value="C">C</option>
+                          <option value="D">D</option>
+                        </select>
+                      </label>
+
+                      <label>
+                        Question order
+                        <input
+                          name="questionOrder"
+                          type="number"
+                          min={1}
+                          max={25}
+                          defaultValue={question.questionOrder}
+                          required
+                        />
+                      </label>
+                    </div>
+
+                    {editError && <p className="profile-error">{editError}</p>}
+
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "12px",
+                        marginTop: "16px",
+                      }}
                     >
-                      Edit
-                    </button>
+                      <button
+                        type="submit"
+                        className="button button-primary"
+                        disabled={editing}
+                      >
+                        {editing ? "Saving..." : "Save changes"}
+                      </button>
 
-                    <button
-                      type="button"
-                      className="button"
-                      onClick={() => handleDeleteQuestion(question.id)}
-                      disabled={deletingQuestionId === question.id}
-                    >
-                      {deletingQuestionId === question.id
-                        ? "Deleting..."
-                        : "Delete"}
-                    </button>
-                  </div>
-
-                  {editingQuestionId === question.id && (
-                    <form
-                      onSubmit={(event) =>
-                        handleUpdateQuestion(event, question.id)
-                      }
-                    >
-                      <div className="profile-fields">
-                        <label className="profile-wide">
-                          Question
-                          <textarea
-                            name="question"
-                            defaultValue={question.question}
-                            required
-                          />
-                        </label>
-
-                        <label>
-                          Option A
-                          <input
-                            name="optionA"
-                            defaultValue={question.options.A}
-                            required
-                          />
-                        </label>
-
-                        <label>
-                          Option B
-                          <input
-                            name="optionB"
-                            defaultValue={question.options.B}
-                            required
-                          />
-                        </label>
-
-                        <label>
-                          Option C
-                          <input
-                            name="optionC"
-                            defaultValue={question.options.C}
-                            required
-                          />
-                        </label>
-
-                        <label>
-                          Option D
-                          <input
-                            name="optionD"
-                            defaultValue={question.options.D}
-                            required
-                          />
-                        </label>
-
-                        <label>
-                          Correct answer
-                          <select
-                            name="correctAnswer"
-                            defaultValue={question.correctAnswer}
-                          >
-                            <option value="A">A</option>
-                            <option value="B">B</option>
-                            <option value="C">C</option>
-                            <option value="D">D</option>
-                          </select>
-                        </label>
-
-                        <label>
-                          Question order
-                          <input
-                            name="questionOrder"
-                            type="number"
-                            min={1}
-                            max={25}
-                            defaultValue={question.questionOrder}
-                            required
-                          />
-                        </label>
-                      </div>
-
-                      {editError && (
-                        <p className="profile-error">{editError}</p>
-                      )}
-
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "12px",
-                          marginTop: "16px",
+                      <button
+                        type="button"
+                        className="button"
+                        onClick={() => {
+                          setEditingQuestionId(null);
+                          setEditError("");
                         }}
                       >
-                        <button
-                          type="submit"
-                          className="button button-primary"
-                          disabled={editing}
-                        >
-                          {editing ? "Saving..." : "Save changes"}
-                        </button>
-
-                        <button
-                          type="button"
-                          className="button"
-                          onClick={() => {
-                            setEditingQuestionId(null);
-                            setEditError("");
-                          }}
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </form>
-                  )}
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
-      </main>
-
-      <Footer />
-    </div>
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+    </DeveloperShell>
   );
 }
