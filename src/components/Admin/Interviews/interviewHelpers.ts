@@ -60,8 +60,8 @@ export function reminderState(interview: Interview) {
   if (interview.reminderSentAt) return { tone: "good", label: `Sent ${formatDay(interview.reminderSentAt)}` };
   const days = daysUntil(interview.interviewDate);
   if (days < 0) return { tone: "", label: "Not sent" };
-  if (days <= 1) return { tone: "wait", label: "Sending H-1" };
-  return { tone: "", label: `Queued H-1` };
+  if (days <= 1) return { tone: "wait", label: "Sending today" };
+  return { tone: "", label: "Queued" };
 }
 
 export function defaultSlot(index: number, taken: string[]) {

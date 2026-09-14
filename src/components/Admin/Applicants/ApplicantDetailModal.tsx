@@ -1,26 +1,30 @@
 import { useEffect, useState } from "react";
 
 import { useApplicantDetail } from "../../../hooks/api/applicant/useApplicantDetail";
-import { Close } from "../../site/Icons";
+import { useAssignTest } from "../../../hooks/api/pre-selection-test/useAssignTest";
+import { Clipboard, Close } from "../../site/Icons";
 import { ApplicantAvatar } from "./ApplicantAvatar";
 import { CvPreview } from "./CvPreview";
 import { StatusDecision } from "./StatusDecision";
+import { TestAnswerSheet } from "./TestAnswerSheet";
 import { educationLabel, formatDateTime, formatRupiah } from "./applicantHelpers";
-import { formatDate, questionCount } from "../adminData";
+import { formatDate } from "../adminData";
 import { statusLabels, statusTones } from "../../../types/applicant";
 
-export type DetailTab = "profile" | "cv";
+export type DetailTab = "profile" | "cv" | "test";
 
 type ApplicantDetailModalProps = {
   slug: string;
   applicationId: number | null;
+  hasPreSelectionTest: boolean;
   initialTab?: DetailTab;
   onClose: () => void;
 };
 
-export function ApplicantDetailModal({ slug, applicationId, initialTab = "profile", onClose }: ApplicantDetailModalProps) {
+export function ApplicantDetailModal({ slug, applicationId, hasPreSelectionTest, initialTab = "profile", onClose }: ApplicantDetailModalProps) {
   const [tab, setTab] = useState<DetailTab>(initialTab);
   const { data, isPending, isError, error } = useApplicantDetail(slug, applicationId);
+  const assignTest = useAssignTest(slug);
 
   useEffect(() => setTab(initialTab), [initialTab, applicationId]);
 
@@ -65,6 +69,11 @@ export function ApplicantDetailModal({ slug, applicationId, initialTab = "profil
               <button type="button" className={tab === "cv" ? "active" : ""} onClick={() => setTab("cv")}>
                 CV preview
               </button>
+              {data.testResult ? (
+                <button type="button" className={tab === "test" ? "active" : ""} onClick={() => setTab("test")}>
+                  Test answers
+                </button>
+              ) : null}
             </nav>
 
             {tab === "profile" ? (
@@ -92,7 +101,7 @@ export function ApplicantDetailModal({ slug, applicationId, initialTab = "profil
                   </div>
                   <div>
                     <dt>Pre-selection test</dt>
-                    <dd>{data.testResult ? `${data.testResult.score}/${questionCount}` : "Not taken"}</dd>
+                    <dd>{data.testResult ? `${data.testResult.score}/100` : "Not taken"}</dd>
                   </div>
                   <div className="wide">
                     <dt>Location</dt>
@@ -115,13 +124,28 @@ export function ApplicantDetailModal({ slug, applicationId, initialTab = "profil
                   <p className="admin-alert danger">Rejection reason: {data.rejectionReason}</p>
                 ) : null}
 
+                {hasPreSelectionTest && data.status === "PENDING" ? (
+                  <button
+                    type="button"
+                    className="admin-btn ghost"
+                    disabled={assignTest.isPending}
+                    onClick={() => assignTest.mutate([data.id])}
+                  >
+                    <Clipboard /> {assignTest.isPending ? "Sending…" : "Send pre-selection test"}
+                  </button>
+                ) : null}
+
                 <StatusDecision slug={slug} applicationId={data.id} status={data.status} />
               </div>
-            ) : (
+            ) : tab === "cv" ? (
               <div className="applicant-dialog-body">
                 <CvPreview slug={slug} applicationId={data.id} name={data.applicant.name} />
                 <p className="admin-note">Submitted {formatDate(data.appliedAt)} · {data.cvFile.split("/").pop()}</p>
                 <StatusDecision slug={slug} applicationId={data.id} status={data.status} />
+              </div>
+            ) : (
+              <div className="applicant-dialog-body">
+                <TestAnswerSheet slug={slug} applicationId={data.id} />
               </div>
             )}
           </>
