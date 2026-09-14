@@ -5,6 +5,7 @@ import {
   getMyApplications,
   type Application,
 } from "../../services/application.service";
+import { ApplicationDetailModal } from "../Application/ApplicationDetailModal";
 
 const recommended = [
   ["Product Designer, Growth", "Nusantara Pay", "92% match"],
@@ -15,6 +16,9 @@ const recommended = [
 export function ApplicantPanel() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [error, setError] = useState("");
+  const [selectedApplicationId, setSelectedApplicationId] = useState<
+    number | null
+  >(null);
   useEffect(() => {
     getMyApplications()
       .then(setApplications)
@@ -57,27 +61,30 @@ export function ApplicantPanel() {
           <ul className="workspace-list">
             {applications.map((application) => (
               <li key={application.id}>
-                <FileText />
-                <span>
-                  <b>{application.job.title}</b>
-                  <small>
-                    {application.job.company.companyName} ·{" "}
-                    {application.status.replaceAll("_", " ")}
-                    {application.rejectionReason
-                      ? ` · ${application.rejectionReason}`
-                      : ""}
-                    {application.interview
-                      ? ` · Interview ${new Date(application.interview.interviewDate).toLocaleString()}`
-                      : ""}
-                  </small>
-                </span>
-                <em
-                  className={
-                    application.status === "REJECTED" ? "wait" : "good"
-                  }
+                <button
+                  className="application-row-button"
+                  type="button"
+                  onClick={() => setSelectedApplicationId(application.id)}
                 >
-                  {application.status}
-                </em>
+                  <FileText />
+                  <span>
+                    <b>{application.job.title}</b>
+                    <small>
+                      {application.job.company.companyName} ·{" "}
+                      {application.status.replaceAll("_", " ")}
+                      {application.interview
+                        ? ` · Interview ${new Date(application.interview.interviewDate).toLocaleString()}`
+                        : ""}
+                    </small>
+                  </span>
+                  <em
+                    className={
+                      application.status === "REJECTED" ? "wait" : "good"
+                    }
+                  >
+                    {application.status}
+                  </em>
+                </button>
               </li>
             ))}
             {!applications.length && !error && (
@@ -108,14 +115,6 @@ export function ApplicantPanel() {
         </article>
       </div>
       <div className="panel-grid dashboard-tools-grid">
-        <article className="panel-card">
-          <p className="eyebrow">Subscriptions</p>
-          <h2>Unlock premium tools</h2>
-          <p>
-            Get access to the CV Generator, skill assessments, and priority
-            features.
-          </p>
-        </article>
         {assigned.length > 0 && (
           <article className="panel-card">
             <p className="eyebrow">Pre-selection test</p>
@@ -188,6 +187,10 @@ export function ApplicantPanel() {
           ))}
         </ul>
       </article>
+      <ApplicationDetailModal
+        applicationId={selectedApplicationId}
+        onClose={() => setSelectedApplicationId(null)}
+      />
     </section>
   );
 }

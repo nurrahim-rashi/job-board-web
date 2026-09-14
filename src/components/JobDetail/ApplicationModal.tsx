@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { getSubscriptionStatus } from "../../services/auth.service";
 import { submitApplication } from "../../services/application.service";
 import { Close, Upload } from "../site/Icons";
@@ -23,6 +23,7 @@ export function ApplicationModal({
   const [submitting, setSubmitting] = useState(false);
   const [choosingCv, setChoosingCv] = useState(false);
   const [checkingSubscription, setCheckingSubscription] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -77,10 +78,10 @@ export function ApplicationModal({
         ) : (
           <>
             <label htmlFor="cv">Upload CV (PDF, max 1MB)</label>
-            <label className="file-input" htmlFor="cv">
+            <div className="file-upload-row"><label className="file-input" htmlFor="cv">
               <Upload /> {file?.name ?? "Choose a file"}
-            </label>
-            <input id="cv" type="file" accept="application/pdf" required onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
+            </label>{file && <button className="file-remove" type="button" aria-label="Remove selected CV" onClick={() => { setFile(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}><Close /></button>}</div>
+            <input ref={fileInputRef} id="cv" type="file" accept="application/pdf" required onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
             <label htmlFor="salary">Expected salary (IDR / month)</label>
             <input id="salary" name="salary" inputMode="numeric" placeholder="25000000" />
             {error && <p className="auth-error">{error}</p>}

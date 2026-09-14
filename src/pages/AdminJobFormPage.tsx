@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AdminShell } from "../components/Admin/AdminShell";
 import { useJobPosting } from "../hooks/api/job-posting/useJobPosting";
@@ -43,6 +43,7 @@ export default function AdminJobFormPage() {
   const [form, setForm] = useState<FormState>(draft);
   const [banner, setBanner] = useState<File | null>(null);
   const [tag, setTag] = useState("");
+  const bannerInputRef = useRef<HTMLInputElement>(null);
 
   const job = existing.data;
 
@@ -221,11 +222,11 @@ export default function AdminJobFormPage() {
 
         <div className="admin-card">
           <h2>Banner <small>optional</small></h2>
-          <label className="admin-upload">
+          <div className="file-upload-row"><label className="admin-upload">
             <Upload />
             {banner?.name || job?.banner || "Upload a banner image (JPG or PNG, max 2MB)"}
-            <input type="file" accept="image/png,image/jpeg" onChange={(event) => setBanner(event.target.files?.[0] ?? null)} />
-          </label>
+            <input ref={bannerInputRef} type="file" accept="image/png,image/jpeg" onChange={(event) => setBanner(event.target.files?.[0] ?? null)} />
+          </label>{banner && <button className="file-remove" type="button" aria-label="Remove selected banner" onClick={() => { setBanner(null); if (bannerInputRef.current) bannerInputRef.current.value = ""; }}><Close /></button>}</div>
         </div>
 
         <footer className="admin-form-footer">

@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { ArrowRight, Building, FileText } from "../site/Icons";
 import { Reveal } from "../../hooks/useReveal";
 import type { HomepageData } from "../../types/auth";
+import { ApplicationDetailModal } from "../Application/ApplicationDetailModal";
 
 const statusDetails: Record<string, { label: string; tone: string }> = {
   DRAFT: { label: "Draft", tone: "wait" },
@@ -23,7 +25,9 @@ export function Sidebar({
   followedCompanies,
   loading,
 }: SidebarProps) {
+  const [selectedApplicationId, setSelectedApplicationId] = useState<number | null>(null);
   return (
+    <>
     <aside className="dashboard-side">
       <Reveal>
         <article id="applications">
@@ -39,12 +43,14 @@ export function Sidebar({
                 };
                 return (
                   <li key={application.id}>
-                    <FileText />
-                    <span>
-                      <b>{application.job.title}</b>
-                      <small>{application.job.company.companyName}</small>
-                    </span>
-                    <em className={status.tone}>{status.label}</em>
+                    <button className="application-row-button" type="button" onClick={() => setSelectedApplicationId(application.id)}>
+                      <FileText />
+                      <span>
+                        <b>{application.job.title}</b>
+                        <small>{application.job.company.companyName}</small>
+                      </span>
+                      <em className={status.tone}>{status.label}</em>
+                    </button>
                   </li>
                 );
               })}
@@ -105,5 +111,7 @@ export function Sidebar({
         </article>
       </Reveal>
     </aside>
+    <ApplicationDetailModal applicationId={selectedApplicationId} onClose={() => setSelectedApplicationId(null)} />
+    </>
   );
 }

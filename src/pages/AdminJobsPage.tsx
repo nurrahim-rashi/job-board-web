@@ -8,6 +8,7 @@ import { useDeleteJobPosting } from "../hooks/api/job-posting/useDeleteJobPostin
 import { useTogglePublishJobPosting } from "../hooks/api/job-posting/useTogglePublishJobPosting";
 import { categoryLabel, jobCategories, type JobCategory, type JobListQuery } from "../types/job-posting";
 import { ArrowRight, Search } from "../components/site/Icons";
+import { isNewJob } from "../lib/job-age";
 
 type SortKey = "newest" | "oldest" | "title" | "applicants" | "deadline";
 
@@ -143,7 +144,7 @@ export default function AdminJobsPage() {
           {results.map((job) => (
             <div key={job.slug} className="admin-row">
               <span className="admin-role">
-                <b>{job.title}</b>
+                <b>{job.title} {isNewJob(job.createdAt) && <i className="new-job-badge">NEW</i>}</b>
                 <small>
                   {job.cityLocation} · {formatSalary(job)}
                 </small>

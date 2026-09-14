@@ -4,7 +4,7 @@ export const jobCategories = [
   { value: "MARKETING", label: "Marketing" },
   { value: "SALES", label: "Sales" },
   { value: "DESIGN", label: "Design" },
-  { value: "HUMAN_RESOURCES", label: "Human resources" },
+  { value: "HUMAN_RESOURCES", label: "Human Resources" },
   { value: "OPERATIONS", label: "Operations" },
   { value: "EDUCATION", label: "Education" },
   { value: "HEALTHCARE", label: "Healthcare" },
@@ -14,7 +14,8 @@ export const jobCategories = [
 export type JobCategory = (typeof jobCategories)[number]["value"];
 
 export function categoryLabel(value: string) {
-  return jobCategories.find((item) => item.value === value)?.label ?? value;
+  return jobCategories.find((item) => item.value === value)?.label
+    ?? value.replaceAll("_", " ").toLocaleLowerCase("en-US").replace(/\b\w/g, (letter) => letter.toLocaleUpperCase("en-US"));
 }
 
 export interface CreateJobPayload {

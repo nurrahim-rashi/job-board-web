@@ -5,6 +5,7 @@ import { useJobPostings } from "../hooks/api/job-posting/useJobPostings";
 import { categoryLabel } from "../types/job-posting";
 import { ArrowRight, Clipboard } from "../components/site/Icons";
 import { TestSummary } from "../components/Admin/TestSummary";
+import { isNewJob } from "../lib/job-age";
 
 export default function AdminTestsPage() {
   const { data, isPending } = useJobPostings({ limit: 50 });
@@ -22,7 +23,7 @@ export default function AdminTestsPage() {
               <div className="admin-detail-head">
                 <div>
                   <p className="eyebrow">{categoryLabel(job.category)}</p>
-                  <h2>{job.title}</h2>
+                  <h2>{job.title} {isNewJob(job.createdAt) && <i className="new-job-badge">NEW</i>}</h2>
                 </div>
                 <em className={`admin-chip ${job.hasPreSelectionTest ? "good" : ""}`}>{job.hasPreSelectionTest ? "Test on" : "Test off"}</em>
               </div>

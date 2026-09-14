@@ -42,6 +42,8 @@ export default function PublicProfilePage() {
   const [workModalOpen, setWorkModalOpen] = useState(false);
   const [editingExperienceIndex, setEditingExperienceIndex] = useState<number | null>(null);
   const [editingWorkIndex, setEditingWorkIndex] = useState<number | null>(null);
+  const [storyModalOpen, setStoryModalOpen] = useState(false);
+  const [storyDraft, setStoryDraft] = useState("");
 
   useEffect(() => {
     setLoading(true);
@@ -69,9 +71,9 @@ export default function PublicProfilePage() {
   }, [currentUser?.id, currentUser?.role, userId]);
 
   useEffect(() => {
-    if (currentUser?.role !== "JOB_SEEKER" || String(currentUser.id) !== userId) return;
+    if (profile?.role !== "JOB_SEEKER") return;
     getPublicCompanies().then(setCompanies).catch(() => setCompanies([]));
-  }, [currentUser?.id, currentUser?.role, userId]);
+  }, [profile?.role]);
 
   async function refreshProfile() {
     setProfile(await getPublicProfile(userId));
@@ -160,7 +162,15 @@ export default function PublicProfilePage() {
             {experiences.length > 0 ? (
               <div className="seeker-profile-entries">
                 {experiences.map((experience, index) => (
-                  <div key={`${experience.title}-${index}`}>
+                  <div className="seeker-experience-entry" key={`${experience.title}-${index}`}>
+                    {experience.companyId && companies.find((company) => company.id === experience.companyId)?.logo && (
+                      <img
+                        className="seeker-experience-logo"
+                        src={(() => { const logo = companies.find((company) => company.id === experience.companyId)!.logo!; return logo.startsWith("http") ? logo : `${apiUrl}${logo}`; })()}
+                        alt=""
+                      />
+                    )}
+                    <div>
                     <header>
                       <h3>
                         {experience.title} ·{" "}
@@ -187,6 +197,7 @@ export default function PublicProfilePage() {
                       </span>
                     </header>
                     {experience.note && <p>{experience.note}</p>}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -276,7 +287,7 @@ export default function PublicProfilePage() {
                 <section>
                   <div className="seeker-section-heading">
                     <h2>My story</h2>
-                    {isOwnProfile && <a href="/profile" aria-label="Edit my story"><Pencil /></a>}
+                    {isOwnProfile && <button type="button" aria-label="Edit my story" onClick={() => { setStoryDraft(profile.profileStory); setStoryModalOpen(true); }}><Pencil /></button>}
                   </div>
                   <p>{profile.profileStory || "Add your story so companies can get to know you."}</p>
                 </section>
@@ -398,6 +409,15 @@ export default function PublicProfilePage() {
               }
             }}
           />
+        )}
+        {storyModalOpen && profile && (
+          <div className="experience-modal" onMouseDown={(event) => event.target === event.currentTarget && setStoryModalOpen(false)}>
+            <form className="experience-modal-dialog" onSubmit={async (event) => { event.preventDefault(); try { await updateProfile({ profileStory: storyDraft }); await refreshProfile(); setStoryModalOpen(false); toast.success("Story updated."); } catch (error) { toast.error(error instanceof Error ? error.message : "Unable to update story."); } }}>
+              <header><div><p className="eyebrow">About you</p><h2>Edit my story</h2></div><button type="button" onClick={() => setStoryModalOpen(false)}>×</button></header>
+              <div className="profile-fields"><label className="profile-wide">My story<textarea autoFocus value={storyDraft} onChange={(event) => setStoryDraft(event.target.value)} /></label></div>
+              <footer><button type="button" className="experience-modal-dismiss" onClick={() => setStoryModalOpen(false)}>Dismiss</button><button className="profile-submit">Save</button></footer>
+            </form>
+          </div>
         )}
       </section>
     </div>

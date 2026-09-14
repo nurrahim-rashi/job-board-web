@@ -58,7 +58,7 @@ export const educationOptions = [
 export interface ApplicantListItem {
   id: number;
   status: ApplicationStatus;
-  expectedSalary: string | number;
+  expectedSalary: string | number | null;
   cvFile: string;
   appliedAt: string;
   priorityReview: boolean;
@@ -75,7 +75,8 @@ export interface ApplicantListItem {
 export interface ApplicantDetail {
   id: number;
   status: ApplicationStatus;
-  expectedSalary: string | number;
+  expectedSalary: string | number | null;
+  expectedSalaryRequestedAt: string | null;
   rejectionReason: string | null;
   appliedAt: string;
   cvFile: string;
