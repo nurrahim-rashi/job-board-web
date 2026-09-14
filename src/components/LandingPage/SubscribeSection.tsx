@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Check, FileText, Gauge, Sparkles, Star } from "../site/Icons";
 import { Stars } from "../site/Stars";
 import { Reveal } from "../../hooks/useReveal";
+import { purchaseSubscription } from "../../lib/subscription-api";
+import type { SubscriptionName } from "../../types/subscription";
 
 type Plan = {
   name: string;
@@ -73,6 +75,23 @@ const perks = [
 const price = (value: number) => `IDR ${value.toLocaleString("id-ID")}`;
 export function SubscribeSection() {
   const [yearly, setYearly] = useState(false);
+  const [isPurchasing, setIsPurchasing] = useState<string | null>(null);
+
+  const handlePurchase = async (planName: SubscriptionName) => {
+    try {
+      setIsPurchasing(planName);
+
+      const response = await purchaseSubscription({
+        plan: planName,
+      });
+
+      window.location.href = response.data.payment.redirectUrl;
+    } catch (error) {
+      console.error("Failed to purchase subscription:", error);
+    } finally {
+      setIsPurchasing(null);
+    }
+  };
   return (
     <section id="subscribe" className="subscribe-section">
       <Stars />
@@ -125,10 +144,28 @@ export function SubscribeSection() {
                       </li>
                     ))}
                   </ul>
-                  <button>
+                  <button
+                    disabled={isPurchasing !== null}
+                    onClick={() => {
+                      if (plan.name === "Polaris Plus") {
+                        void handlePurchase("STANDARD");
+                      }
+
+                      if (plan.name === "Polaris Pro") {
+                        void handlePurchase("PROFESSIONAL");
+                      }
+                    }}
+                  >
                     {amount === 0
                       ? "Create free account"
-                      : `Subscribe to ${plan.name}`}
+                      : isPurchasing ===
+                          (plan.name === "Polaris Plus"
+                            ? "STANDARD"
+                            : plan.name === "Polaris Pro"
+                              ? "PROFESSIONAL"
+                              : null)
+                        ? "Redirecting..."
+                        : `Subscribe to ${plan.name}`}
                   </button>
                 </article>
               </Reveal>

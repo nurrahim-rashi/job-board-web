@@ -32,6 +32,7 @@ import AssessmentQuestionsManagementPage from "../pages/AssessmentQuestionsManag
 import CvGeneratorPage from "../pages/CvGeneratorPage";
 import DeveloperAnalyticsPage from "../pages/DeveloperAnalyticsPage";
 import DeveloperSubscriptionsPage from "../pages/DeveloperSubscriptionsPage";
+import DeveloperHomePage from "../pages/DeveloperHomePage";
 import CertificateVerificationPage from "../pages/CertificateVerificationPage";
 import { useAuth } from "../stores/useAuth";
 import { SignedInFooter } from "../components/SignedInFooter";
@@ -108,11 +109,15 @@ function DashboardRoute() {
   const { search } = useLocation();
   const role = useAuth((state) => state.user?.role);
 
-  return role === "COMPANY_ADMIN" || hasAdminPreview(search) ? (
-    <Navigate replace to={{ pathname: "/admin", search }} />
-  ) : (
-    <DashboardPage />
-  );
+  if (role === "COMPANY_ADMIN" || hasAdminPreview(search)) {
+    return <Navigate replace to={{ pathname: "/admin", search }} />;
+  }
+
+  if (role === "DEVELOPER") {
+    return <DeveloperHomePage />;
+  }
+
+  return <DashboardPage />;
 }
 
 function NotFoundPage() {
