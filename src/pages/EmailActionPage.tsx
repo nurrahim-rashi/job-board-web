@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import {
   forgotPassword,
-  getProfile,
   resetPassword,
   verifyEmail,
 } from "../services/auth.service";
@@ -21,11 +20,9 @@ export default function EmailActionPage({ action }: { action: EmailAction }) {
 
     verifyEmail(token)
       .then(async () => {
-        if (useAuth.getState().token) {
-          await getProfile();
-        }
+        useAuth.getState().logout();
         setMessage(
-          "Email verified. You can now sign in and use protected features.",
+          "Email verified. Please sign in again to use protected features.",
         );
       })
       .catch((requestError) => setError(requestError.message));
@@ -44,7 +41,12 @@ export default function EmailActionPage({ action }: { action: EmailAction }) {
         );
       }
       if (action === "reset") {
-        await resetPassword(token, String(form.get("password")));
+        const password = String(form.get("password"));
+        const confirmPassword = String(form.get("confirmPassword"));
+        if (password !== confirmPassword) {
+          throw new Error("Passwords do not match.");
+        }
+        await resetPassword(token, password);
         setMessage("Password reset. You can now sign in.");
       }
     } catch (requestError) {
@@ -70,8 +72,8 @@ export default function EmailActionPage({ action }: { action: EmailAction }) {
         {action === "verify" ? (
           <>
             <p>{message || error || "Checking your verification link…"}</p>
-            <a className="profile-submit" href="/">
-              Back to Polaris
+            <a className="profile-submit" href="/?auth=signin">
+              Sign in to Polaris
             </a>
           </>
         ) : (
@@ -87,16 +89,28 @@ export default function EmailActionPage({ action }: { action: EmailAction }) {
                 />
               </label>
             ) : (
-              <label>
-                New password
-                <input type="password" name="password" minLength={6} required />
-              </label>
+              <>
+                <label>
+                  New password
+                  <input type="password" name="password" minLength={6} required />
+                </label>
+                <label>
+                  Confirm new password
+                  <input type="password" name="confirmPassword" minLength={6} required />
+                </label>
+                <p className="auth-note">
+                  Use uppercase, lowercase, a number, and a special character.
+                </p>
+              </>
             )}
             {message && <p className="profile-notice">{message}</p>}
             {error && <p className="profile-error">{error}</p>}
             <button className="profile-submit">
               {action === "forgot" ? "Send reset link" : "Reset password"}
             </button>
+            <a className="email-action-signin" href="/?auth=signin">
+              Back to sign in
+            </a>
           </form>
         )}
       </section>

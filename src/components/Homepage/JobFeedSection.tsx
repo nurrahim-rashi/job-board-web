@@ -13,10 +13,13 @@ function salary(job: PublicJob) {
 
 export function JobFeedSection({
   recommendations,
+  recommendationsLoading,
 }: {
   recommendations: HomepageData["recommendations"];
+  recommendationsLoading: boolean;
 }) {
   const [jobs, setJobs] = useState<PublicJob[]>([]);
+  const [jobsLoading, setJobsLoading] = useState(true);
   const [location, setLocation] = useState("latest roles");
   const [manualCity, setManualCity] = useState("");
   const [locating, setLocating] = useState(false);
@@ -24,10 +27,13 @@ export function JobFeedSection({
 
   const loadJobs = (
     options: { latitude?: number; longitude?: number; city?: string } = {},
-  ) =>
-    getPublicJobs({ ...options, limit: 4 })
+  ) => {
+    setJobsLoading(true);
+    return getPublicJobs({ ...options, limit: 4 })
       .then(setJobs)
-      .catch(() => setJobs([]));
+      .catch(() => setJobs([]))
+      .finally(() => setJobsLoading(false));
+  };
 
   useEffect(() => {
     loadJobs();
@@ -93,8 +99,17 @@ export function JobFeedSection({
               </article>
             </Reveal>
           ))}
+          {!jobsLoading && !jobs.length && (
+            <article className="dashboard-empty-card">
+              <MapPin />
+              <h3>No jobs found</h3>
+              <p>Try another city or browse the latest roles again later.</p>
+            </article>
+          )}
+          {jobsLoading && (
+            <article className="dashboard-empty-card is-loading" aria-label="Loading jobs" />
+          )}
         </div>
-        {!jobs.length && <p className="location-note">No published jobs found for this location.</p>}
 
         <Reveal className="matches-title">
           <p className="eyebrow">Picked for you</p>
@@ -112,8 +127,19 @@ export function JobFeedSection({
               </li>
             </Reveal>
           ))}
+          {!recommendationsLoading && !recommendations.length && (
+            <li className="dashboard-empty-row">
+              <Sparkles />
+              <span>
+                <b>No profile matches yet</b>
+                <small>Complete your profile to receive tailored recommendations.</small>
+              </span>
+            </li>
+          )}
+          {recommendationsLoading && (
+            <li className="dashboard-empty-row is-loading" aria-label="Loading recommendations" />
+          )}
         </ul>
-        {!recommendations.length && <p className="location-note">Complete your profile to find better matches.</p>}
       </div>
     </section>
   );

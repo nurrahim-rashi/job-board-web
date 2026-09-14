@@ -1,9 +1,14 @@
+import { useAuth } from "../stores/useAuth";
+
 export function Footer() {
+  const loggedIn = useAuth((state) => Boolean(state.token));
   const columns = [
     { title: "Candidates", links: ["Roles", "Weekly drop", "Salary data"] },
     { title: "Teams", links: ["Post a job", "Sourcing", "Pricing"] },
     { title: "Company", links: ["Stories", "Help Center", "Privacy"] },
   ];
+
+  if (loggedIn) return null;
 
   return (
     <footer id="apply" className="site-footer">
@@ -27,7 +32,7 @@ export function Footer() {
             <article key={column.title}>
               <b>{column.title}</b>
               {column.links.map((link) => (
-                <a href="#top" key={link}>
+                <a href={link === "Pricing" ? "/pricing" : "#top"} key={link}>
                   {link}
                 </a>
               ))}

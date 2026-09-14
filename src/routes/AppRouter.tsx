@@ -22,6 +22,7 @@ import JobDetailPage from "../pages/JobDetailPage";
 import LandingPage from "../pages/LandingPage";
 import PreSelectionTestPage from "../pages/PreSelectionTestPage";
 import ProfilePage from "../pages/ProfilePage";
+import PricingPage from "../pages/PricingPage";
 import PublicProfilePage from "../pages/PublicProfilePage";
 import StoriesPage from "../pages/StoriesPage";
 import AssessmentResultsPage from "../pages/AssessmentResultsPage";
@@ -31,8 +32,8 @@ import AssessmentQuestionsManagementPage from "../pages/AssessmentQuestionsManag
 import CvGeneratorPage from "../pages/CvGeneratorPage";
 import DeveloperAnalyticsPage from "../pages/DeveloperAnalyticsPage";
 import DeveloperSubscriptionsPage from "../pages/DeveloperSubscriptionsPage";
-import SubscriptionPlansPage from "../pages/SubscriptionPlansPage";
 import { useAuth } from "../stores/useAuth";
+import { SignedInFooter } from "../components/SignedInFooter";
 
 function hasPreviewSession(search: string) {
   const preview = new URLSearchParams(search).get("loggedIn");
@@ -126,8 +127,11 @@ function NotFoundPage() {
 }
 
 export function AppRouter() {
+  const loggedIn = useAuth((state) => Boolean(state.token));
+
   return (
-    <Routes>
+    <>
+      <Routes>
       <Route path="/" element={<HomeRoute />} />
       <Route path="/home" element={<HomeRoute />} />
 
@@ -164,15 +168,6 @@ export function AppRouter() {
           <ProtectedRoute>
             <DashboardRoute />
           </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/dashboard/subscriptions"
-        element={
-          <JobSeekerRoute>
-            <SubscriptionPlansPage />
-          </JobSeekerRoute>
         }
       />
 
@@ -317,6 +312,7 @@ export function AppRouter() {
 
       <Route path="/about" element={<AboutPage />} />
       <Route path="/stories" element={<StoriesPage />} />
+      <Route path="/pricing" element={<PricingPage />} />
       <Route path="/companies" element={<BrowseCompaniesPage />} />
       <Route path="/companies/:companyId" element={<CompanyDetailPage />} />
       <Route path="/profile/:userId" element={<PublicProfilePage />} />
@@ -369,6 +365,8 @@ export function AppRouter() {
           </DeveloperRoute>
         }
       />
-    </Routes>
+      </Routes>
+      {loggedIn && <SignedInFooter />}
+    </>
   );
 }

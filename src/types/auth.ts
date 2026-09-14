@@ -18,12 +18,24 @@ export type AuthUser = {
   profileIntro: string;
   salaryExpectation: string;
   profileStory: string;
-  lookingFor: string[];
   skills: string[];
   profileLinks: { label: string; url: string }[] | null;
-  experiences: { title: string; company: string; period: string; note: string }[] | null;
-  selectedWork: { name: string; note: string }[] | null;
+  experiences: {
+    title: string;
+    company: string;
+    companyId?: number;
+    period: string;
+    note: string;
+  }[] | null;
+  selectedWork: {
+    name: string;
+    note: string;
+    url?: string;
+    company?: string;
+    date?: string;
+  }[] | null;
   authProvider: "EMAIL" | "GOOGLE";
+  isPublicProfile: boolean;
   company: {
     id: number;
     companyName: string;
@@ -32,6 +44,8 @@ export type AuthUser = {
     tagline: string;
     size: string;
     founded: number | null;
+    website: string;
+    products: { name: string; url: string; description: string }[] | null;
     values: string[];
     perks: string[];
     logo: string | null;
@@ -59,6 +73,8 @@ export type UpdateProfileInput = Partial<AuthUser> & {
   companyTagline?: string;
   companySize?: string;
   companyFounded?: number;
+  companyWebsite?: string;
+  companyProducts?: { name: string; url: string; description: string }[];
   companyValues?: string[];
   companyPerks?: string[];
 };

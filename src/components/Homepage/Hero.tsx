@@ -3,7 +3,19 @@ import { ArrowRight, Briefcase, MapPin, Search } from "../site/Icons";
 import { Stars } from "../site/Stars";
 import type { DashboardOverview } from "../../types/auth";
 
-export function HeroSection({ overview }: { overview: DashboardOverview | null }) {
+const emptyStats: DashboardOverview["stats"] = [
+  { label: "Applications", value: "—", note: "Total submitted" },
+  { label: "Interviews", value: "—", note: "Currently scheduled" },
+  { label: "Profile", value: "—", note: "Complete" },
+];
+
+export function HeroSection({
+  overview,
+  loading,
+}: {
+  overview: DashboardOverview | null;
+  loading: boolean;
+}) {
   const [location, setLocation] = useState("");
 
   useEffect(() => {
@@ -19,12 +31,6 @@ export function HeroSection({ overview }: { overview: DashboardOverview | null }
         <p className="eyebrow light">Welcome back</p>
         <h1>
           Good to see you{overview ? `, ${overview.name}.` : "."}
-          <br />
-          <span>
-            {overview
-              ? `${overview.newJobs} new roles since Tuesday.`
-              : "Loading your workspace…"}
-          </span>
         </h1>
         <div className="dashboard-search">
           <label>
@@ -47,17 +53,15 @@ export function HeroSection({ overview }: { overview: DashboardOverview | null }
             Search <ArrowRight />
           </a>
         </div>
-        {overview && (
-          <dl>
-            {overview.stats.map((stat) => (
-              <div key={stat.label}>
-                <dt>{stat.label}</dt>
-                <dd>{stat.value}</dd>
-                <small>{stat.note}</small>
-              </div>
-            ))}
-          </dl>
-        )}
+        <dl className={loading ? "is-loading" : undefined} aria-busy={loading}>
+          {(overview?.stats ?? emptyStats).map((stat) => (
+            <div key={stat.label}>
+              <dt>{stat.label}</dt>
+              <dd>{stat.value}</dd>
+              <small>{stat.note}</small>
+            </div>
+          ))}
+        </dl>
       </div>
     </section>
   );
