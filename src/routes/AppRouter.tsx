@@ -32,6 +32,7 @@ import AssessmentQuestionsManagementPage from "../pages/AssessmentQuestionsManag
 import CvGeneratorPage from "../pages/CvGeneratorPage";
 import DeveloperAnalyticsPage from "../pages/DeveloperAnalyticsPage";
 import DeveloperSubscriptionsPage from "../pages/DeveloperSubscriptionsPage";
+import CertificateVerificationPage from "../pages/CertificateVerificationPage";
 import { useAuth } from "../stores/useAuth";
 import { SignedInFooter } from "../components/SignedInFooter";
 
@@ -132,239 +133,249 @@ export function AppRouter() {
   return (
     <>
       <Routes>
-      <Route path="/" element={<HomeRoute />} />
-      <Route path="/home" element={<HomeRoute />} />
+        <Route path="/" element={<HomeRoute />} />
+        <Route path="/home" element={<HomeRoute />} />
 
-      <Route
-        path="/profile"
-        element={
-          <ProtectedRoute>
-            <ProfilePage />
-          </ProtectedRoute>
-        }
-      />
+        <Route
+          path="/verify-certificate"
+          element={<CertificateVerificationPage />}
+        />
 
-      <Route
-        path="/company/profile/edit"
-        element={
-          <AdminRoute>
-            <CompanyEditProfilePage />
-          </AdminRoute>
-        }
-      />
+        <Route
+          path="/verify-certificate/:certificateCode"
+          element={<CertificateVerificationPage />}
+        />
 
-      <Route
-        path="/profile/cv-generator"
-        element={
-          <JobSeekerRoute>
-            <CvGeneratorPage />
-          </JobSeekerRoute>
-        }
-      />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <DashboardRoute />
-          </ProtectedRoute>
-        }
-      />
+        <Route
+          path="/company/profile/edit"
+          element={
+            <AdminRoute>
+              <CompanyEditProfilePage />
+            </AdminRoute>
+          }
+        />
 
-      <Route
-        path="/dashboard/assessments"
-        element={
-          <JobSeekerRoute>
-            <AssessmentDiscoveryPage />
-          </JobSeekerRoute>
-        }
-      />
+        <Route
+          path="/profile/cv-generator"
+          element={
+            <JobSeekerRoute>
+              <CvGeneratorPage />
+            </JobSeekerRoute>
+          }
+        />
 
-      <Route
-        path="/dashboard/assessments/results"
-        element={
-          <JobSeekerRoute>
-            <AssessmentResultsPage />
-          </JobSeekerRoute>
-        }
-      />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardRoute />
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/dashboard/assessments/:assessmentId"
-        element={
-          <JobSeekerRoute>
-            <AssessmentDetailPage />
-          </JobSeekerRoute>
-        }
-      />
+        <Route
+          path="/dashboard/assessments"
+          element={
+            <JobSeekerRoute>
+              <AssessmentDiscoveryPage />
+            </JobSeekerRoute>
+          }
+        />
 
-      <Route
-        path="/dashboard/assessments/:assessmentId/take"
-        element={
-          <JobSeekerRoute>
-            <AssessmentTakePage />
-          </JobSeekerRoute>
-        }
-      />
+        <Route
+          path="/dashboard/assessments/results"
+          element={
+            <JobSeekerRoute>
+              <AssessmentResultsPage />
+            </JobSeekerRoute>
+          }
+        />
 
-      <Route
-        path="/dashboard/assessments/results/:resultId"
-        element={
-          <JobSeekerRoute>
-            <AssessmentResultDetailPage />
-          </JobSeekerRoute>
-        }
-      />
+        <Route
+          path="/dashboard/assessments/:assessmentId"
+          element={
+            <JobSeekerRoute>
+              <AssessmentDetailPage />
+            </JobSeekerRoute>
+          }
+        />
 
-      <Route
-        path="/admin"
-        element={
-          <AdminRoute>
-            <AdminJobsPage />
-          </AdminRoute>
-        }
-      />
+        <Route
+          path="/dashboard/assessments/:assessmentId/take"
+          element={
+            <JobSeekerRoute>
+              <AssessmentTakePage />
+            </JobSeekerRoute>
+          }
+        />
 
-      <Route
-        path="/admin/jobs/new"
-        element={
-          <AdminRoute>
-            <AdminJobFormPage />
-          </AdminRoute>
-        }
-      />
+        <Route
+          path="/dashboard/assessments/results/:resultId"
+          element={
+            <JobSeekerRoute>
+              <AssessmentResultDetailPage />
+            </JobSeekerRoute>
+          }
+        />
 
-      <Route
-        path="/admin/jobs/:slug"
-        element={
-          <AdminRoute>
-            <AdminJobDetailPage />
-          </AdminRoute>
-        }
-      />
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminJobsPage />
+            </AdminRoute>
+          }
+        />
 
-      <Route
-        path="/admin/jobs/:slug/edit"
-        element={
-          <AdminRoute>
-            <AdminJobFormPage />
-          </AdminRoute>
-        }
-      />
+        <Route
+          path="/admin/jobs/new"
+          element={
+            <AdminRoute>
+              <AdminJobFormPage />
+            </AdminRoute>
+          }
+        />
 
-      <Route
-        path="/admin/jobs/:slug/test"
-        element={
-          <AdminRoute>
-            <AdminTestPage />
-          </AdminRoute>
-        }
-      />
+        <Route
+          path="/admin/jobs/:slug"
+          element={
+            <AdminRoute>
+              <AdminJobDetailPage />
+            </AdminRoute>
+          }
+        />
 
-      <Route
-        path="/admin/applicants"
-        element={
-          <AdminRoute>
-            <AdminApplicantsPage />
-          </AdminRoute>
-        }
-      />
+        <Route
+          path="/admin/jobs/:slug/edit"
+          element={
+            <AdminRoute>
+              <AdminJobFormPage />
+            </AdminRoute>
+          }
+        />
 
-      <Route
-        path="/admin/interviews"
-        element={
-          <AdminRoute>
-            <AdminInterviewsPage />
-          </AdminRoute>
-        }
-      />
+        <Route
+          path="/admin/jobs/:slug/test"
+          element={
+            <AdminRoute>
+              <AdminTestPage />
+            </AdminRoute>
+          }
+        />
 
-      <Route
-        path="/admin/tests"
-        element={
-          <AdminRoute>
-            <AdminTestsPage />
-          </AdminRoute>
-        }
-      />
+        <Route
+          path="/admin/applicants"
+          element={
+            <AdminRoute>
+              <AdminApplicantsPage />
+            </AdminRoute>
+          }
+        />
 
-      <Route
-        path="/admin/analytics"
-        element={
-          <AdminRoute>
-            <AdminAnalyticsPage />
-          </AdminRoute>
-        }
-      />
+        <Route
+          path="/admin/interviews"
+          element={
+            <AdminRoute>
+              <AdminInterviewsPage />
+            </AdminRoute>
+          }
+        />
 
-      <Route
-        path="/verify-email"
-        element={<EmailActionPage action="verify" />}
-      />
-      <Route
-        path="/reset-password"
-        element={<EmailActionPage action="forgot" />}
-      />
-      <Route
-        path="/reset-password/confirm"
-        element={<EmailActionPage action="reset" />}
-      />
+        <Route
+          path="/admin/tests"
+          element={
+            <AdminRoute>
+              <AdminTestsPage />
+            </AdminRoute>
+          }
+        />
 
-      <Route path="/about" element={<AboutPage />} />
-      <Route path="/stories" element={<StoriesPage />} />
-      <Route path="/pricing" element={<PricingPage />} />
-      <Route path="/companies" element={<BrowseCompaniesPage />} />
-      <Route path="/companies/:companyId" element={<CompanyDetailPage />} />
-      <Route path="/profile/:userId" element={<PublicProfilePage />} />
-      <Route path="/jobs" element={<BrowseJobsPage />} />
-      <Route path="/jobs/:slug" element={<JobDetailPage />} />
+        <Route
+          path="/admin/analytics"
+          element={
+            <AdminRoute>
+              <AdminAnalyticsPage />
+            </AdminRoute>
+          }
+        />
 
-      <Route
-        path="/jobs/:slug/pre-selection-test"
-        element={
-          <JobSeekerRoute>
-            <PreSelectionTestPage />
-          </JobSeekerRoute>
-        }
-      />
+        <Route
+          path="/verify-email"
+          element={<EmailActionPage action="verify" />}
+        />
+        <Route
+          path="/reset-password"
+          element={<EmailActionPage action="forgot" />}
+        />
+        <Route
+          path="/reset-password/confirm"
+          element={<EmailActionPage action="reset" />}
+        />
 
-      <Route path="*" element={<NotFoundPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/stories" element={<StoriesPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/companies" element={<BrowseCompaniesPage />} />
+        <Route path="/companies/:companyId" element={<CompanyDetailPage />} />
+        <Route path="/profile/:userId" element={<PublicProfilePage />} />
+        <Route path="/jobs" element={<BrowseJobsPage />} />
+        <Route path="/jobs/:slug" element={<JobDetailPage />} />
 
-      <Route
-        path="/dashboard/developer/analytics"
-        element={
-          <DeveloperRoute>
-            <DeveloperAnalyticsPage />
-          </DeveloperRoute>
-        }
-      />
+        <Route
+          path="/jobs/:slug/pre-selection-test"
+          element={
+            <JobSeekerRoute>
+              <PreSelectionTestPage />
+            </JobSeekerRoute>
+          }
+        />
 
-      <Route
-        path="/dashboard/developer/assessments"
-        element={
-          <DeveloperRoute>
-            <AssessmentManagementPage />
-          </DeveloperRoute>
-        }
-      />
+        <Route path="*" element={<NotFoundPage />} />
 
-      <Route
-        path="/dashboard/developer/assessments/:assessmentId"
-        element={
-          <DeveloperRoute>
-            <AssessmentQuestionsManagementPage />
-          </DeveloperRoute>
-        }
-      />
+        <Route
+          path="/dashboard/developer/analytics"
+          element={
+            <DeveloperRoute>
+              <DeveloperAnalyticsPage />
+            </DeveloperRoute>
+          }
+        />
 
-      <Route
-        path="/dashboard/developer/subscriptions"
-        element={
-          <DeveloperRoute>
-            <DeveloperSubscriptionsPage />
-          </DeveloperRoute>
-        }
-      />
+        <Route
+          path="/dashboard/developer/assessments"
+          element={
+            <DeveloperRoute>
+              <AssessmentManagementPage />
+            </DeveloperRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/developer/assessments/:assessmentId"
+          element={
+            <DeveloperRoute>
+              <AssessmentQuestionsManagementPage />
+            </DeveloperRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/developer/subscriptions"
+          element={
+            <DeveloperRoute>
+              <DeveloperSubscriptionsPage />
+            </DeveloperRoute>
+          }
+        />
       </Routes>
       {loggedIn && <SignedInFooter />}
     </>

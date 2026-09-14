@@ -13,10 +13,13 @@ import type {
   UpdateAssessmentQuestionInput,
   AssessmentQuestionsResponse,
   CreateAssessmentQuestionInput,
+  CertificateVerificationResponse,
 } from "../types/assessment";
 
 export const fetchSkillNames = async () => {
-  const response = await axiosInstance.get<{ data: { skillName: string }[] }>("/assessment/skills");
+  const response = await axiosInstance.get<{ data: { skillName: string }[] }>(
+    "/assessment/skills",
+  );
   return response.data.data.map((item) => item.skillName);
 };
 
@@ -87,6 +90,16 @@ export const downloadAssessmentCertificate = async (resultId: number) => {
   );
 
   return response.data as Blob;
+};
+
+export const verifyAssessmentCertificate = async (
+  certificateCode: string,
+): Promise<CertificateVerificationResponse> => {
+  const response = await axiosInstance.get<CertificateVerificationResponse>(
+    `/assessment/certificates/verify/${encodeURIComponent(certificateCode)}`,
+  );
+
+  return response.data;
 };
 
 export const fetchAssessmentResults =

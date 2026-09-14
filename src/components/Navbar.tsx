@@ -6,6 +6,7 @@ import { useAuth } from "../stores/useAuth";
 const links = [
   { label: "Jobs", href: "/jobs" },
   { label: "Companies", href: "/companies" },
+  { label: "Verify Certificate", href: "/verify-certificate" },
   { label: "Stories", href: "/stories" },
   { label: "About", href: "/about" },
 ];
