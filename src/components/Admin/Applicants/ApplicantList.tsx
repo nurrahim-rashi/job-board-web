@@ -1,7 +1,7 @@
 import { ArrowRight, FileText } from "../../site/Icons";
 import { ApplicantAvatar } from "./ApplicantAvatar";
 import { educationLabel, formatRupiah } from "./applicantHelpers";
-import { formatDate, questionCount } from "../adminData";
+import { formatDate, goodScore } from "../adminData";
 import { statusLabels, statusTones, type ApplicantListItem } from "../../../types/applicant";
 
 type ApplicantListProps = {
@@ -38,8 +38,8 @@ export function ApplicantList({ applicants, onOpen, onPreviewCv }: ApplicantList
             {item.testScore == null ? (
               <em className="admin-chip">No test</em>
             ) : (
-              <em className={`admin-chip ${item.testScore >= 18 ? "good" : "wait"}`}>
-                {item.testScore}/{questionCount}
+              <em className={`admin-chip ${item.testScore >= goodScore ? "good" : "wait"}`}>
+                {item.testScore}/100
               </em>
             )}
           </span>

@@ -57,7 +57,14 @@ export default function AdminApplicantsPage() {
               </select>
             </label>
           </section>
-          {slug ? <ApplicantSection key={slug} slug={slug} /> : null}
+          {slug && selected ? (
+            <ApplicantSection
+              key={slug}
+              slug={slug}
+              hasPreSelectionTest={selected.hasPreSelectionTest}
+              testDurationMinutes={selected.testDurationMinutes}
+            />
+          ) : null}
         </>
       ) : (
         <div className="admin-empty">

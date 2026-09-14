@@ -1,19 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { useApplicants } from "../../../hooks/api/applicant/useApplicants";
+import { Clipboard } from "../../site/Icons";
 import { ApplicantDetailModal, type DetailTab } from "./ApplicantDetailModal";
+import { AssignTestModal } from "./AssignTestModal";
 import { ApplicantFilters, emptyFilters, hasActiveFilters, toQuery, type FilterState } from "./ApplicantFilters";
 import { ApplicantList } from "./ApplicantList";
 
 const PAGE_SIZE = 10;
 
-type ApplicantSectionProps = { slug: string };
+type ApplicantSectionProps = { slug: string; hasPreSelectionTest: boolean; testDurationMinutes: number | null };
 
-export function ApplicantSection({ slug }: ApplicantSectionProps) {
+export function ApplicantSection({ slug, hasPreSelectionTest, testDurationMinutes }: ApplicantSectionProps) {
   const [filters, setFilters] = useState<FilterState>(emptyFilters);
   const [debounced, setDebounced] = useState<FilterState>(emptyFilters);
   const [page, setPage] = useState(1);
   const [opened, setOpened] = useState<{ id: number; tab: DetailTab } | null>(null);
+  const [assigning, setAssigning] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebounced(filters), 300);
@@ -42,6 +45,11 @@ export function ApplicantSection({ slug }: ApplicantSectionProps) {
           </h2>
           <p className="admin-note">Listed from the earliest submission by default. Filter, open a profile, preview the CV, then decide.</p>
         </div>
+        {hasPreSelectionTest ? (
+          <button type="button" className="admin-btn ghost" onClick={() => setAssigning(true)}>
+            <Clipboard /> Send pre-selection test
+          </button>
+        ) : null}
       </div>
 
       <ApplicantFilters filters={filters} onChange={setFilters} onReset={reset} />
@@ -88,9 +96,17 @@ export function ApplicantSection({ slug }: ApplicantSectionProps) {
         </div>
       )}
 
+      <AssignTestModal
+        slug={slug}
+        open={assigning}
+        durationMinutes={testDurationMinutes}
+        onClose={() => setAssigning(false)}
+      />
+
       <ApplicantDetailModal
         slug={slug}
         applicationId={opened?.id ?? null}
+        hasPreSelectionTest={hasPreSelectionTest}
         initialTab={opened?.tab}
         onClose={() => setOpened(null)}
       />

@@ -14,11 +14,8 @@ export function InterviewList({ interviews, onEdit, onDelete }: InterviewListPro
     <div className="admin-table interviews">
       <div className="admin-row admin-row-head">
         <span>Applicant</span>
-        <span>Date</span>
-        <span>Time</span>
+        <span>Schedule</span>
         <span>Where</span>
-        <span>Countdown</span>
-        <span>H-1 reminder</span>
         <span>Status</span>
         <span />
       </div>
@@ -32,8 +29,12 @@ export function InterviewList({ interviews, onEdit, onDelete }: InterviewListPro
               <ApplicantAvatar name={interview.applicant.name} avatar={interview.applicant.avatar} />
               <b>{interview.applicant.name}</b>
             </span>
-            <span>{formatDay(interview.interviewDate)}</span>
-            <span>{formatTime(interview.interviewDate)}</span>
+            <span className="interview-when">
+              <b>{formatDay(interview.interviewDate)}</b>
+              <small>
+                {formatTime(interview.interviewDate)} · {countdownLabel(interview.interviewDate)}
+              </small>
+            </span>
             <span className="interview-where">
               {online ? <Video /> : <MapPin />}
               {online ? (
@@ -44,14 +45,11 @@ export function InterviewList({ interviews, onEdit, onDelete }: InterviewListPro
                 <span title={interview.locationOrLink}>{interview.locationOrLink}</span>
               )}
             </span>
-            <span>{countdownLabel(interview.interviewDate)}</span>
-            <span>
-              <em className={`admin-chip ${reminder.tone}`}>{reminder.label}</em>
-            </span>
             <span>
               <em className={`admin-chip ${interviewStatusTones[interview.status]}`}>
                 {interviewStatusLabels[interview.status]}
               </em>
+              <small>H-1 · {reminder.label}</small>
             </span>
             <span className="admin-row-actions">
               <button type="button" className="link" onClick={() => onEdit(interview)}>

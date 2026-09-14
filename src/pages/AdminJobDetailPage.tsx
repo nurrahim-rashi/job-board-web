@@ -122,7 +122,7 @@ export default function AdminJobDetailPage() {
         </section>
       </div>
 
-      <ApplicantSection slug={job.slug} />
+      <ApplicantSection slug={job.slug} hasPreSelectionTest={job.hasPreSelectionTest} testDurationMinutes={job.testDurationMinutes} />
 
       <ConfirmDialog
         open={confirmDelete}
