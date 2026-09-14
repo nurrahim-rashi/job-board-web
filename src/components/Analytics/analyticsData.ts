@@ -25,8 +25,8 @@ export const genderLabels: Record<string, string> = {
 };
 
 export const planLabels: Record<string, string> = {
-  STANDARD: "Standard",
-  PROFESSIONAL: "Professional",
+  STANDARD: "Polaris Plus",
+  PROFESSIONAL: "Polaris Pro",
 };
 
 export const interviewLabels: Record<string, string> = {

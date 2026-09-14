@@ -15,6 +15,11 @@ import type {
   CreateAssessmentQuestionInput,
 } from "../types/assessment";
 
+export const fetchSkillNames = async () => {
+  const response = await axiosInstance.get<{ data: { skillName: string }[] }>("/assessment/skills");
+  return response.data.data.map((item) => item.skillName);
+};
+
 export const fetchAssessments = async () => {
   const response = await axiosInstance.get("/assessment/discovery");
 

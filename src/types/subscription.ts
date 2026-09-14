@@ -1,5 +1,14 @@
 export type SubscriptionName = "STANDARD" | "PROFESSIONAL";
 
+export const subscriptionNameLabels: Record<SubscriptionName, string> = {
+  STANDARD: "Polaris Plus",
+  PROFESSIONAL: "Polaris Pro",
+};
+
+export function subscriptionNameLabel(name: SubscriptionName | string) {
+  return subscriptionNameLabels[name as SubscriptionName] ?? name;
+}
+
 export type SubscriptionFeatures = {
   cvGenerator?: boolean;
   skillAssessmentLimit?: number | null;

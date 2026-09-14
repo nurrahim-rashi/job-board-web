@@ -29,7 +29,7 @@ export function DeveloperPanel() {
             <li>
               <FileText />
               <span>
-                <b>Professional plan approval</b>
+                <b>Polaris Pro plan approval</b>
                 <small>12 payment proofs pending</small>
               </span>
               <em className="wait">Review</em>

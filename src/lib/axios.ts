@@ -1,6 +1,7 @@
 import axios from "axios";
 
 import { useAuth } from "../stores/useAuth";
+import { normalizeDisplayNames } from "./text";
 
 export const apiUrl = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
@@ -16,7 +17,10 @@ axiosInstance.interceptors.request.use((config) => {
 });
 
 axiosInstance.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    response.data = normalizeDisplayNames(response.data);
+    return response;
+  },
   (error: unknown) => {
     if (axios.isAxiosError(error)) {
       const message = (error.response?.data as { message?: string } | undefined)?.message;

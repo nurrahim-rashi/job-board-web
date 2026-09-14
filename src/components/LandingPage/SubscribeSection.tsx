@@ -20,7 +20,7 @@ const plans: Plan[] = [
     features: [
       ["Unlimited job search & company browsing", true],
       ["Jobs near you, within your city radius", true],
-      ["Save roles and track applications", true],
+      ["Track your job applications", true],
       ["CV Generator", false],
       ["Skill Assessment", false],
       ["Priority CV review", false],
@@ -29,30 +29,27 @@ const plans: Plan[] = [
   {
     name: "Polaris Plus",
     tagline: "For people who are actively hunting.",
-    monthly: 49000,
-    yearly: 490000,
+    monthly: 25000,
+    yearly: 250000,
     featured: true,
     features: [
       ["Everything in Free", true],
-      ["CV Generator with tailored templates", true],
-      ["Skill Assessment badges on your profile", true],
-      ["Priority CV review within 48 hours", true],
-      ["Application insights & salary benchmarks", true],
-      ["Early access to new drops", false],
+      ["CV Generator", true],
+      ["Skill Assessment up to 2 times per month", true],
+      ["Priority review when applying", false],
     ],
   },
   {
     name: "Polaris Pro",
     tagline: "Serious about landing the right offer.",
-    monthly: 89000,
-    yearly: 890000,
+    monthly: 100000,
+    yearly: 1000000,
     features: [
-      ["Everything in Plus", true],
-      ["Human CV review by a hiring partner", true],
-      ["Unlimited Skill Assessment retakes", true],
-      ["Early access to new drops", true],
-      ["Direct intro to 3 companies a month", true],
-      ["Interview coaching session", true],
+      ["Everything in Free", true],
+
+      ["CV Generator", true],
+      ["Unlimited Skill Assessments", true],
+      ["Priority review when applying", true],
     ],
   },
 ];
@@ -73,8 +70,7 @@ const perks = [
     body: "Your application lands at the top of the pile, with feedback back inside 48 hours.",
   },
 ];
-const price = (value: number) =>
-  `Rp ${(value / 1000).toLocaleString("en-US")}k`;
+const price = (value: number) => `IDR ${value.toLocaleString("id-ID")}`;
 export function SubscribeSection() {
   const [yearly, setYearly] = useState(false);
   return (

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import toast from "react-hot-toast";
 import { Navbar } from "../components/Navbar";
 import { AdminShell } from "../components/Admin/AdminShell";
@@ -16,7 +16,9 @@ import {
 } from "../services/auth.service";
 import { useAuth } from "../stores/useAuth";
 import type { AuthUser } from "../types/auth";
-import { fetchAssessmentBadges } from "../lib/assessment-api";
+import { fetchAssessmentBadges, fetchSkillNames } from "../lib/assessment-api";
+import { getPublicJobs } from "../services/job.service";
+import { getProvinces, getRegencies, type Region } from "../services/region.service";
 import type { AssessmentBadge } from "../types/assessment";
 import {
   getPublicCompanies,
@@ -103,6 +105,13 @@ export default function ProfilePage() {
   const [experienceDraftError, setExperienceDraftError] = useState("");
   const [selectedWorkModalOpen, setSelectedWorkModalOpen] = useState(false);
   const [subscriptionActive, setSubscriptionActive] = useState<boolean | null>(null);
+  const [skillNames, setSkillNames] = useState<string[]>([]);
+  const [roleSuggestions, setRoleSuggestions] = useState<string[]>([]);
+  const [provinces, setProvinces] = useState<Region[]>([]);
+  const [profileProvinceCode, setProfileProvinceCode] = useState("");
+  const [profileCities, setProfileCities] = useState<Region[]>([]);
+  const [profileCity, setProfileCity] = useState("");
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     getProfile()
@@ -138,12 +147,37 @@ export default function ProfilePage() {
   }, [user?.role]);
 
   useEffect(() => {
+    if (user?.role !== "JOB_SEEKER") return;
+    Promise.all([fetchSkillNames(), getPublicJobs({ limit: 50 })])
+      .then(([skills, jobs]) => {
+        setSkillNames(skills);
+        setRoleSuggestions([...new Set(jobs.map((job) => job.title))].sort());
+      })
+      .catch(() => undefined);
+  }, [user?.role]);
+
+  useEffect(() => {
     setExperiences(sortExperiences(user?.experiences ?? []));
   }, [user?.experiences]);
 
   useEffect(() => {
     if (user) setIsPublicProfile(user.isPublicProfile);
   }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    setProfileCity(user.city ?? "");
+    getProvinces().then((items) => {
+      setProvinces(items);
+      const match = items.find((item) => item.name.toLowerCase() === user.province?.toLowerCase());
+      if (match) setProfileProvinceCode(match.code);
+    }).catch(() => setProvinces([]));
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!profileProvinceCode) { setProfileCities([]); return; }
+    getRegencies(profileProvinceCode).then(setProfileCities).catch(() => setProfileCities([]));
+  }, [profileProvinceCode]);
 
   useEffect(() => {
     if (user?.role !== "JOB_SEEKER") return;
@@ -200,8 +234,8 @@ export default function ProfilePage() {
       const updated = await updateProfile({
         name: String(form.get("name") ?? ""),
         email: String(form.get("email") ?? ""),
-        city: String(form.get("city") ?? "") || undefined,
-        province: String(form.get("province") ?? "") || undefined,
+        city: profileCity || undefined,
+        province: provinces.find((item) => item.code === profileProvinceCode)?.name || user?.province || undefined,
         professionalRole: String(form.get("professionalRole") ?? "") || undefined,
         profileLinks: columns(form.get("profileLinks")).map(([label, url]) => ({ label, url })).filter((item) => item.label && item.url),
         ...(!isCompany ? {
@@ -213,7 +247,7 @@ export default function ProfilePage() {
           availability: availability || undefined,
           salaryExpectation: String(form.get("salaryExpectation") ?? "") || undefined,
           profileStory: String(form.get("profileStory") ?? "") || undefined,
-          skills: String(form.get("skills") ?? "").split(/[,\n]/).map((item) => item.trim()).filter(Boolean),
+          skills: form.getAll("skills").map(String).filter(Boolean),
           experiences: sortExperiences(experiences).map((experience) => ({
             title: experience.title.trim(),
             company: experience.company.trim(),
@@ -346,8 +380,9 @@ export default function ProfilePage() {
               alt="Your profile"
             />
           )}
-          <label className="profile-file-picker">
+          <div className="file-upload-row"><label className="profile-file-picker">
             <input
+              ref={avatarInputRef}
               name="avatar"
               type="file"
               accept="image/jpeg,image/png"
@@ -365,7 +400,7 @@ export default function ProfilePage() {
                   : "Drop it here or click to browse · JPG or PNG · max 1MB"}
               </small>
             </span>
-          </label>
+          </label>{avatarFileName && <button className="file-remove" type="button" aria-label="Remove selected profile photo" onClick={() => { setAvatarFileName(""); if (avatarInputRef.current) avatarInputRef.current.value = ""; }}><span aria-hidden="true">×</span></button>}</div>
           <button className="profile-submit">Upload photo</button>
         </form>
 
@@ -464,12 +499,12 @@ export default function ProfilePage() {
                   />
                 </label>
                 <label>
-                  City
-                  <input name="city" defaultValue={user.city ?? ""} />
+                  Province
+                  <select value={profileProvinceCode} onChange={(event) => { setProfileProvinceCode(event.target.value); setProfileCity(""); }}><option value="">{user.province || "Select province"}</option>{provinces.map((item) => <option key={item.code} value={item.code}>{item.name}</option>)}</select>
                 </label>
                 <label>
-                  Province
-                  <input name="province" defaultValue={user.province ?? ""} />
+                  City / regency
+                  <select value={profileCity} onChange={(event) => setProfileCity(event.target.value)}><option value="">{profileProvinceCode ? "Select city / regency" : user.city || "Choose province first"}</option>{profileCities.map((item) => <option key={item.code} value={item.name}>{item.name}</option>)}</select>
                 </label>
                 <label className="profile-wide">
                   Profile links <small>one per line: Label | URL</small>
@@ -516,12 +551,12 @@ export default function ProfilePage() {
                   </select>
                 </label>
                 <label>
-                  City
-                  <input name="city" defaultValue={user.city ?? ""} />
+                  Province
+                  <select value={profileProvinceCode} onChange={(event) => { setProfileProvinceCode(event.target.value); setProfileCity(""); }}><option value="">{user.province || "Select province"}</option>{provinces.map((item) => <option key={item.code} value={item.code}>{item.name}</option>)}</select>
                 </label>
                 <label>
-                  Province
-                  <input name="province" defaultValue={user.province ?? ""} />
+                  City / regency
+                  <select value={profileCity} onChange={(event) => setProfileCity(event.target.value)}><option value="">{profileProvinceCode ? "Select city / regency" : user.city || "Choose province first"}</option>{profileCities.map((item) => <option key={item.code} value={item.name}>{item.name}</option>)}</select>
                 </label>
                 <label className="profile-wide">
                   Address
@@ -529,7 +564,8 @@ export default function ProfilePage() {
                 </label>
                 <label>
                   Professional role
-                  <input name="professionalRole" defaultValue={user.professionalRole} placeholder="Senior Product Designer" />
+                  <input name="professionalRole" list="profile-role-suggestions" defaultValue={user.professionalRole} placeholder="Start typing a role" />
+                  <datalist id="profile-role-suggestions">{roleSuggestions.map((role) => <option key={role} value={role} />)}</datalist>
                 </label>
                 <label>
                   Availability
@@ -554,8 +590,10 @@ export default function ProfilePage() {
                   <textarea name="profileStory" defaultValue={user.profileStory} placeholder="Tell companies about your journey and the work you care about." />
                 </label>
                 <label className="profile-wide">
-                  Skills <small>separate with commas</small>
-                  <textarea name="skills" defaultValue={user.skills.join(", ")} placeholder="Product design, Figma, Design systems" />
+                  Skills <small>select all that apply</small>
+                  <select name="skills" multiple defaultValue={user.skills} className="profile-skills-select">
+                    {skillNames.map((skill) => <option key={skill} value={skill}>{skill}</option>)}
+                  </select>
                 </label>
                 <div className="profile-wide experience-editor">
                   <div className="experience-editor-heading">

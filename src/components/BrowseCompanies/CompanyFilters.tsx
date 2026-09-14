@@ -1,53 +1,7 @@
-import { Search } from "../site/Icons";
-type Sort = "az" | "za";
-type Props = {
-  query: string;
-  city: string;
-  sort: Sort;
-  cities: string[];
-  onQueryChange: (value: string) => void;
-  onCityChange: (value: string) => void;
-  onSortChange: (value: Sort) => void;
-};
-export function CompanyFilters({
-  query,
-  city,
-  sort,
-  cities,
-  onQueryChange,
-  onCityChange,
-  onSortChange,
-}: Props) {
-  return (
-    <section className="company-filters">
-      <div>
-        <label>
-          <Search />
-          <input
-            value={query}
-            onChange={(event) => onQueryChange(event.target.value)}
-            placeholder="Company name"
-          />
-        </label>
-        <select
-          value={city}
-          onChange={(event) => onCityChange(event.target.value)}
-        >
-          <option value="all">All locations</option>
-          {cities.map((item) => (
-            <option key={item} value={item}>
-              {item}
-            </option>
-          ))}
-        </select>
-        <select
-          value={sort}
-          onChange={(event) => onSortChange(event.target.value as Sort)}
-        >
-          <option value="az">Name A–Z</option>
-          <option value="za">Name Z–A</option>
-        </select>
-      </div>
-    </section>
-  );
+import { MapPin, Search } from "../site/Icons";
+import type { Region } from "../../services/region.service";
+type Sort = "az" | "za" | "nearest";
+type Props = { query: string; province: string; city: string; sort: Sort; provinces: Region[]; cities: Region[]; locating: boolean; located: boolean; onLocate: () => void; onQueryChange: (value: string) => void; onProvinceChange: (value: string) => void; onCityChange: (value: string) => void; onSortChange: (value: Sort) => void };
+export function CompanyFilters(props: Props) {
+  return <section className="company-filters"><div><label><Search /><input value={props.query} onChange={(event) => props.onQueryChange(event.target.value)} placeholder="Company name" /></label><select value={props.province} onChange={(event) => props.onProvinceChange(event.target.value)}><option value="all">Choose province</option>{props.provinces.map((item) => <option key={item.code} value={item.code}>{item.name}</option>)}</select><select value={props.city} disabled={props.province === "all"} onChange={(event) => props.onCityChange(event.target.value)}><option value="all">Choose city/regency</option>{props.cities.map((item) => <option key={item.code} value={item.name}>{item.name}</option>)}</select><button type="button" className="company-locate" onClick={props.onLocate}><MapPin />{props.locating ? "Locating…" : props.located ? "Location enabled" : "Use my location"}</button><select value={props.sort} onChange={(event) => props.onSortChange(event.target.value as Sort)}><option value="az">Name A–Z</option><option value="za">Name Z–A</option>{props.located && <option value="nearest">Nearest to me</option>}</select></div></section>;
 }

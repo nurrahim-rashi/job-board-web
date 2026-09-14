@@ -24,7 +24,7 @@ export type PublicJobDetail = PublicJob & {
   hasPreSelectionTest: boolean;
   testDurationMinutes: number | null;
   applicantCount: number;
-  company: PublicJob["company"] & { id: number; profileContent: string; createdAt: string };
+  company: PublicJob["company"] & { id: number; profileContent: string; createdAt: string; postedBy: { id: number; name: string } };
   relatedJobs: PublicJob[];
 };
 

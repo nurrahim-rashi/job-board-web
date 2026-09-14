@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { getPublicJobs, type PublicJob } from "../../services/job.service";
 import type { HomepageData } from "../../types/auth";
 import { Reveal } from "../../hooks/useReveal";
-import { ArrowRight, Bookmark, MapPin, Sparkles } from "../site/Icons";
+import { ArrowRight, MapPin, Sparkles } from "../site/Icons";
+import { isNewJob } from "../../lib/job-age";
+import { categoryLabel } from "../../types/job-posting";
 
 function salary(job: PublicJob) {
   if (job.salaryMin === null && job.salaryMax === null) return "Salary not listed";
@@ -20,7 +22,7 @@ export function JobFeedSection({
 }) {
   const [jobs, setJobs] = useState<PublicJob[]>([]);
   const [jobsLoading, setJobsLoading] = useState(true);
-  const [location, setLocation] = useState("latest roles");
+  const [location, setLocation] = useState("");
   const [manualCity, setManualCity] = useState("");
   const [locating, setLocating] = useState(false);
   const [granted, setGranted] = useState(false);
@@ -49,7 +51,10 @@ export function JobFeedSection({
         setGranted(true);
         loadJobs({ latitude, longitude }).finally(() => setLocating(false));
       },
-      () => setLocating(false),
+      () => {
+        setLocating(false);
+        window.alert("We could not access your location. Allow location permission or choose a city manually.");
+      },
       { timeout: 8000 },
     );
   };
@@ -68,33 +73,32 @@ export function JobFeedSection({
         <Reveal>
           <div className="feed-heading">
             <div>
-              <p className="eyebrow">{granted ? "Near you" : "Discover roles"}</p>
-              <h2>{granted ? "Jobs around you" : `Latest jobs in ${location}`}</h2>
+              <p className="eyebrow">Discover roles</p>
+              <h2>Latest jobs</h2>
             </div>
             <button onClick={useLocation}>
               <MapPin />
               {locating ? "Locating…" : granted ? "Refresh location" : "Use my location"}
             </button>
           </div>
-          {!granted && (
-            <div className="location-note">
-              <span>Location access is off. Choose a city or browse the newest roles.</span>
-              <div className="location-manual">
-                <input value={manualCity} onChange={(event) => setManualCity(event.target.value)} placeholder="Choose a city" />
-                <button type="button" onClick={useManualCity}>Show jobs</button>
-              </div>
+          <div className="location-note">
+            <span>{granted ? "Showing jobs near your current location." : location ? `Showing the latest jobs in ${location}.` : "Choose a city, use your location, or browse the newest roles."}</span>
+            <div className="location-manual">
+              <input value={manualCity} onChange={(event) => setManualCity(event.target.value)} placeholder="Choose a city" />
+              <button type="button" onClick={useManualCity}>Show jobs</button>
             </div>
-          )}
+          </div>
         </Reveal>
 
         <div className="nearby-grid">
-          {jobs.map((job, index) => (
+          {!jobsLoading && jobs.map((job, index) => (
             <Reveal key={job.id} delay={index * 80}>
               <article className="nearby-card">
-                <div><b>{job.company.companyName[0]}</b><button aria-label={`Save ${job.title}`}><Bookmark /></button></div>
+                {isNewJob(job.createdAt) && <span className="new-job-badge">NEW</span>}
+                <div>{job.company.logo ? <img src={job.company.logo.startsWith("http") ? job.company.logo : `${import.meta.env.VITE_API_URL ?? "http://localhost:8000"}${job.company.logo}`} alt={`${job.company.companyName} logo`} /> : <b>{job.company.companyName[0]}</b>}</div>
                 <h3>{job.title}</h3>
                 <p>{job.company.companyName} · {job.cityLocation}{job.distance !== null && job.distance !== undefined ? ` · ${job.distance.toFixed(1)} km` : ""}</p>
-                <aside><span>{job.category.replaceAll("_", " ")}</span><span>{salary(job)}</span></aside>
+                <aside><span>{categoryLabel(job.category)}</span><span>{salary(job)}</span></aside>
                 <a href={`/jobs/${job.slug}`}>View role <ArrowRight /></a>
               </article>
             </Reveal>
@@ -106,9 +110,9 @@ export function JobFeedSection({
               <p>Try another city or browse the latest roles again later.</p>
             </article>
           )}
-          {jobsLoading && (
-            <article className="dashboard-empty-card is-loading" aria-label="Loading jobs" />
-          )}
+          {jobsLoading && Array.from({ length: 4 }, (_, index) => (
+            <article className="nearby-card is-loading" aria-label="Loading jobs" key={index} />
+          ))}
         </div>
 
         <Reveal className="matches-title">
@@ -121,7 +125,7 @@ export function JobFeedSection({
               <li>
                 <a href={`/jobs/${job.slug}`}>
                   <Sparkles />
-                  <span><b>{job.title} · <em>{job.company.companyName}</em></b><small>{job.reason}</small></span>
+                  <span><b>{job.title} {isNewJob(job.createdAt) && <i className="new-job-badge">NEW</i>} · <em>{job.company.companyName}</em></b><small>{job.reason}</small></span>
                   <strong>{job.score}%</strong>
                 </a>
               </li>

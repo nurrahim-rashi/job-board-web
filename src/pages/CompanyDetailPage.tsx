@@ -6,6 +6,8 @@ import {
   type PublicCompanyDetail,
 } from "../services/company.service";
 import { useAuth } from "../stores/useAuth";
+import { isNewJob } from "../lib/job-age";
+import { categoryLabel } from "../types/job-posting";
 
 function formatSalary(minimum: number | null, maximum: number | null) {
   if (!minimum && !maximum) return "Salary not disclosed";
@@ -63,10 +65,14 @@ export default function CompanyDetailPage() {
 
   return (
     <div className="company-profile-page">
-      <section className="company-profile-hero">
+      <section
+        className="company-profile-hero"
+        style={company.banner ? { backgroundImage: `linear-gradient(rgb(13 19 41 / .72), rgb(23 36 67 / .9)), url(${company.banner.startsWith("http") ? company.banner : `${import.meta.env.VITE_API_URL ?? "http://localhost:8000"}${company.banner}`})` } : undefined}
+      >
         <div className="company-profile-stars" />
         <Navbar />
         <div className="company-profile-intro">
+          {company.logo && <img className="company-profile-logo" src={company.logo.startsWith("http") ? company.logo : `${import.meta.env.VITE_API_URL ?? "http://localhost:8000"}${company.logo}`} alt={`${company.companyName} logo`} />}
           <p>
             {company.city} · {size} · Est. {founded}
           </p>
@@ -152,9 +158,9 @@ export default function CompanyDetailPage() {
               {company.jobPostings.map((job) => (
                 <a key={job.id} href={`/jobs/${job.slug}`}>
                   <span>
-                    <strong>{job.title}</strong>
+                    <strong>{job.title} {isNewJob(job.createdAt) && <i className="new-job-badge">NEW</i>}</strong>
                     <small>
-                      {job.category.replaceAll("_", " ")} · {job.cityLocation}
+                      {categoryLabel(job.category)} · {job.cityLocation}
                     </small>
                   </span>
                   <span>

@@ -6,7 +6,7 @@ export const dashboardRoles = [
     label: "Applicant",
     icon: "◉",
     who: "Rashifa Amara",
-    sub: "Product Designer · Professional plan",
+    sub: "Product Designer · Polaris Pro plan",
     blurb: "Track every application, assessment and interview in one place.",
   },
   {
