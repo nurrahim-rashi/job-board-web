@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { Footer } from "../components/Footer";
-import { Navbar } from "../components/Navbar";
+import { DeveloperShell } from "../components/Developer/DeveloperShell";
 import {
   fetchDeveloperSubscriptions,
   updateSubscriptionPlan,
 } from "../lib/subscription-api";
-import { subscriptionNameLabel, type SubscriptionPlan } from "../types/subscription";
+import {
+  subscriptionNameLabel,
+  type SubscriptionPlan,
+} from "../types/subscription";
 
 export default function DeveloperSubscriptionsPage() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
@@ -71,7 +73,9 @@ export default function DeveloperSubscriptionsPage() {
         ),
       );
 
-      setMessage(`${subscriptionNameLabel(plan.name)} subscription updated successfully.`);
+      setMessage(
+        `${subscriptionNameLabel(plan.name)} subscription updated successfully.`,
+      );
     } catch (err) {
       setError(
         err instanceof Error
@@ -84,104 +88,93 @@ export default function DeveloperSubscriptionsPage() {
   };
 
   return (
-    <div className="workspace-dashboard">
-      <Navbar />
+    <DeveloperShell
+      eyebrow="Developer tools"
+      title="Subscription management"
+      lead="Configure the available subscription tiers, pricing, and subscription duration."
+    >
+      <section className="role-panel subscription-management-page">
+        {message ? <p>{message}</p> : null}
+        {error ? <p>{error}</p> : null}
 
-      <main>
-        <section className="role-panel subscription-management-page">
-          <div className="analytics-intro">
-            <p className="eyebrow">Developer tools</p>
-            <h1>Subscription management</h1>
-            <p>
-              Configure the available subscription tiers, pricing, and
-              subscription duration.
-            </p>
+        {loading ? (
+          <p>Loading subscription plans...</p>
+        ) : (
+          <div className="panel-grid">
+            {plans.map((plan) => (
+              <article className="panel-card" key={plan.id}>
+                <p className="eyebrow">Subscription plan</p>
+                <h2>{plan.name}</h2>
+
+                <label>
+                  Price (IDR)
+                  <input
+                    type="number"
+                    min="1"
+                    value={plan.price}
+                    onChange={(event) =>
+                      updatePlanField(
+                        plan.name,
+                        "price",
+                        Number(event.target.value),
+                      )
+                    }
+                  />
+                </label>
+
+                <label>
+                  Duration (days)
+                  <input
+                    type="number"
+                    min="1"
+                    value={plan.durationDays}
+                    onChange={(event) =>
+                      updatePlanField(
+                        plan.name,
+                        "durationDays",
+                        Number(event.target.value),
+                      )
+                    }
+                  />
+                </label>
+
+                <div>
+                  <b>Features</b>
+
+                  <ul>
+                    {plan.featuresAccess.cvGenerator ? (
+                      <li>CV Generator</li>
+                    ) : null}
+
+                    {plan.featuresAccess.skillAssessmentLimit === null ? (
+                      <li>Unlimited skill assessments</li>
+                    ) : typeof plan.featuresAccess.skillAssessmentLimit ===
+                      "number" ? (
+                      <li>
+                        {plan.featuresAccess.skillAssessmentLimit} skill
+                        assessments
+                      </li>
+                    ) : null}
+
+                    {plan.featuresAccess.priorityReview ? (
+                      <li>Priority application review</li>
+                    ) : null}
+                  </ul>
+                </div>
+
+                <button
+                  className="button button-primary"
+                  type="button"
+                  disabled={savingPlan === plan.name}
+                  onClick={() => void handleSave(plan)}
+                >
+                  {savingPlan === plan.name ? "Saving..." : "Save changes"}
+                </button>
+              </article>
+            ))}
           </div>
-
-          {message ? <p>{message}</p> : null}
-          {error ? <p>{error}</p> : null}
-
-          {loading ? (
-            <p>Loading subscription plans...</p>
-          ) : (
-            <div className="panel-grid">
-              {plans.map((plan) => (
-                <article className="panel-card" key={plan.id}>
-                  <p className="eyebrow">Subscription plan</p>
-                  <h2>{subscriptionNameLabel(plan.name)}</h2>
-
-                  <label>
-                    Price (IDR)
-                    <input
-                      type="number"
-                      min="1"
-                      value={plan.price}
-                      onChange={(event) =>
-                        updatePlanField(
-                          plan.name,
-                          "price",
-                          Number(event.target.value),
-                        )
-                      }
-                    />
-                  </label>
-
-                  <label>
-                    Duration (days)
-                    <input
-                      type="number"
-                      min="1"
-                      value={plan.durationDays}
-                      onChange={(event) =>
-                        updatePlanField(
-                          plan.name,
-                          "durationDays",
-                          Number(event.target.value),
-                        )
-                      }
-                    />
-                  </label>
-
-                  <div>
-                    <b>Features</b>
-
-                    <ul>
-                      {plan.featuresAccess.cvGenerator ? (
-                        <li>CV Generator</li>
-                      ) : null}
-
-                      {plan.featuresAccess.skillAssessmentLimit === null ? (
-                        <li>Unlimited skill assessments</li>
-                      ) : typeof plan.featuresAccess.skillAssessmentLimit ===
-                        "number" ? (
-                        <li>
-                          {plan.featuresAccess.skillAssessmentLimit} skill
-                          assessments
-                        </li>
-                      ) : null}
-
-                      {plan.featuresAccess.priorityReview ? (
-                        <li>Priority application review</li>
-                      ) : null}
-                    </ul>
-                  </div>
-
-                  <button
-                    className="button button-primary"
-                    type="button"
-                    disabled={savingPlan === plan.name}
-                    onClick={() => void handleSave(plan)}
-                  >
-                    {savingPlan === plan.name ? "Saving..." : "Save changes"}
-                  </button>
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
-      </main>
-
-      <Footer />
-    </div>
+        )}
+      </section>
+    </DeveloperShell>
   );
 }

@@ -1,8 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 
-import { Navbar } from "../components/Navbar";
-import { Footer } from "../components/Footer";
+import { DeveloperShell } from "../components/Developer/DeveloperShell";
 import {
   fetchDeveloperAssessments,
   createAssessment,
@@ -78,107 +77,95 @@ export default function AssessmentManagementPage() {
   }
 
   return (
-    <div className="workspace-dashboard">
-      <Navbar />
+    <DeveloperShell
+      eyebrow="Developer tools"
+      title="Manage skill assessments"
+      lead="Create assessments and manage their question banks."
+    >
+      <section className="role-panel">
+        <form className="profile-card" onSubmit={handleCreateAssessment}>
+          <p className="eyebrow">New assessment</p>
+          <h2>Create skill assessment</h2>
 
-      <main>
-        <section className="role-panel">
-          <div>
-            <p className="eyebrow">Developer tools</p>
-            <h1>Manage skill assessments</h1>
-            <p>Create assessments and manage their question banks.</p>
+          <div className="profile-fields">
+            <label>
+              Skill name
+              <input name="skillName" placeholder="e.g. React" required />
+            </label>
+
+            <label>
+              Assessment title
+              <input
+                name="title"
+                placeholder="e.g. React Fundamentals"
+                required
+              />
+            </label>
+
+            <label className="profile-wide">
+              Description
+              <textarea
+                name="description"
+                placeholder="Describe what this assessment covers..."
+              />
+            </label>
           </div>
 
-          <form className="profile-card" onSubmit={handleCreateAssessment}>
-            <p className="eyebrow">New assessment</p>
-            <h2>Create skill assessment</h2>
+          {createError && <p className="profile-error">{createError}</p>}
 
-            <div className="profile-fields">
-              <label>
-                Skill name
-                <input name="skillName" placeholder="e.g. React" required />
-              </label>
+          <button className="profile-submit" type="submit" disabled={creating}>
+            {creating ? "Creating..." : "Create assessment"}
+          </button>
+        </form>
 
-              <label>
-                Assessment title
-                <input
-                  name="title"
-                  placeholder="e.g. React Fundamentals"
-                  required
-                />
-              </label>
+        {loading && <p>Loading assessments...</p>}
 
-              <label className="profile-wide">
-                Description
-                <textarea
-                  name="description"
-                  placeholder="Describe what this assessment covers..."
-                />
-              </label>
-            </div>
+        {error && <p>{error}</p>}
 
-            {createError && <p className="profile-error">{createError}</p>}
+        {!loading && !error && assessments.length === 0 && (
+          <article className="panel-card">
+            <h2>No assessments yet</h2>
+            <p>Create your first skill assessment to get started.</p>
+          </article>
+        )}
 
-            <button
-              className="profile-submit"
-              type="submit"
-              disabled={creating}
-            >
-              {creating ? "Creating..." : "Create assessment"}
-            </button>
-          </form>
+        {!loading && !error && assessments.length > 0 && (
+          <div className="panel-grid">
+            {assessments.map((assessment) => (
+              <article className="panel-card" key={assessment.id}>
+                <p className="eyebrow">{assessment.skillName}</p>
 
-          {loading && <p>Loading assessments...</p>}
+                <h2>{assessment.title}</h2>
 
-          {error && <p>{error}</p>}
+                {assessment.description && <p>{assessment.description}</p>}
 
-          {!loading && !error && assessments.length === 0 && (
-            <article className="panel-card">
-              <h2>No assessments yet</h2>
-              <p>Create your first skill assessment to get started.</p>
-            </article>
-          )}
+                <p>
+                  Questions:{" "}
+                  <strong>
+                    {assessment._count.questions}/{assessment.questionCount}
+                  </strong>
+                </p>
 
-          {!loading && !error && assessments.length > 0 && (
-            <div className="panel-grid">
-              {assessments.map((assessment) => (
-                <article className="panel-card" key={assessment.id}>
-                  <p className="eyebrow">{assessment.skillName}</p>
+                <p>
+                  Passing score: <strong>{assessment.passingScore}</strong>
+                </p>
 
-                  <h2>{assessment.title}</h2>
+                <p>
+                  Duration:{" "}
+                  <strong>{assessment.durationMinutes} minutes</strong>
+                </p>
 
-                  {assessment.description && <p>{assessment.description}</p>}
-
-                  <p>
-                    Questions:{" "}
-                    <strong>
-                      {assessment._count.questions}/{assessment.questionCount}
-                    </strong>
-                  </p>
-
-                  <p>
-                    Passing score: <strong>{assessment.passingScore}</strong>
-                  </p>
-
-                  <p>
-                    Duration:{" "}
-                    <strong>{assessment.durationMinutes} minutes</strong>
-                  </p>
-
-                  <Link
-                    className="button button-primary"
-                    to={`/dashboard/developer/assessments/${assessment.id}`}
-                  >
-                    Manage questions
-                  </Link>
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
-      </main>
-
-      <Footer />
-    </div>
+                <Link
+                  className="button button-primary"
+                  to={`/dashboard/developer/assessments/${assessment.id}`}
+                >
+                  Manage questions
+                </Link>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+    </DeveloperShell>
   );
 }
