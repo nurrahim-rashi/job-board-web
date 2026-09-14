@@ -20,6 +20,14 @@ export async function login(email: string, password: string) {
   return getData(response, "Invalid login response");
 }
 
+export async function loginWithGoogle(credential: string) {
+  const response = await axiosInstance.post<ApiResponse<AuthSession>>(
+    "/auth/google",
+    { credential },
+  );
+  return getData(response, "Invalid Google login response");
+}
+
 export async function register(input: RegisterInput) {
   const response = await axiosInstance.post<ApiResponse<AuthSession>>("/auth/register", input);
   return getData(response, "Invalid registration response");
@@ -95,6 +103,8 @@ export async function uploadAvatar(file: File) {
 export async function logout() {
   try {
     if (useAuth.getState().token) await axiosInstance.post("/auth/logout");
+  } catch {
+    // Logging out locally must still work when the API is unavailable.
   } finally {
     useAuth.getState().logout();
   }

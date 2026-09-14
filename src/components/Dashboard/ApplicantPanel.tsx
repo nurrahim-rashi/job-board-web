@@ -104,30 +104,32 @@ export function ApplicantPanel() {
           </a>
         </article>
       </div>
-      <article className="panel-card">
-        <p className="eyebrow">Subscriptions</p>
-        <h2>Unlock premium tools</h2>
-        <p>
-          Get access to the CV Generator, skill assessments, and priority
-          features.
-        </p>
+      <div className="panel-grid dashboard-tools-grid">
+        <article className="panel-card">
+          <p className="eyebrow">Subscriptions</p>
+          <h2>Unlock premium tools</h2>
+          <p>
+            Get access to the CV Generator, skill assessments, and priority
+            features.
+          </p>
 
-        <Link to="/dashboard/subscriptions">
-          View subscription plans <ArrowRight />
-        </Link>
-      </article>
-      <article className="panel-card">
-        <p className="eyebrow">Skill assessment</p>
-        <h2>Prove your skills</h2>
-        <p>Take skill assessments, earn badges, and strengthen your profile.</p>
-        <Link to="/dashboard/assessments">
-          Browse assessments <ArrowRight />
-        </Link>
+          <Link to="/pricing">
+            View subscription plans <ArrowRight />
+          </Link>
+        </article>
+        <article className="panel-card">
+          <p className="eyebrow">Skill assessment</p>
+          <h2>Prove your skills</h2>
+          <p>Take skill assessments, earn badges, and strengthen your profile.</p>
+          <Link to="/dashboard/assessments">
+            Browse assessments <ArrowRight />
+          </Link>
 
-        <Link to="/dashboard/assessments/results">
-          Assessment history <ArrowRight />
-        </Link>
-      </article>
+          <Link to="/dashboard/assessments/results">
+            Assessment history <ArrowRight />
+          </Link>
+        </article>
+      </div>
       <article className="panel-card recommendation-card">
         <p className="eyebrow">Picked for you</p>
         <h2>Roles that fit your signals</h2>

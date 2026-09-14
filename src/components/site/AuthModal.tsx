@@ -1,6 +1,6 @@
-import { useState, type FormEvent, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent, type MouseEvent } from "react";
 import { Close, Eye } from "./Icons";
-import { login, register } from "../../services/auth.service";
+import { login, loginWithGoogle, register } from "../../services/auth.service";
 import { useAuth } from "../../stores/useAuth";
 
 type AuthModalProps = {
@@ -22,9 +22,69 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
   const [mode, setMode] = useState<"signIn" | "register">("signIn");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const googleButton = useRef<HTMLDivElement>(null);
   const registering = mode === "register";
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+  useEffect(() => {
+    if (!open || !googleClientId || (registering && role === "COMPANY_ADMIN")) return;
+
+    const renderGoogleButton = () => {
+      if (!window.google || !googleButton.current) return;
+      googleButton.current.replaceChildren();
+      window.google.accounts.id.initialize({
+        client_id: googleClientId,
+        callback: ({ credential }) => {
+          setError("");
+          setSubmitting(true);
+          loginWithGoogle(credential)
+            .then(finishAuthentication)
+            .catch((requestError: unknown) =>
+              setError(
+                requestError instanceof Error
+                  ? requestError.message
+                  : "Unable to sign in with Google.",
+              ),
+            )
+            .finally(() => setSubmitting(false));
+        },
+      });
+      window.google.accounts.id.renderButton(googleButton.current, {
+        theme: "outline",
+        size: "large",
+        shape: "pill",
+        text: "continue_with",
+        width: 358,
+      });
+    };
+
+    const existingScript = document.querySelector<HTMLScriptElement>(
+      'script[src="https://accounts.google.com/gsi/client"]',
+    );
+    if (existingScript) {
+      if (window.google) renderGoogleButton();
+      else existingScript.addEventListener("load", renderGoogleButton, { once: true });
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    script.addEventListener("load", renderGoogleButton, { once: true });
+    document.head.appendChild(script);
+  }, [open, googleClientId, registering, role]);
 
   if (!open) return null;
+
+  function finishAuthentication(session: Awaited<ReturnType<typeof login>>) {
+    useAuth.getState().login(session);
+    const returnTo = sessionStorage.getItem("authReturnTo");
+    const defaultDestination =
+      session.user.role === "COMPANY_ADMIN" ? "/admin" : "/";
+    sessionStorage.removeItem("authReturnTo");
+    window.location.assign(returnTo ?? defaultDestination);
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -40,12 +100,7 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
             ...(role === "COMPANY_ADMIN" ? { companyName, phone, city } : {}),
           })
         : await login(email, password);
-      useAuth.getState().login(session);
-      const returnTo = sessionStorage.getItem("authReturnTo");
-      const defaultDestination =
-        session.user.role === "COMPANY_ADMIN" ? "/admin" : "/";
-      window.location.assign(returnTo ?? defaultDestination);
-      sessionStorage.removeItem("authReturnTo");
+      finishAuthentication(session);
     } catch (requestError) {
       setError(
         requestError instanceof Error
@@ -84,6 +139,22 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
             ? "Start saving roles, tracking applications, and finding better matches."
             : "Track applications, save roles, and receive better matches."}
         </p>
+        {(!registering || role === "JOB_SEEKER") && (
+          <>
+            {googleClientId ? (
+              <div className="auth-google" ref={googleButton} />
+            ) : (
+              <button
+                className="auth-google-unavailable"
+                type="button"
+                onClick={() => setError("Google Sign-In is not configured yet.")}
+              >
+                Continue with Google
+              </button>
+            )}
+            <div className="auth-divider"><span>or use email</span></div>
+          </>
+        )}
         {registering && (
           <>
             <label htmlFor="register-name">Name</label>
@@ -163,6 +234,11 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
             <Eye />
           </button>
         </div>
+        {!registering && (
+          <a className="auth-forgot" href="/reset-password">
+            Forgot password?
+          </a>
+        )}
         {error && (
           <p className="auth-error" role="alert">
             {error}

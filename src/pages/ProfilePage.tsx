@@ -2,9 +2,14 @@ import { Link } from "react-router-dom";
 import { useEffect, useState, type FormEvent } from "react";
 import toast from "react-hot-toast";
 import { Navbar } from "../components/Navbar";
+import { AdminShell } from "../components/Admin/AdminShell";
+import { EditProfileHero } from "../components/Profile/EditProfileHero";
+import { SelectedWorkModal } from "../components/Profile/ProfileEntryModals";
+import { Calendar, Upload } from "../components/site/Icons";
 import {
   changePassword,
   getProfile,
+  getSubscriptionStatus,
   resendVerification,
   updateProfile,
   uploadAvatar,
@@ -13,6 +18,20 @@ import { useAuth } from "../stores/useAuth";
 import type { AuthUser } from "../types/auth";
 import { fetchAssessmentBadges } from "../lib/assessment-api";
 import type { AssessmentBadge } from "../types/assessment";
+import {
+  getPublicCompanies,
+  type PublicCompany,
+} from "../services/company.service";
+import {
+  educationOptions,
+  isEducationLevel,
+  normalizeEducation,
+} from "../constants/education";
+import {
+  availabilityOptions,
+  isAvailability,
+  normalizeAvailability,
+} from "../constants/availability";
 
 const lines = (value: FormDataEntryValue | null) =>
   String(value ?? "").split("\n").map((item) => item.trim()).filter(Boolean);
@@ -20,12 +39,70 @@ const lines = (value: FormDataEntryValue | null) =>
 const columns = (value: FormDataEntryValue | null) =>
   lines(value).map((item) => item.split("|").map((part) => part.trim()));
 
+const periodParts = (period: string) => {
+  const [start = "", end = ""] = period.split(/\s+[–-]\s+/);
+  return { start, end, current: end.toLowerCase() === "present" };
+};
+
+const monthInputValue = (value: string) => {
+  if (!value || value.toLowerCase() === "present") return "";
+  if (/^\d{4}-\d{2}$/.test(value)) return value;
+  const parsed = new Date(`${value} 1`);
+  if (Number.isNaN(parsed.getTime())) return "";
+  return `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, "0")}`;
+};
+
+const monthLabel = (value: string) => {
+  if (!value) return "";
+  const [year, month] = value.split("-").map(Number);
+  return new Date(year, month - 1).toLocaleDateString("en-US", {
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const experienceTime = (period: string) => {
+  const { start, end, current } = periodParts(period);
+  if (current) return Number.MAX_SAFE_INTEGER;
+  return new Date(`${end || start || "Jan 1900"} 1`).getTime() || 0;
+};
+
+const sortExperiences = <T extends { period: string }>(items: T[]) =>
+  [...items].sort((a, b) => experienceTime(b.period) - experienceTime(a.period));
+
+const sortSelectedWorks = <T extends { date?: string }>(items: T[]) =>
+  [...items].sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""));
+
+const emptyExperienceDraft = {
+  title: "",
+  company: "",
+  companyId: undefined as number | undefined,
+  start: "",
+  end: "",
+  current: false,
+  note: "",
+};
+
 export default function ProfilePage() {
   const user = useAuth((state) => state.user);
   const [profileLoading, setProfileLoading] = useState(true);
   const [error, setError] = useState("");
   const [badges, setBadges] = useState<AssessmentBadge[]>([]);
   const [badgesLoading, setBadgesLoading] = useState(true);
+  const [experiences, setExperiences] = useState<
+    NonNullable<AuthUser["experiences"]>
+  >([]);
+  const [selectedWorks, setSelectedWorks] = useState<
+    NonNullable<AuthUser["selectedWork"]>
+  >([]);
+  const [avatarFileName, setAvatarFileName] = useState("");
+  const [companies, setCompanies] = useState<PublicCompany[]>([]);
+  const [isPublicProfile, setIsPublicProfile] = useState(true);
+  const [experienceModalOpen, setExperienceModalOpen] = useState(false);
+  const [experienceDraft, setExperienceDraft] = useState(emptyExperienceDraft);
+  const [experienceDraftError, setExperienceDraftError] = useState("");
+  const [selectedWorkModalOpen, setSelectedWorkModalOpen] = useState(false);
+  const [subscriptionActive, setSubscriptionActive] = useState<boolean | null>(null);
 
   useEffect(() => {
     getProfile()
@@ -53,6 +130,49 @@ export default function ProfilePage() {
       });
   }, [user?.role]);
 
+  useEffect(() => {
+    if (user?.role !== "JOB_SEEKER") return;
+    getSubscriptionStatus()
+      .then(({ active }) => setSubscriptionActive(active))
+      .catch(() => setSubscriptionActive(false));
+  }, [user?.role]);
+
+  useEffect(() => {
+    setExperiences(sortExperiences(user?.experiences ?? []));
+  }, [user?.experiences]);
+
+  useEffect(() => {
+    if (user) setIsPublicProfile(user.isPublicProfile);
+  }, [user]);
+
+  useEffect(() => {
+    if (user?.role !== "JOB_SEEKER") return;
+    getPublicCompanies()
+      .then(setCompanies)
+      .catch(() => setCompanies([]));
+  }, [user?.role]);
+
+  useEffect(() => {
+    if (!user?.experiences || companies.length === 0) return;
+    setExperiences(
+      sortExperiences(user.experiences.map((experience) => {
+        if (experience.companyId) return experience;
+        const match = companies.find(
+          (company) =>
+            company.companyName.trim().toLocaleLowerCase() ===
+            experience.company.trim().toLocaleLowerCase(),
+        );
+        return match
+          ? { ...experience, companyId: match.id, company: match.companyName }
+          : experience;
+      })),
+    );
+  }, [companies, user?.experiences]);
+
+  useEffect(() => {
+    setSelectedWorks(sortSelectedWorks(user?.selectedWork ?? []));
+  }, [user?.selectedWork]);
+
   if (!user || profileLoading) return null;
   const isCompany = user.role === "COMPANY_ADMIN";
 
@@ -61,33 +181,62 @@ export default function ProfilePage() {
     setError("");
     const form = new FormData(event.currentTarget);
     try {
+      const lastEducation = String(form.get("lastEducation") ?? "");
+      const availability = String(form.get("availability") ?? "");
+      if (!isCompany && lastEducation && !isEducationLevel(lastEducation)) {
+        throw new Error("Please select a valid education level.");
+      }
+      if (!isCompany && availability && !isAvailability(availability)) {
+        throw new Error("Please select a valid availability status.");
+      }
+      if (
+        !isCompany &&
+        experiences.some(
+          (experience) => !experience.title.trim() || !experience.company.trim(),
+        )
+      ) {
+        throw new Error("Every experience needs a title and company.");
+      }
       const updated = await updateProfile({
         name: String(form.get("name") ?? ""),
         email: String(form.get("email") ?? ""),
         city: String(form.get("city") ?? "") || undefined,
         province: String(form.get("province") ?? "") || undefined,
         professionalRole: String(form.get("professionalRole") ?? "") || undefined,
-        profileIntro: String(form.get("profileIntro") ?? "") || undefined,
         profileLinks: columns(form.get("profileLinks")).map(([label, url]) => ({ label, url })).filter((item) => item.label && item.url),
         ...(!isCompany ? {
+          isPublicProfile: form.get("isPublicProfile") === "on",
           birthDate: String(form.get("birthDate") ?? "") || undefined,
           gender: (String(form.get("gender") ?? "") || undefined) as AuthUser["gender"] | undefined,
-          lastEducation: String(form.get("lastEducation") ?? "") || undefined,
+          lastEducation: lastEducation || undefined,
           address: String(form.get("address") ?? "") || undefined,
-          availability: String(form.get("availability") ?? "") || undefined,
+          availability: availability || undefined,
           salaryExpectation: String(form.get("salaryExpectation") ?? "") || undefined,
           profileStory: String(form.get("profileStory") ?? "") || undefined,
-          lookingFor: lines(form.get("lookingFor")),
           skills: String(form.get("skills") ?? "").split(/[,\n]/).map((item) => item.trim()).filter(Boolean),
-          experiences: columns(form.get("experiences")).map(([title, company, period = "", note = ""]) => ({ title, company, period, note })).filter((item) => item.title && item.company),
-          selectedWork: columns(form.get("selectedWork")).map(([name, note = ""]) => ({ name, note })).filter((item) => item.name),
+          experiences: sortExperiences(experiences).map((experience) => ({
+            title: experience.title.trim(),
+            company: experience.company.trim(),
+            companyId: experience.companyId,
+            period: experience.period.trim(),
+            note: experience.note.trim(),
+          })),
+          selectedWork: sortSelectedWorks(selectedWorks).map((work) => ({
+            name: work.name.trim(),
+            note: work.note.trim(),
+            url: work.url?.trim() || "",
+            company: work.company?.trim() || undefined,
+            date: work.date || undefined,
+          })),
         } : {}),
       });
-      toast.success(
+      sessionStorage.setItem(
+        "profileUpdateMessage",
         updated.emailVerifiedAt
           ? "Profile updated."
           : "Profile updated. Please verify your email.",
       );
+      window.location.assign(`/profile/${updated.id}`);
     } catch (requestError) {
       setError(
         requestError instanceof Error
@@ -95,6 +244,35 @@ export default function ProfilePage() {
           : "Unable to update profile.",
       );
     }
+  }
+
+  function dismissExperienceModal() {
+    setExperienceModalOpen(false);
+    setExperienceDraft(emptyExperienceDraft);
+    setExperienceDraftError("");
+  }
+
+  function saveExperienceDraft(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!experienceDraft.title.trim() || !experienceDraft.company.trim()) {
+      setExperienceDraftError("Role and company are required.");
+      return;
+    }
+    const period = [
+      monthLabel(experienceDraft.start),
+      experienceDraft.current ? "Present" : monthLabel(experienceDraft.end),
+    ].filter(Boolean).join(" – ");
+    setExperiences((current) => sortExperiences([
+      ...current,
+      {
+        title: experienceDraft.title.trim(),
+        company: experienceDraft.company.trim(),
+        companyId: experienceDraft.companyId,
+        period,
+        note: experienceDraft.note.trim(),
+      },
+    ]));
+    dismissExperienceModal();
   }
 
   async function updatePassword(event: FormEvent<HTMLFormElement>) {
@@ -133,21 +311,8 @@ export default function ProfilePage() {
     }
   }
 
-  return (
-    <div className="profile-page">
-      <Navbar />
-      <main className="profile-shell">
-        <header>
-          <p className="eyebrow">Your account</p>
-          <h1>Profile settings</h1>
-          <p>
-            Keep your details current so applications and company information
-            stay accurate.
-          </p>
-          <Link className="button button-primary" to={`/profile/${user.id}`}>
-            View public profile
-          </Link>
-        </header>
+  const profileContent = (
+      <main className={isCompany ? "admin-profile-content" : "profile-shell profile-edit-content"}>
         {!user.emailVerifiedAt && (
           <aside className="verification-banner">
             <div>
@@ -173,18 +338,33 @@ export default function ProfilePage() {
           <h2>Profile photo</h2>
           {user.avatar && (
             <img
-              src={`${import.meta.env.VITE_API_URL ?? "http://localhost:8000"}${user.avatar}`}
+              src={
+                user.avatar.startsWith("http")
+                  ? user.avatar
+                  : `${import.meta.env.VITE_API_URL ?? "http://localhost:8000"}${user.avatar}`
+              }
               alt="Your profile"
             />
           )}
-          <label>
-            JPG, JPEG, or PNG · max 1MB
+          <label className="profile-file-picker">
             <input
               name="avatar"
               type="file"
               accept="image/jpeg,image/png"
+              onChange={(event) =>
+                setAvatarFileName(event.target.files?.[0]?.name ?? "")
+              }
               required
             />
+            <span className="profile-file-picker-icon"><Upload /></span>
+            <span>
+              <strong>{avatarFileName || "Choose a profile photo"}</strong>
+              <small>
+                {avatarFileName
+                  ? "Looking good — ready to upload!"
+                  : "Drop it here or click to browse · JPG or PNG · max 1MB"}
+              </small>
+            </span>
           </label>
           <button className="profile-submit">Upload photo</button>
         </form>
@@ -239,23 +419,26 @@ export default function ProfilePage() {
           </section>
         )}
 
-        {user.role === "JOB_SEEKER" && (
-          <section className="profile-card">
-            <p className="eyebrow">CV Generator</p>
-            <h2>Create your CV</h2>
-            <p>
-              Create and download an ATS-friendly CV using your profile
-              information and additional professional details.
-            </p>
-
-            <Link className="button button-primary" to="/profile/cv-generator">
-              Generate CV
-            </Link>
-          </section>
-        )}
-
-        <form className="profile-card" onSubmit={saveProfile}>
+        <form id="personal-profile-form" className="profile-card" onSubmit={saveProfile}>
           <h2>Personal information</h2>
+          {!isCompany && (
+            <div className="profile-visibility-card">
+              <div>
+                <strong>Show public profile</strong>
+                <p>Allow companies and other people to view your profile page.</p>
+              </div>
+              <label className="profile-toggle">
+                <input
+                  name="isPublicProfile"
+                  type="checkbox"
+                  checked={isPublicProfile}
+                  onChange={(event) => setIsPublicProfile(event.target.checked)}
+                />
+                <span aria-hidden="true" />
+                <b>{isPublicProfile ? "Public" : "Private"}</b>
+              </label>
+            </div>
+          )}
           <div className="profile-fields">
             <label>
               Name
@@ -289,14 +472,6 @@ export default function ProfilePage() {
                   <input name="province" defaultValue={user.province ?? ""} />
                 </label>
                 <label className="profile-wide">
-                  Profile intro
-                  <textarea
-                    name="profileIntro"
-                    defaultValue={user.profileIntro}
-                    placeholder="Tell people about your role at the company."
-                  />
-                </label>
-                <label className="profile-wide">
                   Profile links <small>one per line: Label | URL</small>
                   <textarea
                     name="profileLinks"
@@ -309,11 +484,14 @@ export default function ProfilePage() {
               <>
                 <label>
                   Date of birth
-                  <input
-                    name="birthDate"
-                    type="date"
-                    defaultValue={user.birthDate?.slice(0, 10) ?? ""}
-                  />
+                  <span className="cute-date-input">
+                    <Calendar />
+                    <input
+                      name="birthDate"
+                      type="date"
+                      defaultValue={user.birthDate?.slice(0, 10) ?? ""}
+                    />
+                  </span>
                 </label>
                 <label>
                   Gender
@@ -325,10 +503,17 @@ export default function ProfilePage() {
                 </label>
                 <label>
                   Last education
-                  <input
+                  <select
                     name="lastEducation"
-                    defaultValue={user.lastEducation ?? ""}
-                  />
+                    defaultValue={normalizeEducation(user.lastEducation)}
+                  >
+                    <option value="">Select education level</option>
+                    {educationOptions.map((education) => (
+                      <option key={education} value={education}>
+                        {education}
+                      </option>
+                    ))}
+                  </select>
                 </label>
                 <label>
                   City
@@ -348,36 +533,305 @@ export default function ProfilePage() {
                 </label>
                 <label>
                   Availability
-                  <input name="availability" defaultValue={user.availability} placeholder="Open to opportunities" />
+                  <select
+                    name="availability"
+                    defaultValue={normalizeAvailability(user.availability)}
+                  >
+                    <option value="">Select availability</option>
+                    {availabilityOptions.map((availability) => (
+                      <option key={availability} value={availability}>
+                        {availability}
+                      </option>
+                    ))}
+                  </select>
                 </label>
                 <label>
                   Salary expectation
                   <input name="salaryExpectation" defaultValue={user.salaryExpectation} placeholder="Rp 25–35 juta / month" />
                 </label>
                 <label className="profile-wide">
-                  Profile intro
-                  <textarea name="profileIntro" defaultValue={user.profileIntro} placeholder="A short introduction shown at the top of your public profile." />
-                </label>
-                <label className="profile-wide">
                   My story
                   <textarea name="profileStory" defaultValue={user.profileStory} placeholder="Tell companies about your journey and the work you care about." />
-                </label>
-                <label className="profile-wide">
-                  Looking for <small>one item per line</small>
-                  <textarea name="lookingFor" defaultValue={user.lookingFor.join("\n")} placeholder={"Product-led team\nRemote-friendly role"} />
                 </label>
                 <label className="profile-wide">
                   Skills <small>separate with commas</small>
                   <textarea name="skills" defaultValue={user.skills.join(", ")} placeholder="Product design, Figma, Design systems" />
                 </label>
-                <label className="profile-wide">
-                  Experience <small>one per line: Title | Company | Period | Note</small>
-                  <textarea name="experiences" defaultValue={(user.experiences ?? []).map((item) => `${item.title} | ${item.company} | ${item.period} | ${item.note}`).join("\n")} />
-                </label>
-                <label className="profile-wide">
-                  Selected work <small>one per line: Name | Note</small>
-                  <textarea name="selectedWork" defaultValue={(user.selectedWork ?? []).map((item) => `${item.name} | ${item.note}`).join("\n")} />
-                </label>
+                <div className="profile-wide experience-editor">
+                  <div className="experience-editor-heading">
+                    <div>
+                      <strong>Experience</strong>
+                      <small>Add each role separately.</small>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setExperienceModalOpen(true)}
+                    >
+                      Add experience
+                    </button>
+                  </div>
+                  {experiences.length === 0 && (
+                    <p>No experience added yet.</p>
+                  )}
+                  {experiences.map((experience, index) => {
+                    const period = periodParts(experience.period);
+                    const updatePeriod = (start: string, end: string) => {
+                      const nextPeriod = [
+                        monthLabel(start),
+                        end === "Present" ? end : monthLabel(end),
+                      ].filter(Boolean).join(" – ");
+                      setExperiences((current) =>
+                        current.map((item, itemIndex) =>
+                          itemIndex === index
+                            ? { ...item, period: nextPeriod }
+                            : item,
+                        ),
+                      );
+                    };
+
+                    return (
+                    <section className="experience-editor-item" key={index}>
+                      <label>
+                        Job title
+                        <input
+                          value={experience.title}
+                          onChange={(event) =>
+                            setExperiences((current) =>
+                              current.map((item, itemIndex) =>
+                                itemIndex === index
+                                  ? { ...item, title: event.target.value }
+                                  : item,
+                              ),
+                            )
+                          }
+                          required
+                        />
+                      </label>
+                      <label>
+                        Company
+                        <select
+                          value={experience.companyId ?? "unlisted"}
+                          onChange={(event) =>
+                            setExperiences((current) =>
+                              current.map((item, itemIndex) =>
+                                itemIndex === index
+                                  ? event.target.value === "unlisted"
+                                    ? { ...item, companyId: undefined, company: "" }
+                                    : {
+                                        ...item,
+                                        companyId: Number(event.target.value),
+                                        company:
+                                          companies.find(
+                                            (company) => company.id === Number(event.target.value),
+                                          )?.companyName ?? "",
+                                      }
+                                  : item,
+                              ),
+                            )
+                          }
+                        >
+                          <option value="unlisted">Company not listed</option>
+                          {companies.map((company) => (
+                            <option key={company.id} value={company.id}>
+                              {company.companyName}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      {!experience.companyId && (
+                        <label>
+                          Company name
+                          <input
+                            value={experience.company}
+                            onChange={(event) =>
+                              setExperiences((current) =>
+                                current.map((item, itemIndex) =>
+                                  itemIndex === index
+                                    ? { ...item, company: event.target.value }
+                                    : item,
+                                ),
+                              )
+                            }
+                            placeholder="Type the company name"
+                            required
+                          />
+                        </label>
+                      )}
+                      <label>
+                        Start month
+                        <span className="cute-date-input">
+                          <Calendar />
+                          <input
+                            type="month"
+                            value={monthInputValue(period.start)}
+                            onChange={(event) =>
+                              updatePeriod(
+                                event.target.value,
+                                period.current ? "Present" : monthInputValue(period.end),
+                              )
+                            }
+                            required
+                          />
+                        </span>
+                      </label>
+                      <label>
+                        End month
+                        <span className="cute-date-input">
+                          <Calendar />
+                          <input
+                            type="month"
+                            value={period.current ? "" : monthInputValue(period.end)}
+                            disabled={period.current}
+                            min={monthInputValue(period.start) || undefined}
+                            onChange={(event) =>
+                              updatePeriod(
+                                monthInputValue(period.start),
+                                event.target.value,
+                              )
+                            }
+                          />
+                        </span>
+                      </label>
+                      <label className="profile-wide experience-current">
+                        <input
+                          type="checkbox"
+                          checked={period.current}
+                          onChange={(event) =>
+                            updatePeriod(
+                              monthInputValue(period.start),
+                              event.target.checked ? "Present" : "",
+                            )
+                          }
+                        />
+                        I currently work here
+                      </label>
+                      <label className="profile-wide">
+                        Description
+                        <textarea
+                          value={experience.note}
+                          onChange={(event) =>
+                            setExperiences((current) =>
+                              current.map((item, itemIndex) =>
+                                itemIndex === index
+                                  ? { ...item, note: event.target.value }
+                                  : item,
+                              ),
+                            )
+                          }
+                        />
+                      </label>
+                      <button
+                        className="experience-remove"
+                        type="button"
+                        onClick={() =>
+                          setExperiences((current) =>
+                            current.filter((_, itemIndex) => itemIndex !== index),
+                          )
+                        }
+                      >
+                        Remove
+                      </button>
+                    </section>
+                    );
+                  })}
+                </div>
+                <div className="profile-wide experience-editor selected-work-editor">
+                  <div className="experience-editor-heading">
+                    <div>
+                      <strong>Selected work</strong>
+                      <small>Show projects connected to your experience.</small>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedWorkModalOpen(true)}
+                    >
+                      Add selected work
+                    </button>
+                  </div>
+                  {selectedWorks.length === 0 && <p>No selected work added yet.</p>}
+                  {selectedWorks.map((work, index) => (
+                    <section className="experience-editor-item" key={index}>
+                      <label>
+                        Project name
+                        <input
+                          value={work.name}
+                          required
+                          onChange={(event) =>
+                            setSelectedWorks((current) => current.map((item, itemIndex) =>
+                              itemIndex === index ? { ...item, name: event.target.value } : item,
+                            ))
+                          }
+                        />
+                      </label>
+                      <label>
+                        Project link
+                        <input
+                          type="url"
+                          value={work.url ?? ""}
+                          placeholder="https://example.com/project"
+                          onChange={(event) =>
+                            setSelectedWorks((current) => current.map((item, itemIndex) =>
+                              itemIndex === index ? { ...item, url: event.target.value } : item,
+                            ))
+                          }
+                        />
+                      </label>
+                      <label>
+                        Project date
+                        <span className="cute-date-input">
+                          <Calendar />
+                          <input
+                            type="month"
+                            value={work.date ?? ""}
+                            onChange={(event) =>
+                              setSelectedWorks((current) =>
+                                sortSelectedWorks(current.map((item, itemIndex) =>
+                                  itemIndex === index
+                                    ? { ...item, date: event.target.value }
+                                    : item,
+                                )),
+                              )
+                            }
+                          />
+                        </span>
+                      </label>
+                      <label className="profile-wide">
+                        Associated company
+                        <select
+                          value={work.company ?? ""}
+                          onChange={(event) =>
+                            setSelectedWorks((current) => current.map((item, itemIndex) =>
+                              itemIndex === index ? { ...item, company: event.target.value } : item,
+                            ))
+                          }
+                        >
+                          <option value="">Not associated with a company</option>
+                          {[...new Set(experiences.map((experience) => experience.company.trim()).filter(Boolean))].map((company) => (
+                            <option key={company} value={company}>Associated with {company}</option>
+                          ))}
+                        </select>
+                      </label>
+                      <label className="profile-wide">
+                        Description
+                        <textarea
+                          value={work.note}
+                          onChange={(event) =>
+                            setSelectedWorks((current) => current.map((item, itemIndex) =>
+                              itemIndex === index ? { ...item, note: event.target.value } : item,
+                            ))
+                          }
+                        />
+                      </label>
+                      <button
+                        className="experience-remove"
+                        type="button"
+                        onClick={() => setSelectedWorks((current) => current.filter((_, itemIndex) => itemIndex !== index))}
+                      >
+                        Remove
+                      </button>
+                    </section>
+                  ))}
+                </div>
                 <label className="profile-wide">
                   Profile links <small>one per line: Label | URL</small>
                   <textarea name="profileLinks" defaultValue={(user.profileLinks ?? []).map((item) => `${item.label} | ${item.url}`).join("\n")} placeholder={"Portfolio | https://example.com\nEmail | mailto:you@example.com"} />
@@ -387,6 +841,131 @@ export default function ProfilePage() {
           </div>
           <button className="profile-submit">Save changes</button>
         </form>
+        {experienceModalOpen && (
+          <div
+            className="experience-modal"
+            role="presentation"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) dismissExperienceModal();
+            }}
+          >
+            <form
+              className="experience-modal-dialog"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="experience-modal-title"
+              onSubmit={saveExperienceDraft}
+            >
+              <header>
+                <div>
+                  <p className="eyebrow">Profile experience</p>
+                  <h2 id="experience-modal-title">Add experience</h2>
+                </div>
+                <button type="button" onClick={dismissExperienceModal} aria-label="Close">×</button>
+              </header>
+              {experienceDraftError && <p className="profile-error">{experienceDraftError}</p>}
+              <div className="profile-fields">
+                <label>
+                  Role <small>required</small>
+                  <input
+                    autoFocus
+                    value={experienceDraft.title}
+                    onChange={(event) => setExperienceDraft((draft) => ({ ...draft, title: event.target.value }))}
+                    placeholder="Product Designer"
+                    required
+                  />
+                </label>
+                <label>
+                  Company <small>required</small>
+                  <select
+                    value={experienceDraft.companyId ?? "unlisted"}
+                    onChange={(event) => {
+                      const companyId = event.target.value === "unlisted"
+                        ? undefined
+                        : Number(event.target.value);
+                      setExperienceDraft((draft) => ({
+                        ...draft,
+                        companyId,
+                        company: companyId
+                          ? companies.find((company) => company.id === companyId)?.companyName ?? ""
+                          : "",
+                      }));
+                    }}
+                  >
+                    <option value="unlisted">Company not listed</option>
+                    {companies.map((company) => (
+                      <option key={company.id} value={company.id}>{company.companyName}</option>
+                    ))}
+                  </select>
+                </label>
+                {!experienceDraft.companyId && (
+                  <label className="profile-wide">
+                    Company name <small>required</small>
+                    <input
+                      value={experienceDraft.company}
+                      onChange={(event) => setExperienceDraft((draft) => ({ ...draft, company: event.target.value }))}
+                      placeholder="Type the company name"
+                      required
+                    />
+                  </label>
+                )}
+                <label>
+                  Start month
+                  <span className="cute-date-input">
+                    <Calendar />
+                    <input
+                      type="month"
+                      value={experienceDraft.start}
+                      onChange={(event) => setExperienceDraft((draft) => ({ ...draft, start: event.target.value }))}
+                    />
+                  </span>
+                </label>
+                <label>
+                  End month
+                  <span className="cute-date-input">
+                    <Calendar />
+                    <input
+                      type="month"
+                      value={experienceDraft.current ? "" : experienceDraft.end}
+                      min={experienceDraft.start || undefined}
+                      disabled={experienceDraft.current}
+                      onChange={(event) => setExperienceDraft((draft) => ({ ...draft, end: event.target.value }))}
+                    />
+                  </span>
+                </label>
+                <label className="profile-wide experience-current">
+                  <input
+                    type="checkbox"
+                    checked={experienceDraft.current}
+                    onChange={(event) => setExperienceDraft((draft) => ({ ...draft, current: event.target.checked, end: "" }))}
+                  />
+                  I currently work here
+                </label>
+                <label className="profile-wide">
+                  Description
+                  <textarea
+                    value={experienceDraft.note}
+                    onChange={(event) => setExperienceDraft((draft) => ({ ...draft, note: event.target.value }))}
+                  />
+                </label>
+              </div>
+              <footer>
+                <button type="button" className="experience-modal-dismiss" onClick={dismissExperienceModal}>Dismiss</button>
+                <button type="submit" className="profile-submit">Save for now</button>
+              </footer>
+            </form>
+          </div>
+        )}
+        {selectedWorkModalOpen && (
+          <SelectedWorkModal
+            companies={[...new Set(experiences.map((experience) => experience.company.trim()).filter(Boolean))]}
+            onDismiss={() => setSelectedWorkModalOpen(false)}
+            onSave={(work) => {
+              setSelectedWorks((current) => sortSelectedWorks([...current, work]));
+              setSelectedWorkModalOpen(false);
+            }}
+          />
+        )}
         {user.authProvider === "EMAIL" && (
           <form className="profile-card" onSubmit={updatePassword}>
             <h2>Change password</h2>
@@ -408,7 +987,72 @@ export default function ProfilePage() {
             <button className="profile-submit">Update password</button>
           </form>
         )}
+        {!isCompany && (
+          <section className="profile-cv-cta">
+            <div className="stars" aria-hidden="true">
+              {Array.from({ length: 38 }, (_, index) => (
+                <i
+                  key={index}
+                  style={{
+                    left: `${(index * 37 + 9) % 100}%`,
+                    top: `${(index * 53 + 12) % 100}%`,
+                    width: index % 7 === 0 ? 3 : 1.5,
+                    height: index % 7 === 0 ? 3 : 1.5,
+                    animationDelay: `${(index % 11) * 0.32}s`,
+                  }}
+                />
+              ))}
+            </div>
+            <div className="profile-cv-cta-content">
+              <p>POLARIS CV</p>
+              <h2>
+                Generate your profile into a CV in <span>seconds.</span>
+              </h2>
+              <Link
+                className="button button-light"
+                to={
+                  subscriptionActive === true
+                    ? "/profile/cv-generator"
+                    : "/pricing"
+                }
+              >
+                Generate my CV
+              </Link>
+            </div>
+          </section>
+        )}
       </main>
+  );
+
+  if (isCompany) {
+    return (
+      <AdminShell
+        eyebrow="Your account"
+        title="Profile settings"
+        showHeader={false}
+      >
+        <EditProfileHero
+          admin
+          eyebrow="Your account"
+          title="Edit your profile"
+          description="Keep your personal details and company role up to date."
+          action={<Link className="button button-light" to={`/profile/${user.id}`}>View public profile</Link>}
+        />
+        {profileContent}
+      </AdminShell>
+    );
+  }
+
+  return (
+    <div className="profile-page">
+      <Navbar />
+      <EditProfileHero
+        eyebrow="Your account"
+        title="Build a profile that stands out."
+        description="Keep your details, experience, and skills current so companies can understand your strengths."
+        action={<Link className="button button-light" to={`/profile/${user.id}`}>View public profile</Link>}
+      />
+      {profileContent}
     </div>
   );
 }

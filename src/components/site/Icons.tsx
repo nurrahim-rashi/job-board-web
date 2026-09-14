@@ -19,6 +19,8 @@ const icon = (path: string) =>
     );
   };
 export const ArrowRight = icon("M5 12h14M13 6l6 6-6 6");
+export const Plus = icon("M12 5v14M5 12h14");
+export const Pencil = icon("M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z");
 export const Search = icon(
   "m21 21-4.35-4.35M19 11a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z",
 );

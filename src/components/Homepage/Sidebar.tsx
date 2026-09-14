@@ -15,19 +15,22 @@ const statusDetails: Record<string, { label: string; tone: string }> = {
 type SidebarProps = Pick<
   HomepageData,
   "applications" | "profileCompletion" | "followedCompanies"
->;
+> & { loading: boolean };
 
 export function Sidebar({
   applications,
   profileCompletion,
   followedCompanies,
+  loading,
 }: SidebarProps) {
   return (
     <aside className="dashboard-side">
       <Reveal>
         <article id="applications">
           <p className="eyebrow">Your applications</p>
-          {applications.length ? (
+          {loading ? (
+            <div className="dashboard-side-placeholder is-loading" />
+          ) : applications.length ? (
             <ul>
               {applications.map((application) => {
                 const status = statusDetails[application.status] ?? {
@@ -76,7 +79,9 @@ export function Sidebar({
       <Reveal delay={140}>
         <article id="companies">
           <p className="eyebrow">Companies you follow</p>
-          {followedCompanies.length ? (
+          {loading ? (
+            <div className="dashboard-side-placeholder is-loading" />
+          ) : followedCompanies.length ? (
             <ul className="company-list">
               {followedCompanies.map((company) => (
                 <li key={company.id}>

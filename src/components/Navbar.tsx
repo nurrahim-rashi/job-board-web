@@ -28,9 +28,18 @@ export function Navbar() {
     window.addEventListener("scroll", update, { passive: true });
     return () => window.removeEventListener("scroll", update);
   }, []);
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("auth") === "signin") {
+      setAuthOpen(true);
+    }
+  }, []);
   async function handleLogout() {
     await logout();
-    window.location.assign("/");
+    // Company profiles are public, so signing out must not take visitors away
+    // from the company they are currently viewing.
+    if (!/^\/companies\/[^/]+\/?$/.test(window.location.pathname)) {
+      window.location.assign("/");
+    }
   }
   return (
     <header className={`site-nav ${scrolled ? "is-scrolled" : ""}`}>
@@ -47,7 +56,7 @@ export function Navbar() {
                     !loggedIn || !["Stories", "About"].includes(link.label),
                 ),
                 ...(loggedIn && userId
-                  ? [{ label: "My Profile", href: `/profile/${userId}` }]
+                  ? [{ label: "Dashboard", href: "/dashboard" }]
                   : []),
               ]
           ).map((link) => (
@@ -59,8 +68,8 @@ export function Navbar() {
         {loggedIn ? (
           <>
             {!isAdmin && (
-              <a className="nav-profile" href="/dashboard">
-                Dashboard
+              <a className="nav-profile" href={userId ? `/profile/${userId}` : "/profile"}>
+                My Profile
               </a>
             )}
             <button type="button" className="nav-cta" onClick={handleLogout}>

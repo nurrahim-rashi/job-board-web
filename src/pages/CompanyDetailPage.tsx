@@ -57,6 +57,7 @@ export default function CompanyDetailPage() {
   const founded = company.founded ?? new Date(company.createdAt).getFullYear();
   const size = company.size || "Independent company";
   const tagline = company.tagline || company.profileContent;
+  const products = company.products ?? [];
   const canEdit =
     user?.role === "COMPANY_ADMIN" && String(user.company?.id) === companyId;
 
@@ -72,6 +73,11 @@ export default function CompanyDetailPage() {
           <h1>{company.companyName}</h1>
           <p className="company-profile-tagline">{tagline}</p>
           <p className="company-profile-about">{company.profileContent}</p>
+          {company.website && (
+            <a className="company-profile-website" href={company.website} target="_blank" rel="noreferrer">
+              Visit website ↗
+            </a>
+          )}
           {canEdit && (
             <a className="company-profile-edit" href="/company/profile/edit">
               Edit company
@@ -110,6 +116,27 @@ export default function CompanyDetailPage() {
                   </ul>
                 </section>
               )}
+            </article>
+          )}
+
+          {products.length > 0 && (
+            <article className="company-paper-card company-products-card">
+              <header>
+                <h2>Products</h2>
+                <span>{products.length} product{products.length === 1 ? "" : "s"}</span>
+              </header>
+              <div className="company-products-grid">
+                {products.map((product, index) => (
+                  <section key={`${product.name}-${index}`}>
+                    <h3>
+                      {product.url ? (
+                        <a href={product.url} target="_blank" rel="noreferrer">{product.name} ↗</a>
+                      ) : product.name}
+                    </h3>
+                    {product.description && <p>{product.description}</p>}
+                  </section>
+                ))}
+              </div>
             </article>
           )}
 
