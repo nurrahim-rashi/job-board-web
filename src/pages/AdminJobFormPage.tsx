@@ -7,6 +7,7 @@ import { useUpdateJobPosting } from "../hooks/api/job-posting/useUpdateJobPostin
 import { useTogglePublishJobPosting } from "../hooks/api/job-posting/useTogglePublishJobPosting";
 import { jobCategories, type CreateJobPayload, type JobCategory } from "../types/job-posting";
 import { ArrowLeft, Close, Upload } from "../components/site/Icons";
+import { getProvinces, getRegencies, type Region } from "../services/region.service";
 
 type FormState = {
   title: string;
@@ -43,9 +44,35 @@ export default function AdminJobFormPage() {
   const [form, setForm] = useState<FormState>(draft);
   const [banner, setBanner] = useState<File | null>(null);
   const [tag, setTag] = useState("");
+  const [provinces, setProvinces] = useState<Region[]>([]);
+  const [provinceCode, setProvinceCode] = useState("");
+  const [locations, setLocations] = useState<Region[]>([]);
+  const [regionsLoading, setRegionsLoading] = useState(false);
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
   const job = existing.data;
+
+  useEffect(() => {
+    let active = true;
+    getProvinces()
+      .then((items) => active && setProvinces(items))
+      .catch(() => active && setProvinces([]));
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
+    if (!provinceCode) {
+      setLocations([]);
+      return;
+    }
+    let active = true;
+    setRegionsLoading(true);
+    getRegencies(provinceCode)
+      .then((items) => active && setLocations(items))
+      .catch(() => active && setLocations([]))
+      .finally(() => active && setRegionsLoading(false));
+    return () => { active = false; };
+  }, [provinceCode]);
 
   useEffect(() => {
     if (!job) return;
@@ -162,8 +189,30 @@ export default function AdminJobFormPage() {
               </select>
             </label>
             <label>
-              City location
-              <input value={form.cityLocation} onChange={(event) => set("cityLocation", event.target.value)} placeholder="Jakarta Selatan" required />
+              Work province
+              <select
+                value={provinceCode}
+                onChange={(event) => {
+                  setProvinceCode(event.target.value);
+                  set("cityLocation", "");
+                }}
+              >
+                <option value="">Choose province</option>
+                {provinces.map((province) => <option key={province.code} value={province.code}>{province.name}</option>)}
+              </select>
+            </label>
+            <label>
+              Work location
+              <select
+                value={form.cityLocation}
+                disabled={!provinceCode && !form.cityLocation}
+                onChange={(event) => set("cityLocation", event.target.value)}
+                required
+              >
+                <option value="">{regionsLoading ? "Loading locations…" : provinceCode ? "Choose city / regency" : form.cityLocation || "Choose province first"}</option>
+                {form.cityLocation && !locations.some((location) => location.name === form.cityLocation) && <option value={form.cityLocation}>{form.cityLocation}</option>}
+                {locations.map((location) => <option key={location.code} value={location.name}>{location.name}</option>)}
+              </select>
             </label>
             <label>
               Application deadline

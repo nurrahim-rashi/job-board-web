@@ -71,7 +71,6 @@ export default function CompanyEditProfilePage() {
           description: product.description.trim(),
         })),
         profileContent: String(form.get("profileContent") ?? ""),
-        companyValues: lines(form.get("companyValues")),
         companyPerks: lines(form.get("companyPerks")),
       });
       toast.success("Company profile updated.");
@@ -133,7 +132,6 @@ export default function CompanyEditProfilePage() {
             <label className="profile-wide">Company website<input name="companyWebsite" type="url" defaultValue={company.website} placeholder="https://company.com" /></label>
             <label className="profile-wide">Tagline<input name="companyTagline" defaultValue={company.tagline} placeholder="A short line about your company" /></label>
             <label className="profile-wide">Company profile content<textarea name="profileContent" defaultValue={company.profileContent} /></label>
-            <label className="profile-wide">Company values <small>one per line</small><textarea name="companyValues" defaultValue={company.values.join("\n")} /></label>
             <label className="profile-wide">Perks &amp; life there <small>one per line</small><textarea name="companyPerks" defaultValue={company.perks.join("\n")} /></label>
             <div className="profile-wide experience-editor selected-work-editor">
               <div className="experience-editor-heading">

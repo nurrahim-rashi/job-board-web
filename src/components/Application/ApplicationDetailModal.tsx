@@ -1,17 +1,10 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { getMyApplicationDetail, submitExpectedSalary, type Application } from "../../services/application.service";
+import { getMyApplicationDetail, proposeInterviewSchedule, submitExpectedSalary, type Application } from "../../services/application.service";
 import { categoryLabel } from "../../types/job-posting";
-import { Close, FileText, MapPin } from "../site/Icons";
-
-const statusLabels: Record<string, string> = {
-  DRAFT: "Draft",
-  PENDING: "CV screening",
-  TEST_ASSIGNED: "Test assigned",
-  PROCESS: "In review",
-  INTERVIEW: "Interview",
-  ACCEPTED: "Accepted",
-  REJECTED: "Not selected",
-};
+import { Close, FileText, MapPin, Pencil } from "../site/Icons";
+import { applicationStatusLabel } from "../../lib/application-status";
+import { updateProfile } from "../../services/auth.service";
+import { useAuth } from "../../stores/useAuth";
 
 const money = (value: number | null) => value == null ? "Not provided" : `IDR ${value.toLocaleString("id-ID")}`;
 const dateTime = (value: string) => new Intl.DateTimeFormat("en-GB", { dateStyle: "long", timeStyle: "short", timeZone: "Asia/Jakarta" }).format(new Date(value));
@@ -24,6 +17,14 @@ export function ApplicationDetailModal({ applicationId, onClose }: { application
   const [loading, setLoading] = useState(false);
   const [salaryError, setSalaryError] = useState("");
   const [submittingSalary, setSubmittingSalary] = useState(false);
+  const [showProposal, setShowProposal] = useState(false);
+  const [proposalError, setProposalError] = useState("");
+  const [submittingProposal, setSubmittingProposal] = useState(false);
+  const [editingSalary, setEditingSalary] = useState(false);
+  const [addingExperience, setAddingExperience] = useState(false);
+  const [experienceAdded, setExperienceAdded] = useState(false);
+  const [experienceError, setExperienceError] = useState("");
+  const user = useAuth((state) => state.user);
 
   useEffect(() => {
     if (applicationId == null) return;
@@ -31,9 +32,12 @@ export function ApplicationDetailModal({ applicationId, onClose }: { application
     setApplication(null);
     setError("");
     setSalaryError("");
+    setEditingSalary(false);
+    setExperienceAdded(false);
+    setExperienceError("");
     setLoading(true);
     getMyApplicationDetail(applicationId)
-      .then((data) => active && setApplication(data))
+      .then((data) => { if (active) { setApplication(data); setEditingSalary(data.expectedSalary == null && Boolean(data.expectedSalaryRequestedAt)); } })
       .catch((requestError) => active && setError(requestError instanceof Error ? requestError.message : "Unable to load application"))
       .finally(() => active && setLoading(false));
     return () => { active = false; };
@@ -62,10 +66,49 @@ export function ApplicationDetailModal({ applicationId, onClose }: { application
     try {
       const result = await submitExpectedSalary(application.id, expectedSalary);
       setApplication({ ...application, expectedSalary: result.expectedSalary });
+      setEditingSalary(false);
     } catch (requestError) {
       setSalaryError(requestError instanceof Error ? requestError.message : "Unable to submit expected salary");
     } finally {
       setSubmittingSalary(false);
+    }
+  }
+
+  async function addAcceptedExperience() {
+    if (!application || !user) return;
+    const exists = (user.experiences ?? []).some((experience) => experience.companyId === application.job.company.id && experience.title.toLocaleLowerCase() === application.job.title.toLocaleLowerCase());
+    if (exists) { setExperienceAdded(true); return; }
+    setAddingExperience(true);
+    setExperienceError("");
+    try {
+      const start = new Intl.DateTimeFormat("en-US", { month: "short", year: "numeric" }).format(new Date());
+      await updateProfile({ experiences: [...(user.experiences ?? []), { title: application.job.title, company: application.job.company.companyName, companyId: application.job.company.id, period: `${start} – Present`, note: "" }] });
+      setExperienceAdded(true);
+    } catch (requestError) {
+      setExperienceError(requestError instanceof Error ? requestError.message : "Unable to add this experience");
+    } finally { setAddingExperience(false); }
+  }
+
+  async function saveProposal(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!application?.interview) return;
+    const form = new FormData(event.currentTarget);
+    const rawDate = String(form.get("proposedDate") ?? "");
+    const selectedDate = new Date(rawDate);
+    if (!rawDate || !Number.isFinite(selectedDate.getTime()) || selectedDate <= new Date()) {
+      setProposalError("Choose a future date and time.");
+      return;
+    }
+    setSubmittingProposal(true);
+    setProposalError("");
+    try {
+      const result = await proposeInterviewSchedule(application.id, selectedDate.toISOString(), String(form.get("proposalNote") ?? ""));
+      setApplication({ ...application, interview: { ...application.interview, proposedDate: result.proposedDate } });
+      setShowProposal(false);
+    } catch (requestError) {
+      setProposalError(requestError instanceof Error ? requestError.message : "Unable to propose schedule");
+    } finally {
+      setSubmittingProposal(false);
     }
   }
 
@@ -77,22 +120,25 @@ export function ApplicationDetailModal({ applicationId, onClose }: { application
           <p className="eyebrow">Your application</p>
           <h2 id="application-detail-title">{application.job.title}</h2>
           <p>{application.job.company.companyName} · {application.job.cityLocation}</p>
-          <em className={`application-status ${application.status === "REJECTED" ? "bad" : application.status === "ACCEPTED" || application.status === "INTERVIEW" ? "good" : "wait"}`}>{statusLabels[application.status] ?? application.status}</em>
+          <em className={`application-status ${application.status === "REJECTED" ? "bad" : application.status === "ACCEPTED" || application.status === "INTERVIEW" ? "good" : "wait"}`}>{applicationStatusLabel(application.status)}</em>
         </header>
         <dl className="application-detail-facts">
           <div><dt>Job category</dt><dd>{categoryLabel(application.job.category)}</dd></div>
           <div><dt>Applied on</dt><dd>{dateTime(application.createdAt)}</dd></div>
-          <div><dt>Expected salary</dt><dd>{money(application.expectedSalary)}</dd></div>
+          <div><dt>Expected salary</dt><dd>{money(application.expectedSalary)} <button className="application-inline-edit" type="button" aria-label={editingSalary ? "Close expected salary editor" : "Edit expected salary"} title={editingSalary ? "Close editor" : "Edit expected salary"} onClick={() => setEditingSalary((value) => !value)}><Pencil /></button></dd></div>
           <div><dt>Application updated</dt><dd>{dateTime(application.updatedAt)}</dd></div>
           <div><dt>Job deadline</dt><dd>{date(application.job.deadline)}</dd></div>
         </dl>
-        {application.expectedSalary == null && application.expectedSalaryRequestedAt && <form className="application-salary-request" onSubmit={saveExpectedSalary}>
-          <span className="application-alert-icon" aria-hidden="true">!</span>
-          <div><h3>{application.job.company.companyName} requested your expected salary</h3><p>Enter your expected monthly salary to complete this application information.</p><label htmlFor="requested-expected-salary">Expected salary (IDR/month)</label><input id="requested-expected-salary" name="expectedSalary" type="number" min="1" step="1" required placeholder="e.g. 12000000" />{salaryError && <small className="auth-error">{salaryError}</small>}</div>
-          <button type="submit" disabled={submittingSalary}>{submittingSalary ? "Saving…" : "Submit salary"}</button>
+        {editingSalary && <form className="application-salary-request" onSubmit={saveExpectedSalary}>
+          <span className="application-alert-icon" aria-hidden="true">{application.expectedSalaryRequestedAt ? "!" : "IDR"}</span>
+          <div><h3>{application.expectedSalaryRequestedAt && application.expectedSalary == null ? `${application.job.company.companyName} requested your expected salary` : "Edit expected salary"}</h3><p>Enter your expected monthly salary for this application.</p><label htmlFor="requested-expected-salary">Expected salary (IDR/month)</label><input id="requested-expected-salary" name="expectedSalary" type="number" min="1" step="1" required defaultValue={application.expectedSalary ?? ""} placeholder="e.g. 12000000" />{salaryError && <small className="auth-error">{salaryError}</small>}</div>
+          <button type="submit" disabled={submittingSalary}>{submittingSalary ? "Saving…" : "Save salary"}</button>
         </form>}
+        {application.status === "TEST_ASSIGNED" && <section className="application-next-step"><p className="eyebrow">Action required</p><h3>Your pre-selection test is ready</h3><p>Complete the assigned test to keep your application moving.</p><a href={`/jobs/${application.job.slug}/pre-selection-test`}>Start test</a></section>}
+        {application.status === "PENDING" && <section className="application-priority-card"><p className="eyebrow">Polaris Pro</p><h3>Get priority review on future applications</h3><p>Stand out closer to the top of the company&rsquo;s review queue.</p><a href="/pricing">Upgrade to Polaris Pro</a></section>}
         {application.status === "INTERVIEW" && !application.interview && <section className="application-interview pending"><p className="eyebrow">Interview stage</p><h3>Waiting for the company to schedule your interview</h3><p>You have reached the interview stage. The date, location, or meeting link will appear here once the company confirms it.</p></section>}
-        {application.interview && <section className="application-interview"><p className="eyebrow">Interview details</p><h3>{dateTime(application.interview.interviewDate)}</h3><p className="application-interview-place"><MapPin />{isLink(application.interview.locationOrLink) ? <a href={application.interview.locationOrLink} target="_blank" rel="noreferrer">Open interview link</a> : application.interview.locationOrLink}</p><small>Status: {application.interview.status.toLocaleLowerCase().replaceAll("_", " ")}</small>{application.interview.notes && <p>{application.interview.notes}</p>}</section>}
+        {application.interview && <section className="application-interview"><p className="eyebrow">Interview details</p><h3>{dateTime(application.interview.interviewDate)}</h3><p className="application-interview-place"><MapPin />{isLink(application.interview.locationOrLink) ? <a href={application.interview.locationOrLink} target="_blank" rel="noreferrer">Open interview link</a> : application.interview.locationOrLink}</p><small>Status: {application.interview.status.toLocaleLowerCase().replaceAll("_", " ")}</small>{application.interview.notes && <p>{application.interview.notes}</p>}{application.interview.proposedDate ? <p className="interview-proposal-sent"><b>New schedule proposed</b><span>{dateTime(application.interview.proposedDate)}</span></p> : <button type="button" className="interview-propose-button" onClick={() => setShowProposal((shown) => !shown)}>Can’t make it? Propose a new time</button>}{showProposal && <form className="interview-proposal-form" onSubmit={saveProposal}><label>Preferred date and time<input name="proposedDate" type="datetime-local" min={new Date(Date.now() + 60_000).toISOString().slice(0, 16)} required /></label><label>Message <small>(optional)</small><textarea name="proposalNote" placeholder="Tell the company why you need another time" /></label>{proposalError && <small className="auth-error">{proposalError}</small>}<div><button type="button" className="interview-proposal-cancel" onClick={() => { setShowProposal(false); setProposalError(""); }}>Cancel</button><button type="submit" disabled={submittingProposal}>{submittingProposal ? "Sending…" : "Send proposal"}</button></div></form>}</section>}
+        {application.status === "ACCEPTED" && <section className="application-accepted-card"><p className="eyebrow">Congratulations</p><h3>Did you take this role?</h3><p>Add it to your Polaris experience with the company linked automatically.</p>{experienceError && <small className="auth-error">{experienceError}</small>}<button type="button" disabled={addingExperience || experienceAdded} onClick={() => void addAcceptedExperience()}>{addingExperience ? "Adding…" : experienceAdded ? "Added to experience" : "I now work here"}</button></section>}
         {application.rejectionReason && <section className="application-rejection"><b>Company feedback</b><p>{application.rejectionReason}</p></section>}
         <footer><a href={cvUrl} target="_blank" rel="noreferrer"><FileText />View submitted CV</a><a href={`/jobs/${application.job.slug}`}>Open job details</a></footer>
       </>}

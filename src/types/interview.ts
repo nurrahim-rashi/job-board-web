@@ -23,6 +23,9 @@ export interface Interview {
   interviewDate: string;
   locationOrLink: string;
   notes: string | null;
+  proposedDate: string | null;
+  proposalNote: string | null;
+  alternativeSlots: string[];
   status: InterviewStatus;
   reminderSentAt: string | null;
   createdAt: string;
@@ -62,6 +65,7 @@ export interface UpdateInterviewInput {
   locationOrLink?: string;
   notes?: string | null;
   status?: InterviewStatus;
+  alternativeSlots?: string[];
 }
 
 export const MAX_SCHEDULES_PER_REQUEST = 20;

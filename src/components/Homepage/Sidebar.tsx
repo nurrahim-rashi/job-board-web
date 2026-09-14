@@ -1,17 +1,18 @@
 import { useState } from "react";
-import { ArrowRight, Building, FileText } from "../site/Icons";
+import { ArrowRight, Building, Clipboard, FileText, Sparkles } from "../site/Icons";
 import { Reveal } from "../../hooks/useReveal";
 import type { HomepageData } from "../../types/auth";
 import { ApplicationDetailModal } from "../Application/ApplicationDetailModal";
+import { applicationStatusLabel } from "../../lib/application-status";
 
 const statusDetails: Record<string, { label: string; tone: string }> = {
   DRAFT: { label: "Draft", tone: "wait" },
-  PENDING: { label: "CV screening", tone: "wait" },
-  TEST_ASSIGNED: { label: "Test assigned", tone: "wait" },
-  PROCESS: { label: "In review", tone: "wait" },
+  PENDING: { label: "Pending", tone: "wait" },
+  TEST_ASSIGNED: { label: "Test Assigned", tone: "wait" },
+  PROCESS: { label: "Process", tone: "wait" },
   INTERVIEW: { label: "Interview", tone: "good" },
   ACCEPTED: { label: "Accepted", tone: "good" },
-  REJECTED: { label: "Not selected", tone: "bad" },
+  REJECTED: { label: "Rejected", tone: "bad" },
 };
 
 type SidebarProps = Pick<
@@ -38,7 +39,7 @@ export function Sidebar({
             <ul>
               {applications.map((application) => {
                 const status = statusDetails[application.status] ?? {
-                  label: application.status.replaceAll("_", " "),
+                  label: applicationStatusLabel(application.status),
                   tone: "wait",
                 };
                 return (
@@ -108,6 +109,24 @@ export function Sidebar({
           <a href="/companies">
             Browse companies <ArrowRight />
           </a>
+        </article>
+      </Reveal>
+      <Reveal delay={180}>
+        <article className="home-priority-card">
+          <div className="home-promo-icon"><Sparkles /></div>
+          <p className="eyebrow">Polaris Pro · Priority</p>
+          <h2>Stand out as a priority applicant</h2>
+          <p>Put your application closer to the top when hiring teams start reviewing.</p>
+          <a href="/pricing">Upgrade to Polaris Pro <ArrowRight /></a>
+        </article>
+      </Reveal>
+      <Reveal delay={220}>
+        <article className="home-assessment-card">
+          <div className="home-promo-icon"><Clipboard /></div>
+          <p className="eyebrow">Verified skills</p>
+          <h2>Give recruiters proof, not promises</h2>
+          <p>Skill badges help your profile stand out before the first interview.</p>
+          <a href="/pricing">Upgrade to Polaris Plus <ArrowRight /></a>
         </article>
       </Reveal>
     </aside>

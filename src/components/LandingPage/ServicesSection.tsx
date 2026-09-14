@@ -8,6 +8,7 @@ import {
 } from "../site/Icons";
 import { Reveal } from "../../hooks/useReveal";
 import { SectionHead } from "./SectionHead";
+import { AuthModal } from "../site/AuthModal";
 const services = [
   {
     icon: Compass,
@@ -41,7 +42,9 @@ const services = [
   },
 ];
 export function ServicesSection() {
+  const [authOpen, setAuthOpen] = useState(false);
   return (
+    <>
     <section id="services" className="paper-section">
       <div className="content">
         <SectionHead
@@ -63,11 +66,14 @@ export function ServicesSection() {
           ))}
         </div>{" "}
         <Reveal className="center">
-          <a className="button button-primary" href="#apply">
+          <button className="button button-primary" type="button" onClick={() => setAuthOpen(true)}>
             Post a job
-          </a>
+          </button>
         </Reveal>
       </div>
     </section>
+    <AuthModal open={authOpen} initialMode="register" initialRole="COMPANY_ADMIN" onClose={() => setAuthOpen(false)} />
+    </>
   );
 }
+import { useState } from "react";

@@ -77,6 +77,12 @@ export function ApplicantDetailModal({ slug, applicationId, hasPreSelectionTest,
                 <p className="admin-note">{data.applicant.email}</p>
                 <em className={`admin-chip ${statusTones[data.status]}`}>{statusLabels[data.status]}</em>
               </div>
+              <a
+                className="admin-btn ghost applicant-view-profile"
+                href={`/profile/${data.applicant.id}`}
+              >
+                View applicant
+              </a>
             </header>
 
             <nav className="applicant-tabs">
@@ -145,6 +151,7 @@ export function ApplicantDetailModal({ slug, applicationId, hasPreSelectionTest,
                       {data.interview.locationOrLink} · {data.interview.status.toLowerCase()}
                     </small>
                     {data.interview.notes ? <p className="admin-note">{data.interview.notes}</p> : null}
+                    {data.interview.proposedDate ? <p className="admin-alert"><b>Applicant proposed {formatDateTime(data.interview.proposedDate)}</b>{data.interview.proposalNote ? ` · ${data.interview.proposalNote}` : ""}</p> : null}
                   </div>
                 ) : null}
 

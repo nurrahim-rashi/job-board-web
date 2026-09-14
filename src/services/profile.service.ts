@@ -4,6 +4,7 @@ import type { ApiResponse } from "../types/api";
 export type PublicSeekerProfile = {
   id: number;
   name: string;
+  emailVerifiedAt: string | null;
   role: "JOB_SEEKER" | "COMPANY_ADMIN" | "DEVELOPER";
   avatar: string | null;
   lastEducation: string | null;
@@ -30,6 +31,11 @@ export type PublicSeekerProfile = {
     date?: string;
   }[] | null;
   company: { id: number; companyName: string } | null;
+  applicationInsights: {
+    interviewResponseRate: number;
+    letterResponseRate: number;
+    appliedRoles: { slug: string; title: string; company: { companyName: string } }[];
+  };
 };
 
 export async function getPublicProfile(userId: string) {

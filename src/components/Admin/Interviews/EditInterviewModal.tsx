@@ -113,6 +113,18 @@ export function EditInterviewModal({ slug, interview, onClose, onDelete }: EditI
             Currently booked for <b>{formatSchedule(interview.interviewDate)}</b> · {countdownLabel(interview.interviewDate)}
           </p>
 
+          {interview.proposedDate ? (
+            <aside className="admin-alert interview-reschedule-warning" role="alert">
+              <i aria-hidden="true">!</i>
+              <div>
+                <small>Reschedule request</small>
+                <strong>Applicant asked to reschedule the interview</strong>
+                <span>Proposed time: <b>{formatSchedule(interview.proposedDate)}</b></span>
+                <span>{interview.proposalNote ? <>Reason: &ldquo;{interview.proposalNote}&rdquo;</> : "The applicant did not provide a reason."}</span>
+              </div>
+            </aside>
+          ) : null}
+
           <div className="admin-fields">
             <label>
               <span>Date and time</span>

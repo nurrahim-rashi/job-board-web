@@ -15,6 +15,7 @@ import {
   uploadAvatar,
 } from "../services/auth.service";
 import { useAuth } from "../stores/useAuth";
+import { useProfileView } from "../stores/useProfileView";
 import type { AuthUser } from "../types/auth";
 import { fetchAssessmentBadges, fetchSkillNames } from "../lib/assessment-api";
 import { getPublicJobs } from "../services/job.service";
@@ -232,7 +233,7 @@ export default function ProfilePage() {
         throw new Error("Every experience needs a title and company.");
       }
       const updated = await updateProfile({
-        name: String(form.get("name") ?? ""),
+        name: [String(form.get("firstName") ?? "").trim(), String(form.get("lastName") ?? "").trim()].filter(Boolean).join(" "),
         email: String(form.get("email") ?? ""),
         city: profileCity || undefined,
         province: provinces.find((item) => item.code === profileProvinceCode)?.name || user?.province || undefined,
@@ -270,7 +271,8 @@ export default function ProfilePage() {
           ? "Profile updated."
           : "Profile updated. Please verify your email.",
       );
-      window.location.assign(`/profile/${updated.id}`);
+      useProfileView.getState().openProfile(updated.id);
+      window.location.assign("/profile/view");
     } catch (requestError) {
       setError(
         requestError instanceof Error
@@ -476,8 +478,12 @@ export default function ProfilePage() {
           )}
           <div className="profile-fields">
             <label>
-              Name
-              <input name="name" defaultValue={user.name} required />
+              First name
+              <input name="firstName" defaultValue={user.name} required />
+            </label>
+            <label>
+              Last name
+              <input name="lastName" placeholder="Add your last name" />
             </label>
             <label>
               Email
@@ -1074,7 +1080,7 @@ export default function ProfilePage() {
           eyebrow="Your account"
           title="Edit your profile"
           description="Keep your personal details and company role up to date."
-          action={<Link className="button button-light" to={`/profile/${user.id}`}>View public profile</Link>}
+          action={<Link className="button button-light" to="/profile/view" onClick={() => useProfileView.getState().openProfile(user.id)}>View public profile</Link>}
         />
         {profileContent}
       </AdminShell>
@@ -1088,7 +1094,7 @@ export default function ProfilePage() {
         eyebrow="Your account"
         title="Build a profile that stands out."
         description="Keep your details, experience, and skills current so companies can understand your strengths."
-        action={<Link className="button button-light" to={`/profile/${user.id}`}>View public profile</Link>}
+        action={<Link className="button button-light" to="/profile/view" onClick={() => useProfileView.getState().openProfile(user.id)}>View public profile</Link>}
       />
       {profileContent}
     </div>
