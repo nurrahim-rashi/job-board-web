@@ -115,39 +115,40 @@ export function ApplicantPanel() {
             Get access to the CV Generator, skill assessments, and priority
             features.
           </p>
-      {assigned.length > 0 && (
-        <article className="panel-card">
-          <p className="eyebrow">Pre-selection test</p>
-          <h2>Waiting on your answers</h2>
-          <ul className="workspace-list">
-            {assigned.map((application) => (
-              <li key={application.id}>
-                <Clipboard />
-                <span>
-                  <b>{application.job.title}</b>
-                  <small>
-                    {application.job.company.companyName} · multiple choice,
-                    timed, one attempt
-                  </small>
-                </span>
-                <Link
-                  className="pretest-start"
-                  to={`/jobs/${application.job.slug}/pre-selection-test`}
-                >
-                  Start test
-                </Link>
-              </li>
-            ))}
-          </ul>
         </article>
-      )}
-      <article className="panel-card">
-        <p className="eyebrow">Subscriptions</p>
-        <h2>Unlock premium tools</h2>
-        <p>
-          Get access to the CV Generator, skill assessments, and priority
-          features.
-        </p>
+        {assigned.length > 0 && (
+          <article className="panel-card">
+            <p className="eyebrow">Pre-selection test</p>
+            <h2>Waiting on your answers</h2>
+            <ul className="workspace-list">
+              {assigned.map((application) => (
+                <li key={application.id}>
+                  <Clipboard />
+                  <span>
+                    <b>{application.job.title}</b>
+                    <small>
+                      {application.job.company.companyName} · multiple choice,
+                      timed, one attempt
+                    </small>
+                  </span>
+                  <Link
+                    className="pretest-start"
+                    to={`/jobs/${application.job.slug}/pre-selection-test`}
+                  >
+                    Start test
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </article>
+        )}
+        <article className="panel-card">
+          <p className="eyebrow">Subscriptions</p>
+          <h2>Unlock premium tools</h2>
+          <p>
+            Get access to the CV Generator, skill assessments, and priority
+            features.
+          </p>
 
           <Link to="/pricing">
             View subscription plans <ArrowRight />
@@ -156,7 +157,9 @@ export function ApplicantPanel() {
         <article className="panel-card">
           <p className="eyebrow">Skill assessment</p>
           <h2>Prove your skills</h2>
-          <p>Take skill assessments, earn badges, and strengthen your profile.</p>
+          <p>
+            Take skill assessments, earn badges, and strengthen your profile.
+          </p>
           <Link to="/dashboard/assessments">
             Browse assessments <ArrowRight />
           </Link>
