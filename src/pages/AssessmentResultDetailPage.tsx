@@ -4,6 +4,8 @@ import { Clipboard, Share } from "../components/site/Icons";
 
 import { Footer } from "../components/Footer";
 import { Navbar } from "../components/Navbar";
+import { SeekerDashboardHero } from "../components/Dashboard/SeekerDashboardHero";
+import { SeekerDashboardShell } from "../components/Dashboard/SeekerDashboardShell";
 import {
   downloadAssessmentCertificate,
   fetchAssessmentResultDetail,
@@ -187,159 +189,151 @@ export default function AssessmentResultDetailPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="workspace-dashboard">
-        <Navbar />
-        <main>
-          <section className="role-panel">
-            <p>Loading assessment result...</p>
-          </section>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-
   return (
-    <div className="workspace-dashboard">
+    <div className="workspace-dashboard seeker-dashboard-overview">
       <Navbar />
 
       <main>
-        <section className="role-panel">
-          <Link to="/dashboard/assessments/results">
-            ← Back to assessment history
-          </Link>
+        <SeekerDashboardHero />
 
-          {error ? (
-            <article className="panel-card">
-              <h2>Unable to load result</h2>
-              <p>{error}</p>
-            </article>
-          ) : result ? (
-            <>
+        <SeekerDashboardShell>
+          <section className="role-panel">
+            <Link to="/dashboard/assessments/results">
+              ← Back to assessment history
+            </Link>
+
+            {loading ? (
+              <p>Loading assessment result...</p>
+            ) : error ? (
               <article className="panel-card">
-                <p className="eyebrow">{result.skillName}</p>
+                <h2>Unable to load result</h2>
+                <p>{error}</p>
+              </article>
+            ) : result ? (
+              <>
+                <article className="panel-card">
+                  <p className="eyebrow">{result.skillName}</p>
 
-                <h1>{result.title}</h1>
+                  <h1>{result.title}</h1>
 
-                <div className="panel-stats">
-                  <article>
-                    <span>Score</span>
-                    <b>{result.score}</b>
-                  </article>
+                  <div className="panel-stats">
+                    <article>
+                      <span>Score</span>
+                      <b>{result.score}</b>
+                    </article>
 
-                  <article>
-                    <span>Result</span>
-                    <b>{result.isPassed ? "PASS" : "FAIL"}</b>
-                  </article>
+                    <article>
+                      <span>Result</span>
+                      <b>{result.isPassed ? "PASS" : "FAIL"}</b>
+                    </article>
 
-                  <article>
-                    <span>Completed</span>
-                    <b>
-                      {result.completedAt
-                        ? new Date(result.completedAt).toLocaleDateString()
-                        : "-"}
-                    </b>
-                  </article>
-                </div>
-
-                {result.badgeName && (
-                  <p>
-                    Badge earned: <strong>{result.badgeName}</strong>
-                  </p>
-                )}
-
-                {result.isPassed && (
-                  <div className="certificate-actions">
-                    <button
-                      type="button"
-                      className="button button-primary"
-                      onClick={handleDownloadCertificate}
-                      disabled={downloading || preparingShare}
-                    >
-                      {downloading
-                        ? "Preparing certificate..."
-                        : "Download certificate"}
-                    </button>
-
-                    <div className="certificate-share">
-                      <div className="certificate-share-heading">
-                        <Share />
-                        <span>
-                          <b>Share your certificate</b>
-                          <small>
-                            Share a public verification link to your
-                            achievement.
-                          </small>
-                        </span>
-                      </div>
-
-                      <div className="certificate-share-buttons">
-                        <button
-                          type="button"
-                          onClick={handleCopyCertificateLink}
-                          disabled={preparingShare || downloading}
-                        >
-                          <Clipboard />
-                          Copy link
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={handleLinkedInShare}
-                          disabled={preparingShare || downloading}
-                        >
-                          LinkedIn
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={handleXShare}
-                          disabled={preparingShare || downloading}
-                        >
-                          X
-                        </button>
-                      </div>
-
-                      {shareMessage && (
-                        <p className="certificate-share-message">
-                          {shareMessage}
-                        </p>
-                      )}
-                    </div>
+                    <article>
+                      <span>Completed</span>
+                      <b>
+                        {result.completedAt
+                          ? new Date(result.completedAt).toLocaleDateString()
+                          : "-"}
+                      </b>
+                    </article>
                   </div>
-                )}
 
-                {certificateError && <p>{certificateError}</p>}
-              </article>
+                  {result.badgeName && (
+                    <p>
+                      Badge earned: <strong>{result.badgeName}</strong>
+                    </p>
+                  )}
 
-              <article className="panel-card">
-                <p className="eyebrow">Answer review</p>
+                  {result.isPassed && (
+                    <div className="certificate-actions">
+                      <button
+                        type="button"
+                        className="button button-primary"
+                        onClick={handleDownloadCertificate}
+                        disabled={downloading || preparingShare}
+                      >
+                        {downloading
+                          ? "Preparing certificate..."
+                          : "Download certificate"}
+                      </button>
 
-                <h2>Your answers</h2>
+                      <div className="certificate-share">
+                        <div className="certificate-share-heading">
+                          <Share />
+                          <span>
+                            <b>Share your certificate</b>
+                            <small>
+                              Share a public verification link to your
+                              achievement.
+                            </small>
+                          </span>
+                        </div>
 
-                <ul className="workspace-list">
-                  {result.answers.map((answer, index) => (
-                    <li key={answer.questionId}>
-                      <span>
-                        <b>
-                          {index + 1}. {answer.question}
-                        </b>
+                        <div className="certificate-share-buttons">
+                          <button
+                            type="button"
+                            onClick={handleCopyCertificateLink}
+                            disabled={preparingShare || downloading}
+                          >
+                            <Clipboard />
+                            Copy link
+                          </button>
 
-                        <small>Your answer: {answer.answer}</small>
-                      </span>
+                          <button
+                            type="button"
+                            onClick={handleLinkedInShare}
+                            disabled={preparingShare || downloading}
+                          >
+                            LinkedIn
+                          </button>
 
-                      <em className={answer.isCorrect ? "good" : "wait"}>
-                        {answer.isCorrect ? "Correct" : "Incorrect"}
-                      </em>
-                    </li>
-                  ))}
-                </ul>
-              </article>
-            </>
-          ) : null}
-        </section>
+                          <button
+                            type="button"
+                            onClick={handleXShare}
+                            disabled={preparingShare || downloading}
+                          >
+                            X
+                          </button>
+                        </div>
+
+                        {shareMessage && (
+                          <p className="certificate-share-message">
+                            {shareMessage}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {certificateError && <p>{certificateError}</p>}
+                </article>
+
+                <article className="panel-card">
+                  <p className="eyebrow">Answer review</p>
+
+                  <h2>Your answers</h2>
+
+                  <ul className="workspace-list">
+                    {result.answers.map((answer, index) => (
+                      <li key={answer.questionId}>
+                        <span>
+                          <b>
+                            {index + 1}. {answer.question}
+                          </b>
+
+                          <small>Your answer: {answer.answer}</small>
+                        </span>
+
+                        <em className={answer.isCorrect ? "good" : "wait"}>
+                          {answer.isCorrect ? "Correct" : "Incorrect"}
+                        </em>
+                      </li>
+                    ))}
+                  </ul>
+                </article>
+              </>
+            ) : null}
+          </section>
+        </SeekerDashboardShell>
       </main>
 
       <Footer />
