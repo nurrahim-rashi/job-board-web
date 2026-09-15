@@ -31,9 +31,11 @@ export type PublicSeekerProfile = {
     date?: string;
   }[] | null;
   company: { id: number; companyName: string } | null;
+  quality: { score: number; metrics: import("../components/Profile/QualityScoreCard").QualityMetric[] };
   applicationInsights: {
     interviewResponseRate: number;
     letterResponseRate: number;
+    reliabilityRate: number;
     appliedRoles: { slug: string; title: string; company: { companyName: string } }[];
   };
 };

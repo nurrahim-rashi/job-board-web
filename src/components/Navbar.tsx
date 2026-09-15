@@ -3,6 +3,7 @@ import { AuthModal } from "./site/AuthModal";
 import { logout } from "../services/auth.service";
 import { useAuth } from "../stores/useAuth";
 import { useProfileView } from "../stores/useProfileView";
+import { navigateAfterLogout } from "../lib/logout-navigation";
 
 const links = [
   { label: "Jobs", href: "/jobs" },
@@ -38,11 +39,7 @@ export function Navbar() {
   }, []);
   async function handleLogout() {
     await logout();
-    // Company profiles are public, so signing out must not take visitors away
-    // from the company they are currently viewing.
-    if (!/^\/companies\/[^/]+\/?$/.test(window.location.pathname)) {
-      window.location.assign("/");
-    }
+    navigateAfterLogout();
   }
   return (
     <header className={`site-nav ${scrolled ? "is-scrolled" : ""}`}>
