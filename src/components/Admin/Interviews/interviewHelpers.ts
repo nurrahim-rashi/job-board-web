@@ -51,8 +51,8 @@ export function countdownLabel(iso: string) {
   const days = daysUntil(iso);
   if (days < 0) return `${Math.abs(days)} day${Math.abs(days) === 1 ? "" : "s"} ago`;
   if (days === 0) return "Today";
-  if (days === 1) return "Tomorrow";
-  return `In ${days} days`;
+  if (days === 1) return "In 1 Day";
+  return `In ${days} Days`;
 }
 
 export function reminderState(interview: Interview) {

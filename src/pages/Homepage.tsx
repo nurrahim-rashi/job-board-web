@@ -31,7 +31,6 @@ export default function Homepage() {
           <Sidebar
             applications={data?.applications ?? []}
             profileCompletion={data?.profileCompletion ?? 0}
-            followedCompanies={data?.followedCompanies ?? []}
             loading={loading}
           />
         </div>

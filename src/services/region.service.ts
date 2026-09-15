@@ -8,6 +8,11 @@ export async function getProvinces() {
   return response.data.data;
 }
 
+export async function getCountries() {
+  const response = await axiosInstance.get<RegionResponse>("/regions/countries");
+  return response.data.data;
+}
+
 export async function getRegencies(provinceCode: string) {
   const response = await axiosInstance.get<RegionResponse>(`/regions/regencies/${provinceCode}`);
   return response.data.data;

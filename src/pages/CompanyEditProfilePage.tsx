@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 import { AdminShell } from "../components/Admin/AdminShell";
+import { PageLoading } from "../components/site/PageLoading";
 import { EditProfileHero } from "../components/Profile/EditProfileHero";
 import { getProfile, updateProfile } from "../services/auth.service";
 import { useAuth } from "../stores/useAuth";
@@ -51,7 +52,7 @@ export default function CompanyEditProfilePage() {
   useEffect(() => { getProvinces().then(setProvinces).catch(() => setProvinces([])); }, []);
   useEffect(() => { if (!provinceCode) { setCities([]); return; } getRegencies(provinceCode).then(setCities).catch(() => setCities([])); }, [provinceCode]);
 
-  if (loading || !user?.company) return null;
+  if (loading || !user?.company) return <PageLoading label="Loading company profile" variant="admin" />;
 
   async function saveCompany(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
