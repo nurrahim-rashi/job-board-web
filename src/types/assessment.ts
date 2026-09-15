@@ -196,6 +196,27 @@ export interface CreateAssessmentQuestionInput {
 export type UpdateAssessmentQuestionInput =
   Partial<CreateAssessmentQuestionInput>;
 
+export interface AssessmentCertificateData {
+  resultId: number;
+  certificateCode: string;
+  user: {
+    id: number;
+    name: string;
+  };
+  assessment: {
+    id: number;
+    skillName: string;
+    title: string;
+  };
+  score: number;
+  completedAt: string;
+}
+
+export interface AssessmentCertificateResponse {
+  message: string;
+  data: AssessmentCertificateData;
+}
+
 export interface CertificateVerificationData {
   valid: true;
   certificateCode: string;

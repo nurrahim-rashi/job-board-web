@@ -14,6 +14,7 @@ import type {
   AssessmentQuestionsResponse,
   CreateAssessmentQuestionInput,
   CertificateVerificationResponse,
+  AssessmentCertificateResponse,
 } from "../types/assessment";
 
 export const fetchSkillNames = async () => {
@@ -73,8 +74,10 @@ export const submitAssessment = async (
   return response.data;
 };
 
-export const generateAssessmentCertificate = async (resultId: number) => {
-  const response = await axiosInstance.post(
+export const generateAssessmentCertificate = async (
+  resultId: number,
+): Promise<AssessmentCertificateResponse> => {
+  const response = await axiosInstance.post<AssessmentCertificateResponse>(
     `/assessment/results/${resultId}/certificate`,
   );
 

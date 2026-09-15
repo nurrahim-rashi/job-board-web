@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { Clipboard, Share } from "../components/site/Icons";
 
 import { Footer } from "../components/Footer";
 import { Navbar } from "../components/Navbar";
@@ -9,7 +10,10 @@ import {
   generateAssessmentCertificate,
 } from "../lib/assessment-api";
 
-import type { AssessmentResultDetail } from "../types/assessment";
+import type {
+  AssessmentResultDetail,
+  AssessmentCertificateData,
+} from "../types/assessment";
 
 export default function AssessmentResultDetailPage() {
   const { resultId } = useParams();
@@ -22,6 +26,11 @@ export default function AssessmentResultDetailPage() {
   const [downloading, setDownloading] = useState(false);
 
   const [certificateError, setCertificateError] = useState("");
+  const [certificate, setCertificate] =
+    useState<AssessmentCertificateData | null>(null);
+
+  const [preparingShare, setPreparingShare] = useState(false);
+  const [shareMessage, setShareMessage] = useState("");
 
   useEffect(() => {
     const loadResult = async () => {
@@ -47,6 +56,22 @@ export default function AssessmentResultDetailPage() {
     loadResult();
   }, [resultId]);
 
+  const ensureCertificate = async () => {
+    if (!result || !result.isPassed) {
+      throw new Error("Certificate is only available for passed assessments");
+    }
+
+    if (certificate) {
+      return certificate;
+    }
+
+    const response = await generateAssessmentCertificate(result.resultId);
+
+    setCertificate(response.data);
+
+    return response.data;
+  };
+
   const handleDownloadCertificate = async () => {
     if (!result || !result.isPassed) return;
 
@@ -54,7 +79,7 @@ export default function AssessmentResultDetailPage() {
       setDownloading(true);
       setCertificateError("");
 
-      await generateAssessmentCertificate(result.resultId);
+      await ensureCertificate();
 
       const blob = await downloadAssessmentCertificate(result.resultId);
 
@@ -77,6 +102,88 @@ export default function AssessmentResultDetailPage() {
       );
     } finally {
       setDownloading(false);
+    }
+  };
+
+  const getVerificationUrl = (certificateCode: string) =>
+    `${window.location.origin}/verify-certificate/${encodeURIComponent(
+      certificateCode,
+    )}`;
+
+  const handleCopyCertificateLink = async () => {
+    try {
+      setPreparingShare(true);
+      setCertificateError("");
+      setShareMessage("");
+
+      const certificateData = await ensureCertificate();
+      const verificationUrl = getVerificationUrl(
+        certificateData.certificateCode,
+      );
+
+      await navigator.clipboard.writeText(verificationUrl);
+
+      setShareMessage("Verification link copied.");
+    } catch (error) {
+      setCertificateError(
+        error instanceof Error
+          ? error.message
+          : "Failed to copy certificate link",
+      );
+    } finally {
+      setPreparingShare(false);
+    }
+  };
+
+  const handleLinkedInShare = async () => {
+    try {
+      setPreparingShare(true);
+      setCertificateError("");
+      setShareMessage("");
+
+      const certificateData = await ensureCertificate();
+      const verificationUrl = getVerificationUrl(
+        certificateData.certificateCode,
+      );
+
+      const shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
+        verificationUrl,
+      )}`;
+
+      window.open(shareUrl, "_blank", "noopener,noreferrer");
+    } catch (error) {
+      setCertificateError(
+        error instanceof Error ? error.message : "Failed to share certificate",
+      );
+    } finally {
+      setPreparingShare(false);
+    }
+  };
+
+  const handleXShare = async () => {
+    try {
+      setPreparingShare(true);
+      setCertificateError("");
+      setShareMessage("");
+
+      const certificateData = await ensureCertificate();
+      const verificationUrl = getVerificationUrl(
+        certificateData.certificateCode,
+      );
+
+      const text = `I earned the ${certificateData.assessment.title} certificate on Polaris.`;
+
+      const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+        text,
+      )}&url=${encodeURIComponent(verificationUrl)}`;
+
+      window.open(shareUrl, "_blank", "noopener,noreferrer");
+    } catch (error) {
+      setCertificateError(
+        error instanceof Error ? error.message : "Failed to share certificate",
+      );
+    } finally {
+      setPreparingShare(false);
     }
   };
 
@@ -144,16 +251,64 @@ export default function AssessmentResultDetailPage() {
                 )}
 
                 {result.isPassed && (
-                  <button
-                    type="button"
-                    className="button button-primary"
-                    onClick={handleDownloadCertificate}
-                    disabled={downloading}
-                  >
-                    {downloading
-                      ? "Preparing certificate..."
-                      : "Download certificate"}
-                  </button>
+                  <div className="certificate-actions">
+                    <button
+                      type="button"
+                      className="button button-primary"
+                      onClick={handleDownloadCertificate}
+                      disabled={downloading || preparingShare}
+                    >
+                      {downloading
+                        ? "Preparing certificate..."
+                        : "Download certificate"}
+                    </button>
+
+                    <div className="certificate-share">
+                      <div className="certificate-share-heading">
+                        <Share />
+                        <span>
+                          <b>Share your certificate</b>
+                          <small>
+                            Share a public verification link to your
+                            achievement.
+                          </small>
+                        </span>
+                      </div>
+
+                      <div className="certificate-share-buttons">
+                        <button
+                          type="button"
+                          onClick={handleCopyCertificateLink}
+                          disabled={preparingShare || downloading}
+                        >
+                          <Clipboard />
+                          Copy link
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={handleLinkedInShare}
+                          disabled={preparingShare || downloading}
+                        >
+                          LinkedIn
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={handleXShare}
+                          disabled={preparingShare || downloading}
+                        >
+                          X
+                        </button>
+                      </div>
+
+                      {shareMessage && (
+                        <p className="certificate-share-message">
+                          {shareMessage}
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 )}
 
                 {certificateError && <p>{certificateError}</p>}
