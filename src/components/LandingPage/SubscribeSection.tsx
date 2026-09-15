@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 import { Check, FileText, Gauge, Sparkles, Star } from "../site/Icons";
 import { Stars } from "../site/Stars";
 import { Reveal } from "../../hooks/useReveal";
@@ -15,6 +16,7 @@ type Plan = {
   featured?: boolean;
   features: [string, boolean][];
 };
+
 const plans: Plan[] = [
   {
     name: "Free",
@@ -50,13 +52,13 @@ const plans: Plan[] = [
     yearly: 1000000,
     features: [
       ["Everything in Free", true],
-
       ["CV Generator", true],
       ["Unlimited Skill Assessments", true],
       ["Priority review when applying", true],
     ],
   },
 ];
+
 const perks = [
   {
     icon: FileText,
@@ -74,25 +76,40 @@ const perks = [
     body: "Your application lands at the top of the pile, with feedback back inside 48 hours.",
   },
 ];
+
 const price = (value: number) => `IDR ${value.toLocaleString("id-ID")}`;
+
 export function SubscribeSection() {
   const [yearly, setYearly] = useState(false);
   const [isPurchasing, setIsPurchasing] = useState<string | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
+
   const user = useAuth((state) => state.user);
 
   const subscribe = async (plan: SubscriptionName) => {
     if (!user) {
-      sessionStorage.setItem("authReturnTo", `${window.location.pathname}${window.location.search}`);
+      sessionStorage.setItem(
+        "authReturnTo",
+        `${window.location.pathname}${window.location.search}`,
+      );
+
       sessionStorage.setItem("postAuthAction", `subscribe:${plan}`);
       setAuthOpen(true);
       return;
     }
+
     if (user.role !== "JOB_SEEKER") return;
+
     try {
       setIsPurchasing(plan);
-      const response = await purchaseSubscription({ plan });
+
+      const response = await purchaseSubscription({
+        plan,
+      });
+
       window.location.assign(response.data.payment.redirectUrl);
+    } catch (error) {
+      console.error("Failed to purchase subscription:", error);
     } finally {
       setIsPurchasing(null);
     }
@@ -100,20 +117,29 @@ export function SubscribeSection() {
 
   useEffect(() => {
     const action = sessionStorage.getItem("postAuthAction");
-    if (user?.role !== "JOB_SEEKER" || !action?.startsWith("subscribe:")) return;
+
+    if (user?.role !== "JOB_SEEKER" || !action?.startsWith("subscribe:")) {
+      return;
+    }
+
     sessionStorage.removeItem("postAuthAction");
+
     void subscribe(action.slice("subscribe:".length) as SubscriptionName);
   }, [user]);
+
   return (
     <section id="subscribe" className="subscribe-section">
       <Stars />
+
       <div className="subscribe-content">
         <Reveal className="subscribe-heading">
           <p>MEMBERSHIP</p>
+
           <h2>
             Unlock the tools that get you <span>hired sooner</span>
           </h2>
         </Reveal>
+
         <Reveal className="billing-toggle" delay={80}>
           <button
             className={!yearly ? "active" : ""}
@@ -121,6 +147,7 @@ export function SubscribeSection() {
           >
             Monthly
           </button>
+
           <button
             className={yearly ? "active" : ""}
             onClick={() => setYearly(true)}
@@ -128,9 +155,11 @@ export function SubscribeSection() {
             Yearly <small>2 months free</small>
           </button>
         </Reveal>
+
         <div className="pricing-grid">
           {plans.map((plan, index) => {
             const amount = yearly ? plan.yearly : plan.monthly;
+
             return (
               <Reveal key={plan.name} delay={index * 100}>
                 <article className={plan.featured ? "featured" : ""}>
@@ -140,26 +169,43 @@ export function SubscribeSection() {
                       Most popular
                     </em>
                   )}
+
                   <h3>{plan.name}</h3>
                   <p>{plan.tagline}</p>
+
                   <strong>
                     {amount === 0 ? "Free" : price(amount)}
+
                     {amount > 0 && <small>/{yearly ? "year" : "month"}</small>}
                   </strong>
+
                   <ul>
                     {plan.features.map(([label, included]) => (
                       <li key={label}>
                         <Check className={included ? "included" : ""} />
+
                         <span className={included ? "" : "disabled"}>
                           {label}
                         </span>
                       </li>
                     ))}
                   </ul>
+
                   <button
-                    disabled={isPurchasing !== null}
                     type="button"
-                    onClick={() => amount === 0 ? setAuthOpen(true) : void subscribe(plan.name === "Polaris Plus" ? "STANDARD" : "PROFESSIONAL")}
+                    disabled={isPurchasing !== null}
+                    onClick={() => {
+                      if (amount === 0) {
+                        setAuthOpen(true);
+                        return;
+                      }
+
+                      void subscribe(
+                        plan.name === "Polaris Plus"
+                          ? "STANDARD"
+                          : "PROFESSIONAL",
+                      );
+                    }}
                   >
                     {amount === 0
                       ? "Create free account"
@@ -177,6 +223,7 @@ export function SubscribeSection() {
             );
           })}
         </div>
+
         <div className="perk-grid">
           {perks.map(({ icon: Icon, title, body }, index) => (
             <Reveal key={title} delay={index * 90}>
@@ -189,7 +236,13 @@ export function SubscribeSection() {
           ))}
         </div>
       </div>
-      <AuthModal open={authOpen} initialMode="register" initialRole="JOB_SEEKER" onClose={() => setAuthOpen(false)} />
+
+      <AuthModal
+        open={authOpen}
+        initialMode="register"
+        initialRole="JOB_SEEKER"
+        onClose={() => setAuthOpen(false)}
+      />
     </section>
   );
 }

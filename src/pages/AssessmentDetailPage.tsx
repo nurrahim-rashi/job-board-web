@@ -3,6 +3,8 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
+import { SeekerDashboardHero } from "../components/Dashboard/SeekerDashboardHero";
+import { SeekerDashboardShell } from "../components/Dashboard/SeekerDashboardShell";
 import { fetchAssessmentDetail, startAssessment } from "../lib/assessment-api";
 import type { Assessment } from "../types/assessment";
 
@@ -40,22 +42,6 @@ export default function AssessmentDetailPage() {
     loadAssessment();
   }, [assessmentId]);
 
-  if (loading) {
-    return (
-      <div className="workspace-dashboard">
-        <Navbar />
-
-        <main>
-          <section className="role-panel">
-            <p>Loading assessment...</p>
-          </section>
-        </main>
-
-        <Footer />
-      </div>
-    );
-  }
-
   const handleStartAssessment = async () => {
     if (!assessment) return;
 
@@ -78,56 +64,62 @@ export default function AssessmentDetailPage() {
   };
 
   return (
-    <div className="workspace-dashboard">
+    <div className="workspace-dashboard seeker-dashboard-overview">
       <Navbar />
 
       <main>
-        <section className="role-panel">
-          <Link to="/dashboard/assessments">← Back to assessments</Link>
+        <SeekerDashboardHero />
 
-          {error ? (
-            <article className="panel-card">
-              <h2>Unable to load assessment</h2>
-              <p>{error}</p>
-            </article>
-          ) : assessment ? (
-            <article className="panel-card">
-              <p className="eyebrow">{assessment.skillName}</p>
+        <SeekerDashboardShell>
+          <section className="role-panel">
+            <Link to="/dashboard/assessments">← Back to assessments</Link>
 
-              <h1>{assessment.title}</h1>
+            {loading ? (
+              <p>Loading assessment...</p>
+            ) : error ? (
+              <article className="panel-card">
+                <h2>Unable to load assessment</h2>
+                <p>{error}</p>
+              </article>
+            ) : assessment ? (
+              <article className="panel-card">
+                <p className="eyebrow">{assessment.skillName}</p>
 
-              {assessment.description && <p>{assessment.description}</p>}
+                <h1>{assessment.title}</h1>
 
-              <div className="panel-stats">
-                <article>
-                  <span>Questions</span>
-                  <b>{assessment.questionCount}</b>
-                </article>
+                {assessment.description && <p>{assessment.description}</p>}
 
-                <article>
-                  <span>Time limit</span>
-                  <b>{assessment.durationMinutes} min</b>
-                </article>
+                <div className="panel-stats">
+                  <article>
+                    <span>Questions</span>
+                    <b>{assessment.questionCount}</b>
+                  </article>
 
-                <article>
-                  <span>Passing score</span>
-                  <b>{assessment.passingScore}</b>
-                </article>
-              </div>
+                  <article>
+                    <span>Time limit</span>
+                    <b>{assessment.durationMinutes} min</b>
+                  </article>
 
-              <button
-                type="button"
-                className="button button-primary"
-                onClick={handleStartAssessment}
-                disabled={starting}
-              >
-                {starting ? "Starting..." : "Start assessment"}
-              </button>
+                  <article>
+                    <span>Passing score</span>
+                    <b>{assessment.passingScore}</b>
+                  </article>
+                </div>
 
-              {startError && <p>{startError}</p>}
-            </article>
-          ) : null}
-        </section>
+                <button
+                  type="button"
+                  className="button button-primary"
+                  onClick={handleStartAssessment}
+                  disabled={starting}
+                >
+                  {starting ? "Starting..." : "Start assessment"}
+                </button>
+
+                {startError && <p>{startError}</p>}
+              </article>
+            ) : null}
+          </section>
+        </SeekerDashboardShell>
       </main>
 
       <Footer />

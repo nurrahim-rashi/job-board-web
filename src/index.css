@@ -3043,6 +3043,7 @@ p {
   color: #555b4c;
   font-size: 13px;
 }
+
 .interview-latest-actions {
   display: flex;
   flex-wrap: wrap;
@@ -3087,6 +3088,7 @@ p {
   font-size: 12px;
   line-height: 1.5;
 }
+
 .applicant-view-profile {
   margin-left: auto;
   white-space: nowrap;
@@ -3195,6 +3197,7 @@ p {
     grid-row: 3;
     padding: 30px 28px;
   }
+
   .company-profile-content .company-open-roles > header {
     align-items: flex-start;
     flex-direction: column;
@@ -3208,6 +3211,7 @@ p {
   .company-profile-content .company-role-list > a > span:last-child {
     text-align: left;
   }
+
 }
 .company-about-card {
   order: 1;
@@ -13438,6 +13442,7 @@ input[type="month"]:focus-visible {
   font-size: 12px;
   line-height: 1.5;
 }
+
 .interview-last-minute-warning {
   display: grid;
   gap: 5px;
@@ -13468,6 +13473,7 @@ input[type="month"]:focus-visible {
   font-size: 11px;
   padding: 8px 11px;
 }
+
 .seeker-dashboard-shell {
   background: #f4f0e8;
   display: grid;
@@ -14056,6 +14062,7 @@ input[type="month"]:focus-visible {
 .company-profile-columns .profile-right-column > * {
   margin-block: 0 !important;
 }
+
 @media (max-width: 560px) {
   .pretest-nav {
     flex-direction: column;
@@ -14192,7 +14199,138 @@ input[type="month"]:focus-visible {
   .test-sheet-head {
     grid-template-columns: minmax(0, 1fr);
   }
+
 }
+.assign-dialog > div {
+  display: flex;
+  flex-direction: column;
+  max-height: 86vh;
+}
+.test-sheet-head {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 150px minmax(0, 1fr);
+}
+.test-sheet-head > div {
+  background: #f7f3ea;
+  border: 1px solid #e4dfd4;
+  border-radius: 16px;
+  padding: 14px 16px;
+}
+.test-sheet-head b {
+  display: block;
+  font-family: Fraunces, Georgia, serif;
+  font-size: 40px;
+  font-weight: 400;
+  letter-spacing: -0.05em;
+  margin: 6px 0 2px;
+}
+.test-sheet-head small {
+  color: #74717a;
+  display: block;
+  font-size: 13px;
+}
+.test-sheet-head .eyebrow + .eyebrow {
+  margin-top: 10px;
+}
+.test-sheet-list {
+  display: grid;
+  gap: 12px;
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+}
+.test-sheet-list > li {
+  border: 1px solid #ded9cf;
+  border-left-width: 3px;
+  border-radius: 16px;
+  padding: 15px 17px;
+}
+.test-sheet-list > li.right {
+  border-left-color: #77b487;
+}
+.test-sheet-list > li.wrong {
+  border-left-color: #d09a97;
+}
+.test-sheet-list > li.blank {
+  border-left-color: #e4dfd4;
+}
+.test-sheet-question {
+  display: flex;
+  font-size: 14px;
+  gap: 10px;
+  line-height: 1.5;
+  margin: 0 0 12px;
+}
+.test-sheet-question em {
+  color: #97949c;
+  flex-shrink: 0;
+  font:
+    600 12px "DM Mono",
+    monospace;
+  font-style: normal;
+  padding-top: 2px;
+}
+.test-sheet-list ul {
+  display: grid;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.test-sheet-list ul li {
+  align-items: center;
+  background: #fcfaf4;
+  border: 1px solid #ece7dd;
+  border-radius: 11px;
+  display: flex;
+  gap: 10px;
+  padding: 9px 12px;
+}
+.test-sheet-list ul li b {
+  color: #74717a;
+  flex-shrink: 0;
+  font-size: 12px;
+  width: 14px;
+}
+.test-sheet-list ul li span {
+  flex: 1;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.test-sheet-list ul li small {
+  color: #74717a;
+  flex-shrink: 0;
+  font-size: 11px;
+}
+.test-sheet-list ul li.key {
+  background: #e5f4e7;
+  border-color: #cbe6d1;
+}
+.test-sheet-list ul li.key b,
+.test-sheet-list ul li.key small {
+  color: #287240;
+}
+.test-sheet-list ul li.chosen {
+  border-color: #485eb4;
+  box-shadow: 0 0 0 2px rgb(72 94 180 / 0.14);
+}
+.test-sheet-list ul li.chosen:not(.key) {
+  background: #fae8e7;
+}
+.test-sheet-list ul li.chosen:not(.key) b,
+.test-sheet-list ul li.chosen:not(.key) small {
+  color: #9c3836;
+}
+.test-sheet-list .admin-note {
+  margin: 10px 0 0;
+}
+@media (max-width: 620px) {
+  .test-sheet-head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .certificate-verification-page {
   min-height: 70vh;
 }
@@ -14414,6 +14552,122 @@ input[type="month"]:focus-visible {
 .developer-tool-links a > span:last-child {
   color: #485eb4;
   font-size: 20px;
+}
+
+/* Assessment certificate sharing */
+
+.certificate-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.certificate-share {
+  padding: 24px;
+  border: 1px solid #d9d5cc;
+  border-radius: 18px;
+  background: #faf8f3;
+}
+
+.certificate-share-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.certificate-share-heading > svg {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  color: #304b9b;
+}
+
+.certificate-share-heading > span {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.certificate-share-heading b {
+  font-size: 18px;
+  font-weight: 700;
+  color: #17191f;
+}
+
+.certificate-share-heading small {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #6d6a65;
+}
+
+.certificate-share-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.certificate-share-buttons button {
+  min-height: 42px;
+  padding: 9px 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  border: 1px solid #cbc7be;
+  border-radius: 10px;
+  background: #fffdf8;
+
+  color: #202228;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    transform 0.15s ease;
+}
+
+.certificate-share-buttons button:hover:not(:disabled) {
+  border-color: #304b9b;
+  background: #f2f4fb;
+  transform: translateY(-1px);
+}
+
+.certificate-share-buttons button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.certificate-share-buttons button svg {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+}
+
+.certificate-share-message {
+  margin: 14px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #304b9b;
+}
+
+@media (max-width: 620px) {
+  .certificate-share {
+    padding: 18px;
+  }
+
+  .certificate-share-buttons {
+    flex-direction: column;
+  }
+
+  .certificate-share-buttons button {
+    width: 100%;
+  }
 }
 
 /* Shared loading language: preserve the final data layout while requests resolve. */
