@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import AboutPage from "../pages/AboutPage";
 import AdminAnalyticsPage from "../pages/AdminAnalyticsPage";
@@ -62,7 +63,15 @@ function HomeRoute() {
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const loggedIn = useAuth((state) => Boolean(state.token));
-  return loggedIn ? children : <Navigate replace to="/" />;
+  return loggedIn ? children : <RememberedSignInRedirect />;
+}
+
+function RememberedSignInRedirect() {
+  const location = useLocation();
+  useEffect(() => {
+    sessionStorage.setItem("authReturnTo", `${location.pathname}${location.search}${location.hash}`);
+  }, [location.hash, location.pathname, location.search]);
+  return <Navigate replace to="/?auth=signin" />;
 }
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
@@ -71,7 +80,7 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
   const role = useAuth((state) => state.user?.role);
 
   if (!loggedIn && !hasPreviewSession(search)) {
-    return <Navigate replace to="/" />;
+    return <RememberedSignInRedirect />;
   }
 
   return role === "COMPANY_ADMIN" || hasAdminPreview(search) ? (
@@ -86,7 +95,7 @@ function DeveloperRoute({ children }: { children: React.ReactNode }) {
   const role = useAuth((state) => state.user?.role);
 
   if (!loggedIn) {
-    return <Navigate replace to="/" />;
+    return <RememberedSignInRedirect />;
   }
 
   return role === "DEVELOPER" ? children : <Navigate replace to="/dashboard" />;
@@ -97,7 +106,7 @@ function JobSeekerRoute({ children }: { children: React.ReactNode }) {
   const role = useAuth((state) => state.user?.role);
 
   if (!loggedIn) {
-    return <Navigate replace to="/" />;
+    return <RememberedSignInRedirect />;
   }
 
   return role === "JOB_SEEKER" ? (
@@ -162,7 +171,6 @@ export function AppRouter() {
           }
         />
 
-<<<<<<< Updated upstream
         <Route
           path="/company/profile/edit"
           element={
@@ -171,21 +179,6 @@ export function AppRouter() {
             </AdminRoute>
           }
         />
-=======
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <DashboardRoute />
-          </ProtectedRoute>
-        }
-      />
-      <Route path="/dashboard/applications" element={<JobSeekerRoute><SeekerApplicationsPage /></JobSeekerRoute>} />
-      <Route path="/dashboard/saved-jobs" element={<JobSeekerRoute><SavedJobsPage /></JobSeekerRoute>} />
-      <Route path="/dashboard/interviews" element={<JobSeekerRoute><SeekerApplicationsPage view="interviews" /></JobSeekerRoute>} />
-      <Route path="/dashboard/tests" element={<JobSeekerRoute><SeekerApplicationsPage view="tests" /></JobSeekerRoute>} />
-      <Route path="/dashboard/closed-jobs" element={<JobSeekerRoute><SeekerApplicationsPage view="closed" /></JobSeekerRoute>} />
->>>>>>> Stashed changes
 
         <Route
           path="/profile/cv-generator"
@@ -204,6 +197,11 @@ export function AppRouter() {
             </ProtectedRoute>
           }
         />
+        <Route path="/dashboard/applications" element={<JobSeekerRoute><SeekerApplicationsPage /></JobSeekerRoute>} />
+        <Route path="/dashboard/saved-jobs" element={<JobSeekerRoute><SavedJobsPage /></JobSeekerRoute>} />
+        <Route path="/dashboard/interviews" element={<JobSeekerRoute><SeekerApplicationsPage view="interviews" /></JobSeekerRoute>} />
+        <Route path="/dashboard/tests" element={<JobSeekerRoute><SeekerApplicationsPage view="tests" /></JobSeekerRoute>} />
+        <Route path="/dashboard/closed-jobs" element={<JobSeekerRoute><SeekerApplicationsPage view="closed" /></JobSeekerRoute>} />
 
         <Route
           path="/dashboard/assessments"
@@ -322,7 +320,6 @@ export function AppRouter() {
           }
         />
 
-<<<<<<< Updated upstream
         <Route
           path="/admin/analytics"
           element={
@@ -331,17 +328,6 @@ export function AppRouter() {
             </AdminRoute>
           }
         />
-=======
-      <Route path="/about" element={<AboutPage />} />
-      <Route path="/stories" element={<StoriesPage />} />
-      <Route path="/pricing" element={<PricingPage />} />
-      <Route path="/companies" element={<BrowseCompaniesPage />} />
-      <Route path="/companies/:companyId" element={<CompanyDetailPage />} />
-      <Route path="/profile/view" element={<ProtectedRoute><PublicProfilePage /></ProtectedRoute>} />
-      <Route path="/profile/:userId" element={<PublicProfilePage />} />
-      <Route path="/jobs" element={<BrowseJobsPage />} />
-      <Route path="/jobs/:slug" element={<JobDetailPage />} />
->>>>>>> Stashed changes
 
         <Route
           path="/verify-email"
@@ -361,6 +347,7 @@ export function AppRouter() {
         <Route path="/pricing" element={<PricingPage />} />
         <Route path="/companies" element={<BrowseCompaniesPage />} />
         <Route path="/companies/:companyId" element={<CompanyDetailPage />} />
+        <Route path="/profile/view" element={<ProtectedRoute><PublicProfilePage /></ProtectedRoute>} />
         <Route path="/profile/:userId" element={<PublicProfilePage />} />
         <Route path="/jobs" element={<BrowseJobsPage />} />
         <Route path="/jobs/:slug" element={<JobDetailPage />} />

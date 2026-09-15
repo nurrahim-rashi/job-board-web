@@ -1,7 +1,7 @@
 import { interviewStatusLabels, interviewStatusTones, type Interview } from "../../../types/interview";
 import { ArrowRight, MapPin, Video } from "../../site/Icons";
 import { ApplicantAvatar } from "../Applicants/ApplicantAvatar";
-import { countdownLabel, formatDay, formatTime, isMeetingLink, reminderState } from "./interviewHelpers";
+import { countdownLabel, formatDay, isMeetingLink, reminderState } from "./interviewHelpers";
 
 type InterviewListProps = {
   interviews: Interview[];
@@ -31,9 +31,7 @@ export function InterviewList({ interviews, onEdit, onDelete }: InterviewListPro
             </span>
             <span className="interview-when">
               <b>{formatDay(interview.interviewDate)}</b>
-              <small>
-                {formatTime(interview.interviewDate)} · {countdownLabel(interview.interviewDate)}
-              </small>
+              <small>{countdownLabel(interview.interviewDate)}</small>
             </span>
             <span className="interview-where">
               {online ? <Video /> : <MapPin />}

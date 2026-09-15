@@ -33,6 +33,12 @@ const draft: FormState = {
   published: false,
 };
 
+const dateInputLimit = (daysFromToday: number) => {
+  const date = new Date();
+  date.setDate(date.getDate() + daysFromToday);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+};
+
 export default function AdminJobFormPage() {
   const { slug } = useParams();
   const navigate = useNavigate();
@@ -216,7 +222,8 @@ export default function AdminJobFormPage() {
             </label>
             <label>
               Application deadline
-              <input type="date" value={form.deadline} onChange={(event) => set("deadline", event.target.value)} required />
+              <input type="date" min={dateInputLimit(0)} max={dateInputLimit(360)} value={form.deadline} onChange={(event) => set("deadline", event.target.value)} required />
+              <small>Choose today or any date within the next 360 days.</small>
             </label>
             <label className="wide">
               Description

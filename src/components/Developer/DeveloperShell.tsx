@@ -4,6 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Clipboard, Gauge, Users } from "../site/Icons";
 
 import { logout } from "../../services/auth.service";
+import { navigateAfterLogout } from "../../lib/logout-navigation";
 
 const menu = [
   {
@@ -49,7 +50,7 @@ export function DeveloperShell({
 
   async function handleLogout() {
     await logout();
-    window.location.assign("/");
+    navigateAfterLogout();
   }
 
   return (

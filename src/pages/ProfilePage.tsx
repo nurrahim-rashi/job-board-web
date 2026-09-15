@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import toast from "react-hot-toast";
 import { Navbar } from "../components/Navbar";
+import { PageLoading } from "../components/site/PageLoading";
 import { AdminShell } from "../components/Admin/AdminShell";
 import { EditProfileHero } from "../components/Profile/EditProfileHero";
 import { SelectedWorkModal } from "../components/Profile/ProfileEntryModals";
@@ -76,6 +77,8 @@ const sortExperiences = <T extends { period: string }>(items: T[]) =>
 const sortSelectedWorks = <T extends { date?: string }>(items: T[]) =>
   [...items].sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""));
 
+const selectedWorkMonth = (value?: string) => value?.match(/^(\d{4}-\d{2})/)?.[1] ?? "";
+
 const emptyExperienceDraft = {
   title: "",
   company: "",
@@ -84,6 +87,15 @@ const emptyExperienceDraft = {
   end: "",
   current: false,
   note: "",
+};
+
+const educationParts = (value: string | null) => {
+  const match = value?.match(/^(.+?) in (.+?) at (.+)$/i);
+  return {
+    level: normalizeEducation(match?.[1] ?? value),
+    major: match?.[2] ?? "",
+    institution: match?.[3] ?? "",
+  };
 };
 
 export default function ProfilePage() {
@@ -208,7 +220,7 @@ export default function ProfilePage() {
     setSelectedWorks(sortSelectedWorks(user?.selectedWork ?? []));
   }, [user?.selectedWork]);
 
-  if (!user || profileLoading) return null;
+  if (!user || profileLoading) return <PageLoading label="Loading profile" variant={user?.role === "COMPANY_ADMIN" ? "admin" : "public"} />;
   const isCompany = user.role === "COMPANY_ADMIN";
 
   async function saveProfile(event: FormEvent<HTMLFormElement>) {
@@ -216,11 +228,15 @@ export default function ProfilePage() {
     setError("");
     const form = new FormData(event.currentTarget);
     try {
-      const lastEducation = String(form.get("lastEducation") ?? "");
+      const educationLevel = String(form.get("educationLevel") ?? "").trim();
+      const educationMajor = String(form.get("educationMajor") ?? "").trim();
+      const educationInstitution = String(form.get("educationInstitution") ?? "").trim();
+      const lastEducation = `${educationLevel} in ${educationMajor} at ${educationInstitution}`;
       const availability = String(form.get("availability") ?? "");
-      if (!isCompany && lastEducation && !isEducationLevel(lastEducation)) {
-        throw new Error("Please select a valid education level.");
+      if (!isCompany && (!isEducationLevel(educationLevel) || !educationMajor || !educationInstitution)) {
+        throw new Error("Education level, major, and school or university are required.");
       }
+      if (!isCompany && (!form.get("birthDate") || !form.get("gender") || !String(form.get("address") ?? "").trim() || !profileCity || !(profileProvinceCode || user?.province))) throw new Error("Birth date, gender, education, and complete address are required.");
       if (!isCompany && availability && !isAvailability(availability)) {
         throw new Error("Please select a valid availability status.");
       }
@@ -261,7 +277,7 @@ export default function ProfilePage() {
             note: work.note.trim(),
             url: work.url?.trim() || "",
             company: work.company?.trim() || undefined,
-            date: work.date || undefined,
+            date: selectedWorkMonth(work.date) || undefined,
           })),
         } : {}),
       });
@@ -530,23 +546,25 @@ export default function ProfilePage() {
                     <input
                       name="birthDate"
                       type="date"
+                      required
                       defaultValue={user.birthDate?.slice(0, 10) ?? ""}
                     />
                   </span>
                 </label>
                 <label>
                   Gender
-                  <select name="gender" defaultValue={user.gender ?? ""}>
+                  <select name="gender" defaultValue={user.gender ?? ""} required>
                     <option value="">Select</option>
                     <option value="MALE">Male</option>
                     <option value="FEMALE">Female</option>
                   </select>
                 </label>
                 <label>
-                  Last education
+                  Education level
                   <select
-                    name="lastEducation"
-                    defaultValue={normalizeEducation(user.lastEducation)}
+                    name="educationLevel"
+                    defaultValue={educationParts(user.lastEducation).level}
+                    required
                   >
                     <option value="">Select education level</option>
                     {educationOptions.map((education) => (
@@ -555,6 +573,14 @@ export default function ProfilePage() {
                       </option>
                     ))}
                   </select>
+                </label>
+                <label>
+                  Major / field of study
+                  <input name="educationMajor" defaultValue={educationParts(user.lastEducation).major} placeholder="e.g. Computer Science" required />
+                </label>
+                <label>
+                  School / university
+                  <input name="educationInstitution" defaultValue={educationParts(user.lastEducation).institution} placeholder="e.g. University of Indonesia" required />
                 </label>
                 <label>
                   Province
@@ -566,7 +592,7 @@ export default function ProfilePage() {
                 </label>
                 <label className="profile-wide">
                   Address
-                  <textarea name="address" defaultValue={user.address ?? ""} />
+                  <textarea name="address" defaultValue={user.address ?? ""} required />
                 </label>
                 <label>
                   Professional role

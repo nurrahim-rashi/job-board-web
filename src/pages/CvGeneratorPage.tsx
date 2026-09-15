@@ -61,6 +61,13 @@ export default function CvGeneratorPage() {
       anchor.remove();
 
       URL.revokeObjectURL(url);
+      const pendingApplication = sessionStorage.getItem("cvApplyReturn");
+      if (pendingApplication) {
+        const { returnTo, action } = JSON.parse(pendingApplication) as { returnTo: string; action: string };
+        sessionStorage.removeItem("cvApplyReturn");
+        sessionStorage.setItem("postAuthAction", action);
+        window.location.assign(returnTo);
+      }
     } catch (requestError) {
       setError(
         requestError instanceof Error

@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Briefcase, Building, Calendar, Clipboard, Gauge, Users } from "../site/Icons";
 import { useAuth } from "../../stores/useAuth";
 import { logout } from "../../services/auth.service";
+import { navigateAfterLogout } from "../../lib/logout-navigation";
 
 const menu = [
   { label: "Job postings", to: "/admin", icon: Briefcase },
@@ -22,7 +23,7 @@ export function AdminShell({ eyebrow, title, lead, actions, showHeader = true, c
   const isActive = (to: string) => (to === "/admin" ? pathname === "/admin" || pathname.startsWith("/admin/jobs") : pathname.startsWith(to));
   async function handleLogout() {
     await logout();
-    window.location.assign("/");
+    navigateAfterLogout();
   }
   return (
     <div className="admin-console">

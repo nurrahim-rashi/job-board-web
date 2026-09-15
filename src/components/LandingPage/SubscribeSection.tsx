@@ -2,11 +2,8 @@ import { useEffect, useState } from "react";
 import { Check, FileText, Gauge, Sparkles, Star } from "../site/Icons";
 import { Stars } from "../site/Stars";
 import { Reveal } from "../../hooks/useReveal";
-<<<<<<< Updated upstream
-=======
 import { AuthModal } from "../site/AuthModal";
 import { useAuth } from "../../stores/useAuth";
->>>>>>> Stashed changes
 import { purchaseSubscription } from "../../lib/subscription-api";
 import type { SubscriptionName } from "../../types/subscription";
 
@@ -80,25 +77,7 @@ const perks = [
 const price = (value: number) => `IDR ${value.toLocaleString("id-ID")}`;
 export function SubscribeSection() {
   const [yearly, setYearly] = useState(false);
-<<<<<<< Updated upstream
   const [isPurchasing, setIsPurchasing] = useState<string | null>(null);
-
-  const handlePurchase = async (planName: SubscriptionName) => {
-    try {
-      setIsPurchasing(planName);
-
-      const response = await purchaseSubscription({
-        plan: planName,
-      });
-
-      window.location.href = response.data.payment.redirectUrl;
-    } catch (error) {
-      console.error("Failed to purchase subscription:", error);
-    } finally {
-      setIsPurchasing(null);
-    }
-  };
-=======
   const [authOpen, setAuthOpen] = useState(false);
   const user = useAuth((state) => state.user);
 
@@ -110,8 +89,13 @@ export function SubscribeSection() {
       return;
     }
     if (user.role !== "JOB_SEEKER") return;
-    const response = await purchaseSubscription({ plan });
-    window.location.assign(response.data.payment.redirectUrl);
+    try {
+      setIsPurchasing(plan);
+      const response = await purchaseSubscription({ plan });
+      window.location.assign(response.data.payment.redirectUrl);
+    } finally {
+      setIsPurchasing(null);
+    }
   };
 
   useEffect(() => {
@@ -120,7 +104,6 @@ export function SubscribeSection() {
     sessionStorage.removeItem("postAuthAction");
     void subscribe(action.slice("subscribe:".length) as SubscriptionName);
   }, [user]);
->>>>>>> Stashed changes
   return (
     <section id="subscribe" className="subscribe-section">
       <Stars />
@@ -173,22 +156,11 @@ export function SubscribeSection() {
                       </li>
                     ))}
                   </ul>
-<<<<<<< Updated upstream
                   <button
                     disabled={isPurchasing !== null}
-                    onClick={() => {
-                      if (plan.name === "Polaris Plus") {
-                        void handlePurchase("STANDARD");
-                      }
-
-                      if (plan.name === "Polaris Pro") {
-                        void handlePurchase("PROFESSIONAL");
-                      }
-                    }}
+                    type="button"
+                    onClick={() => amount === 0 ? setAuthOpen(true) : void subscribe(plan.name === "Polaris Plus" ? "STANDARD" : "PROFESSIONAL")}
                   >
-=======
-                  <button type="button" onClick={() => amount === 0 ? setAuthOpen(true) : void subscribe(plan.name === "Polaris Plus" ? "STANDARD" : "PROFESSIONAL")}>
->>>>>>> Stashed changes
                     {amount === 0
                       ? "Create free account"
                       : isPurchasing ===

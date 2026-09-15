@@ -110,10 +110,4 @@ export type HomepageData = {
     reason: string;
     company: { companyName: string };
   }[];
-  followedCompanies: {
-    id: number;
-    companyName: string;
-    city: string;
-    openJobs: number;
-  }[];
 };

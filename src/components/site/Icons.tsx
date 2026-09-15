@@ -78,6 +78,7 @@ export const Close = icon("m18 6-12 12M6 6l12 12");
 export const Eye = icon(
   "M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Zm10 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z",
 );
+export const Info = icon("M12 11v6M12 7h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z");
 export const Target = icon(
   "M12 2v4m0 12v4M2 12h4m12 0h4M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm0-6a10 10 0 1 1 0 20 10 10 0 0 1 0-20Z",
 );

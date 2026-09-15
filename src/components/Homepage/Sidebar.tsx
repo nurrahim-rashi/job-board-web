@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowRight, Building, Clipboard, FileText, Sparkles } from "../site/Icons";
+import { ArrowRight, Clipboard, FileText, Sparkles } from "../site/Icons";
 import { Reveal } from "../../hooks/useReveal";
 import type { HomepageData } from "../../types/auth";
 import { ApplicationDetailModal } from "../Application/ApplicationDetailModal";
@@ -17,13 +17,12 @@ const statusDetails: Record<string, { label: string; tone: string }> = {
 
 type SidebarProps = Pick<
   HomepageData,
-  "applications" | "profileCompletion" | "followedCompanies"
+  "applications" | "profileCompletion"
 > & { loading: boolean };
 
 export function Sidebar({
   applications,
   profileCompletion,
-  followedCompanies,
   loading,
 }: SidebarProps) {
   const [selectedApplicationId, setSelectedApplicationId] = useState<number | null>(null);
@@ -83,34 +82,6 @@ export function Sidebar({
         </article>
       </Reveal>
 
-      <Reveal delay={140}>
-        <article id="companies">
-          <p className="eyebrow">Companies you follow</p>
-          {loading ? (
-            <div className="dashboard-side-placeholder is-loading" />
-          ) : followedCompanies.length ? (
-            <ul className="company-list">
-              {followedCompanies.map((company) => (
-                <li key={company.id}>
-                  <b>
-                    <Building />
-                  </b>
-                  <span>
-                    <strong>{company.companyName}</strong>
-                    <small>{company.city}</small>
-                  </span>
-                  <em>{company.openJobs} jobs</em>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p>You are not following any companies yet.</p>
-          )}
-          <a href="/companies">
-            Browse companies <ArrowRight />
-          </a>
-        </article>
-      </Reveal>
       <Reveal delay={180}>
         <article className="home-priority-card">
           <div className="home-promo-icon"><Sparkles /></div>

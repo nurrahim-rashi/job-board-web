@@ -6,6 +6,8 @@ import { Calendar } from "../site/Icons";
 type Experience = NonNullable<AuthUser["experiences"]>[number];
 type SelectedWork = NonNullable<AuthUser["selectedWork"]>[number];
 
+const workMonth = (value?: string) => value?.match(/^(\d{4}-\d{2})/)?.[1] ?? "";
+
 const monthLabel = (value: string) => {
   if (!value) return "";
   const [year, month] = value.split("-").map(Number);
@@ -92,14 +94,14 @@ export function SelectedWorkModal({
   onDismiss: () => void;
   onSave: (work: SelectedWork) => void | Promise<void>;
 }) {
-  const [work, setWork] = useState<SelectedWork>(initial ?? { name: "", note: "", url: "", company: "", date: "" });
+  const [work, setWork] = useState<SelectedWork>(initial ? { ...initial, date: workMonth(initial.date) } : { name: "", note: "", url: "", company: "", date: "" });
   const [saving, setSaving] = useState(false);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!work.name.trim()) return;
     setSaving(true);
-    try { await onSave({ ...work, name: work.name.trim(), note: work.note.trim() }); }
+    try { await onSave({ ...work, name: work.name.trim(), note: work.note.trim(), date: workMonth(work.date) || undefined }); }
     finally { setSaving(false); }
   }
 
