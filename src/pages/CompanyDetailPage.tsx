@@ -13,6 +13,7 @@ import { QualityScoreCard } from "../components/Profile/QualityScoreCard";
 import { PageLoading } from "../components/site/PageLoading";
 import { ExpandableContent } from "../components/site/ExpandableContent";
 import { useMatchedCardMinHeights } from "../hooks/useMatchedCardMinHeights";
+import { CompanyReviews } from "../components/CompanyReview/CompanyReviews";
 
 function formatSalary(minimum: number | null, maximum: number | null) {
   if (!minimum && !maximum) return "Salary not disclosed";
@@ -309,6 +310,8 @@ export default function CompanyDetailPage() {
             </article>
           </aside>
         </div>
+
+        <CompanyReviews companyId={companyId} />
       </section>
     </div>
   );

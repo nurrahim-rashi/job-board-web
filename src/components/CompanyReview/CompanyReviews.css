@@ -1,0 +1,341 @@
+.company-reviews-section {
+  margin: 32px auto 0;
+  max-width: 1200px;
+  width: 100%;
+}
+
+.company-reviews-shell {
+  padding: 30px;
+}
+
+.company-reviews-heading,
+.company-review-form > header,
+.company-review-card > header {
+  align-items: flex-start;
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+}
+
+.company-reviews-heading h2,
+.company-review-form h3,
+.company-review-card h3 {
+  margin: 0;
+}
+
+.company-reviews-heading > div > p {
+  color: #74717a;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 8px 0 0;
+  max-width: 680px;
+}
+
+.company-reviews-heading > strong {
+  background: #f0ede5;
+  border-radius: 999px;
+  color: #485eb4;
+  flex: 0 0 auto;
+  font-size: 13px;
+  padding: 8px 12px;
+}
+
+.company-review-eyebrow,
+.company-review-anonymous {
+  color: #485eb4;
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+
+.company-review-form {
+  background: #f7f3ea;
+  border: 1px solid #ded9cf;
+  border-radius: 18px;
+  display: grid;
+  gap: 20px;
+  margin-top: 26px;
+  padding: 22px;
+}
+
+.company-review-form h3 {
+  font-family: Fraunces, Georgia, serif;
+  font-size: 25px;
+  font-weight: 400;
+}
+
+.company-review-private {
+  background: #fff;
+  border: 1px solid #ded9cf;
+  border-radius: 999px;
+  color: #67656c;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 7px 11px;
+}
+
+.company-review-verified-role {
+  background: #fff;
+  border: 1px solid #ded9cf;
+  border-radius: 14px;
+  padding: 13px 15px;
+}
+
+.company-review-verified-role span,
+.company-review-verified-role strong {
+  display: block;
+}
+
+.company-review-verified-role span {
+  color: #74717a;
+  font-size: 11px;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.company-review-form > label {
+  color: #67656c;
+  display: block;
+  font-size: 13px;
+}
+
+.company-review-form > label > small {
+  color: #97949c;
+  margin-left: 6px;
+}
+
+.company-review-form input,
+.company-review-form textarea {
+  background: #fcfaf4;
+  border: 1px solid #ded9cf;
+  border-radius: 12px;
+  color: #202129;
+  display: block;
+  font:
+    14px "DM Sans",
+    sans-serif;
+  margin-top: 7px;
+  padding: 11px;
+  width: 100%;
+}
+
+.company-review-form input {
+  min-height: 45px;
+}
+
+.company-review-form textarea {
+  min-height: 130px;
+  resize: vertical;
+}
+
+.company-review-form input:focus,
+.company-review-form textarea:focus {
+  border-color: #485eb4;
+  outline: 2px solid rgb(72 94 180 / 0.12);
+}
+
+.company-review-rating-form {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.company-review-rating-form fieldset {
+  background: #fff;
+  border: 1px solid #ded9cf;
+  border-radius: 14px;
+  margin: 0;
+  padding: 13px 15px;
+}
+
+.company-review-rating-form legend {
+  color: #67656c;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 0 4px;
+}
+
+.company-review-rating-form fieldset > div {
+  align-items: center;
+  display: flex;
+  gap: 3px;
+}
+
+.company-review-rating-form button {
+  background: transparent;
+  border: 0;
+  color: #d4d0c7;
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 1;
+  padding: 2px;
+}
+
+.company-review-rating-form button.selected {
+  color: #485eb4;
+}
+
+.company-review-rating-form fieldset span {
+  color: #74717a;
+  font-size: 12px;
+  margin-left: 7px;
+}
+
+.company-review-comment > small:last-child {
+  display: block;
+  margin: 6px 0 0;
+  text-align: right;
+}
+
+.company-review-submit {
+  border: 0;
+  cursor: pointer;
+  justify-self: start;
+}
+
+.company-review-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
+}
+
+.company-review-submit-error,
+.company-review-error {
+  color: #a84444;
+}
+
+.company-review-notice,
+.company-review-empty,
+.company-review-status {
+  background: #f7f3ea;
+  border: 1px solid #ded9cf;
+  border-radius: 14px;
+  margin-top: 24px;
+  padding: 16px 18px;
+}
+
+.company-review-notice strong,
+.company-review-notice span,
+.company-review-empty strong {
+  display: block;
+}
+
+.company-review-notice span,
+.company-review-empty p {
+  color: #74717a;
+  font-size: 13px;
+  margin: 4px 0 0;
+}
+
+.company-review-list {
+  display: grid;
+  gap: 16px;
+  margin-top: 26px;
+}
+
+.company-review-card {
+  border-top: 1px solid #ded9cf;
+  padding-top: 22px;
+}
+
+.company-review-card h3 {
+  font-family: Fraunces, Georgia, serif;
+  font-size: 23px;
+  font-weight: 400;
+}
+
+.company-review-card time {
+  color: #97949c;
+  font-size: 12px;
+}
+
+.company-review-salary {
+  margin-top: 14px;
+}
+
+.company-review-salary span,
+.company-review-salary strong {
+  display: block;
+}
+
+.company-review-salary span {
+  color: #74717a;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.company-review-salary strong {
+  margin-top: 3px;
+}
+
+.company-review-ratings {
+  display: grid;
+  gap: 10px 22px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 18px;
+}
+
+.company-review-ratings > div {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.company-review-ratings > div > span:first-child {
+  color: #67656c;
+  font-size: 12px;
+}
+
+.company-review-stars {
+  color: #485eb4;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+.company-review-stars i {
+  color: #d4d0c7;
+  font-style: normal;
+}
+
+.company-review-text {
+  color: #3f4048;
+  line-height: 1.7;
+  margin: 18px 0 0;
+  white-space: pre-wrap;
+}
+
+.company-review-error button {
+  background: transparent;
+  border: 0;
+  color: #485eb4;
+  cursor: pointer;
+  font-weight: 800;
+  padding: 4px 0;
+  text-decoration: underline;
+}
+
+@media (max-width: 700px) {
+  .company-reviews-shell {
+    padding: 22px 18px;
+  }
+
+  .company-reviews-heading,
+  .company-review-form > header,
+  .company-review-card > header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .company-review-rating-form,
+  .company-review-ratings {
+    grid-template-columns: 1fr;
+  }
+
+  .company-review-submit {
+    width: 100%;
+  }
+}
