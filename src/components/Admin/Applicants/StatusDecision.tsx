@@ -11,9 +11,14 @@ const actionLabels: Record<DecisionStatus, string> = {
   REJECTED: "Reject",
 };
 
-type StatusDecisionProps = { slug: string; applicationId: number; status: ApplicationStatus };
+type StatusDecisionProps = {
+  slug: string;
+  applicationId: number;
+  status: ApplicationStatus;
+  onInviteToInterview?: () => void;
+};
 
-export function StatusDecision({ slug, applicationId, status }: StatusDecisionProps) {
+export function StatusDecision({ slug, applicationId, status, onInviteToInterview }: StatusDecisionProps) {
   const updateStatus = useUpdateApplicantStatus();
   const [rejecting, setRejecting] = useState(false);
   const [reason, setReason] = useState("");
@@ -31,6 +36,12 @@ export function StatusDecision({ slug, applicationId, status }: StatusDecisionPr
   const decide = (next: DecisionStatus) => {
     if (next === "REJECTED") {
       setRejecting(true);
+      return;
+    }
+    // Scheduling the interview already moves the applicant to INTERVIEW, so the
+    // invitation hands over to the scheduler instead of flipping the status on its own.
+    if (next === "INTERVIEW" && onInviteToInterview) {
+      onInviteToInterview();
       return;
     }
     updateStatus.mutate({ slug, applicationId, status: next });

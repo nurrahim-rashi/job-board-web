@@ -1,13 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { useApplicants } from "../../../hooks/api/applicant/useApplicants";
+import { useInterviews } from "../../../hooks/api/interview/useInterviews";
 import { Clipboard } from "../../site/Icons";
+import { ScheduleInterviewModal, type PreselectedApplicant } from "../Interviews/ScheduleInterviewModal";
 import { ApplicantDetailModal, type DetailTab } from "./ApplicantDetailModal";
 import { AssignTestModal } from "./AssignTestModal";
 import { ApplicantFilters, emptyFilters, hasActiveFilters, toQuery, type FilterState } from "./ApplicantFilters";
 import { ApplicantList } from "./ApplicantList";
 
 const PAGE_SIZE = 10;
+const ROSTER_LIMIT = 50;
 
 type ApplicantSectionProps = { slug: string; hasPreSelectionTest: boolean; testDurationMinutes: number | null };
 
@@ -17,6 +20,7 @@ export function ApplicantSection({ slug, hasPreSelectionTest, testDurationMinute
   const [page, setPage] = useState(1);
   const [opened, setOpened] = useState<{ id: number; tab: DetailTab } | null>(null);
   const [assigning, setAssigning] = useState(false);
+  const [scheduling, setScheduling] = useState<PreselectedApplicant | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebounced(filters), 300);
@@ -27,6 +31,8 @@ export function ApplicantSection({ slug, hasPreSelectionTest, testDurationMinute
 
   const query = useMemo(() => ({ ...toQuery(debounced), page, limit: PAGE_SIZE }), [debounced, page]);
   const { data, isPending, isError, error, isFetching } = useApplicants(slug, query);
+
+  const roster = useInterviews(scheduling ? slug : undefined, { limit: ROSTER_LIMIT, sortOrder: "asc" });
 
   const applicants = data?.applicants ?? [];
   const meta = data?.meta;
@@ -108,7 +114,19 @@ export function ApplicantSection({ slug, hasPreSelectionTest, testDurationMinute
         applicationId={opened?.id ?? null}
         hasPreSelectionTest={hasPreSelectionTest}
         initialTab={opened?.tab}
+        onScheduleInterview={(applicant) => {
+          setOpened(null);
+          setScheduling(applicant);
+        }}
         onClose={() => setOpened(null)}
+      />
+
+      <ScheduleInterviewModal
+        slug={slug}
+        open={Boolean(scheduling)}
+        scheduledIds={(roster.data?.interviews ?? []).map((item) => item.applicationId)}
+        preselect={scheduling}
+        onClose={() => setScheduling(null)}
       />
     </section>
   );

@@ -1,5 +1,16 @@
 import { interviewStatusLabels, interviewStatuses, type InterviewQuery } from "../../../types/interview";
 import { Search } from "../../site/Icons";
+import { AdminSelect, type AdminSelectOption } from "../AdminSelect";
+
+const statusOptions: AdminSelectOption[] = [
+  { value: "all", label: "All statuses" },
+  ...interviewStatuses.map((status) => ({ value: status, label: interviewStatusLabels[status] })),
+];
+
+const sortOptions: AdminSelectOption[] = [
+  { value: "asc", label: "Soonest first" },
+  { value: "desc", label: "Latest first" },
+];
 
 export type InterviewFilterState = {
   status: string;
@@ -57,29 +68,18 @@ export function InterviewFilters({ filters, onChange, onReset }: InterviewFilter
         <div className="interview-filter-hint">
           <Search /> Narrow the schedule down
         </div>
-        <select
+        <AdminSelect
+          ariaLabel="Filter by interview status"
           value={filters.status}
-          onChange={(event) => set("status", event.target.value)}
-          aria-label="Filter by interview status"
-        >
-          <option value="all">All statuses</option>
-          {interviewStatuses.map((status) => (
-            <option key={status} value={status}>
-              {interviewStatusLabels[status]}
-            </option>
-          ))}
-        </select>
-        <div className="admin-sort">
-          <label htmlFor="interview-sort">Sort</label>
-          <select
-            id="interview-sort"
-            value={filters.sortOrder}
-            onChange={(event) => set("sortOrder", event.target.value as "asc" | "desc")}
-          >
-            <option value="asc">Soonest first</option>
-            <option value="desc">Latest first</option>
-          </select>
-        </div>
+          onChange={(status) => set("status", status)}
+          options={statusOptions}
+        />
+        <AdminSelect
+          label="Sort"
+          value={filters.sortOrder}
+          onChange={(order) => set("sortOrder", order as "asc" | "desc")}
+          options={sortOptions}
+        />
       </div>
 
       <div className="applicant-filters-grid">

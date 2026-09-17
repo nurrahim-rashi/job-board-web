@@ -84,6 +84,11 @@ export default function AdminTestPage() {
       setNotice("Write at least one complete question before saving.");
       return;
     }
+    const minutes = Number(duration);
+    if (!Number.isInteger(minutes) || minutes < 1) {
+      setNotice("Set a whole number of minutes for the time limit before saving.");
+      return;
+    }
     const duplicate = questions.findIndex((item) => isComplete(item) && hasDuplicateOptions(item));
     if (duplicate !== -1) {
       setActive(duplicate);
@@ -95,7 +100,7 @@ export default function AdminTestPage() {
       options: item.options.map((option) => option.trim()),
       correctAnswer: answerOptions[item.answer],
     }));
-    const result = await saveQuestions.mutateAsync(payload).catch(() => null);
+    const result = await saveQuestions.mutateAsync({ questions: payload, testDurationMinutes: minutes }).catch(() => null);
     if (result) navigate(`/admin/jobs/${slug}`);
   }
 

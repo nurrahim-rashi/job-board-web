@@ -3,16 +3,16 @@ import toast from "react-hot-toast";
 
 import { axiosInstance } from "../../../lib/axios";
 import type { ApiResponse } from "../../../types/api";
-import type { TestQuestionInput } from "../../../types/pre-selection-test";
+import type { SaveTestPayload } from "../../../types/pre-selection-test";
 
 export const useSaveTestQuestions = (slug: string) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (questions: TestQuestionInput[]) => {
-      const response = await axiosInstance.put<ApiResponse<{ totalQuestions: number }>>(
+    mutationFn: async (payload: SaveTestPayload) => {
+      const response = await axiosInstance.put<ApiResponse<{ totalQuestions: number; testDurationMinutes?: number }>>(
         `/job-posting/${slug}/pre-selection-test/questions`,
-        { questions },
+        payload,
       );
       return response.data;
     },

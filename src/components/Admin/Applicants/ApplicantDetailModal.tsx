@@ -12,6 +12,7 @@ import { educationLabel, formatDateTime, formatRupiah } from "./applicantHelpers
 import { formatDate } from "../adminData";
 import { statusLabels, statusTones } from "../../../types/applicant";
 import { axiosInstance } from "../../../lib/axios";
+import type { PreselectedApplicant } from "../Interviews/ScheduleInterviewModal";
 
 export type DetailTab = "profile" | "cv" | "test";
 
@@ -20,10 +21,11 @@ type ApplicantDetailModalProps = {
   applicationId: number | null;
   hasPreSelectionTest: boolean;
   initialTab?: DetailTab;
+  onScheduleInterview: (applicant: PreselectedApplicant) => void;
   onClose: () => void;
 };
 
-export function ApplicantDetailModal({ slug, applicationId, hasPreSelectionTest, initialTab = "profile", onClose }: ApplicantDetailModalProps) {
+export function ApplicantDetailModal({ slug, applicationId, hasPreSelectionTest, initialTab = "profile", onScheduleInterview, onClose }: ApplicantDetailModalProps) {
   const [tab, setTab] = useState<DetailTab>(initialTab);
   const { data, isPending, isError, error, refetch } = useApplicantDetail(slug, applicationId);
   const assignTest = useAssignTest(slug);
@@ -56,6 +58,7 @@ export function ApplicantDetailModal({ slug, applicationId, hasPreSelectionTest,
   if (applicationId == null) return null;
 
   const address = data ? [data.applicant.address, data.applicant.city, data.applicant.province].filter(Boolean).join(", ") : "";
+  const invite = data ? () => onScheduleInterview({ applicationId: data.id, name: data.applicant.name }) : undefined;
 
   return (
     <div className="admin-dialog applicant-dialog" role="dialog" aria-modal="true" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
@@ -170,13 +173,13 @@ export function ApplicantDetailModal({ slug, applicationId, hasPreSelectionTest,
                   </button>
                 ) : null}
 
-                <StatusDecision slug={slug} applicationId={data.id} status={data.status} />
+                <StatusDecision slug={slug} applicationId={data.id} status={data.status} onInviteToInterview={invite} />
               </div>
             ) : tab === "cv" ? (
               <div className="applicant-dialog-body">
                 <CvPreview slug={slug} applicationId={data.id} name={data.applicant.name} />
                 <p className="admin-note">Submitted {formatDate(data.appliedAt)} · {data.cvFile.split("/").pop()}</p>
-                <StatusDecision slug={slug} applicationId={data.id} status={data.status} />
+                <StatusDecision slug={slug} applicationId={data.id} status={data.status} onInviteToInterview={invite} />
               </div>
             ) : (
               <div className="applicant-dialog-body">

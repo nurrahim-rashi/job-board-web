@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { AdminShell } from "../components/Admin/AdminShell";
 import { ApplicantSection } from "../components/Admin/Applicants/ApplicantSection";
+import { AdminSelect } from "../components/Admin/AdminSelect";
 import { useJobPostings } from "../hooks/api/job-posting/useJobPostings";
 import { ArrowRight } from "../components/site/Icons";
 
@@ -46,16 +47,16 @@ export default function AdminApplicantsPage() {
       ) : jobs.length ? (
         <>
           <section className="admin-filters">
-            <label className="admin-sort">
-              <span>Job posting</span>
-              <select value={slug} onChange={(event) => pick(event.target.value)}>
-                {jobs.map((job) => (
-                  <option key={job.slug} value={job.slug}>
-                    {job.title} · {job.applicantCount} applied
-                  </option>
-                ))}
-              </select>
-            </label>
+            <AdminSelect
+              label="Job posting"
+              value={slug}
+              onChange={pick}
+              options={jobs.map((job) => ({
+                value: job.slug,
+                label: job.title,
+                meta: `${job.applicantCount} applied`,
+              }))}
+            />
           </section>
           {slug && selected ? (
             <ApplicantSection
