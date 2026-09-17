@@ -18,21 +18,74 @@ import {
   downloadAssessmentCertificate,
 } from "../lib/assessment-api";
 
+interface PersistedAssessmentProgress {
+  assessmentData: StartAssessmentData;
+  answers: Record<number, AnswerOption>;
+  currentIndex: number;
+}
+
+const getAssessmentStorageKey = (assessmentId: string | undefined) =>
+  `assessment-progress-${assessmentId}`;
+
 export default function AssessmentTakePage() {
   const { assessmentId } = useParams();
   const location = useLocation();
 
-  const assessmentData = location.state as StartAssessmentData | null;
+  const navigationAssessmentData = location.state as StartAssessmentData | null;
 
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const storageKey = getAssessmentStorageKey(assessmentId);
 
-  const [answers, setAnswers] = useState<Record<number, AnswerOption>>({});
+  const persistedProgress = useMemo<PersistedAssessmentProgress | null>(() => {
+    try {
+      const stored = sessionStorage.getItem(storageKey);
+
+      if (!stored) {
+        return null;
+      }
+
+      return JSON.parse(stored) as PersistedAssessmentProgress;
+    } catch {
+      sessionStorage.removeItem(storageKey);
+      return null;
+    }
+  }, [storageKey]);
+
+  const validPersistedProgress =
+    persistedProgress &&
+    String(persistedProgress.assessmentData.assessment.id) === assessmentId
+      ? persistedProgress
+      : null;
+
+  const assessmentData =
+    navigationAssessmentData ?? validPersistedProgress?.assessmentData ?? null;
+
+  const [currentIndex, setCurrentIndex] = useState(
+    validPersistedProgress?.currentIndex ?? 0,
+  );
+
+  const [answers, setAnswers] = useState<Record<number, AnswerOption>>(
+    validPersistedProgress?.answers ?? {},
+  );
 
   const [remainingSeconds, setRemainingSeconds] = useState(0);
 
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [result, setResult] = useState<SubmitAssessmentData | null>(null);
+
+  useEffect(() => {
+    if (!assessmentData || result) {
+      return;
+    }
+
+    const progress: PersistedAssessmentProgress = {
+      assessmentData,
+      answers,
+      currentIndex,
+    };
+
+    sessionStorage.setItem(storageKey, JSON.stringify(progress));
+  }, [assessmentData, answers, currentIndex, result, storageKey]);
 
   const [checkingResult, setCheckingResult] = useState(true);
   const [downloadingCertificate, setDownloadingCertificate] = useState(false);
@@ -189,7 +242,7 @@ export default function AssessmentTakePage() {
         assessmentData.resultId,
         submittedAnswers,
       );
-
+      sessionStorage.removeItem(storageKey);
       setResult(response.data);
     } catch (error) {
       setSubmitError(
