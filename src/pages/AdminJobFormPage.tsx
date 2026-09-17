@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AdminShell } from "../components/Admin/AdminShell";
+import { AdminSelect, type AdminSelectOption } from "../components/Admin/AdminSelect";
 import { useJobPosting } from "../hooks/api/job-posting/useJobPosting";
 import { useCreateJobPosting } from "../hooks/api/job-posting/useCreateJobPosting";
 import { useUpdateJobPosting } from "../hooks/api/job-posting/useUpdateJobPosting";
@@ -32,6 +33,11 @@ const draft: FormState = {
   tags: [],
   published: false,
 };
+
+const categoryOptions: AdminSelectOption[] = jobCategories.map((item) => ({
+  value: item.value,
+  label: item.label,
+}));
 
 const dateInputLimit = (daysFromToday: number) => {
   const date = new Date();
@@ -165,6 +171,26 @@ export default function AdminJobFormPage() {
     );
   }
 
+  const provinceOptions: AdminSelectOption[] = [
+    { value: "", label: "Choose province" },
+    ...provinces.map((province) => ({ value: province.code, label: province.name })),
+  ];
+
+  const cityOptions: AdminSelectOption[] = [
+    {
+      value: "",
+      label: regionsLoading
+        ? "Loading locations…"
+        : provinceCode
+          ? "Choose city / regency"
+          : form.cityLocation || "Choose province first",
+    },
+    ...(form.cityLocation && !locations.some((location) => location.name === form.cityLocation)
+      ? [{ value: form.cityLocation, label: form.cityLocation }]
+      : []),
+    ...locations.map((location) => ({ value: location.name, label: location.name })),
+  ];
+
   return (
     <AdminShell
       eyebrow={editing ? "Edit posting" : "New posting"}
@@ -184,42 +210,32 @@ export default function AdminJobFormPage() {
               Job title
               <input value={form.title} onChange={(event) => set("title", event.target.value)} placeholder="Senior Product Designer" required />
             </label>
-            <label>
-              Category
-              <select value={form.category} onChange={(event) => set("category", event.target.value as JobCategory)}>
-                {jobCategories.map((item) => (
-                  <option key={item.value} value={item.value}>
-                    {item.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Work province
-              <select
-                value={provinceCode}
-                onChange={(event) => {
-                  setProvinceCode(event.target.value);
-                  set("cityLocation", "");
-                }}
-              >
-                <option value="">Choose province</option>
-                {provinces.map((province) => <option key={province.code} value={province.code}>{province.name}</option>)}
-              </select>
-            </label>
-            <label>
-              Work location
-              <select
-                value={form.cityLocation}
-                disabled={!provinceCode && !form.cityLocation}
-                onChange={(event) => set("cityLocation", event.target.value)}
-                required
-              >
-                <option value="">{regionsLoading ? "Loading locations…" : provinceCode ? "Choose city / regency" : form.cityLocation || "Choose province first"}</option>
-                {form.cityLocation && !locations.some((location) => location.name === form.cityLocation) && <option value={form.cityLocation}>{form.cityLocation}</option>}
-                {locations.map((location) => <option key={location.code} value={location.name}>{location.name}</option>)}
-              </select>
-            </label>
+            <AdminSelect
+              variant="field"
+              label="Category"
+              value={form.category}
+              onChange={(next) => set("category", next as JobCategory)}
+              options={categoryOptions}
+            />
+            <AdminSelect
+              variant="field"
+              label="Work province"
+              value={provinceCode}
+              onChange={(next) => {
+                setProvinceCode(next);
+                set("cityLocation", "");
+              }}
+              options={provinceOptions}
+            />
+            <AdminSelect
+              variant="field"
+              label="Work location"
+              value={form.cityLocation}
+              onChange={(next) => set("cityLocation", next)}
+              options={cityOptions}
+              disabled={!provinceCode && !form.cityLocation}
+              required
+            />
             <label>
               Application deadline
               <input type="date" min={dateInputLimit(0)} max={dateInputLimit(360)} value={form.deadline} onChange={(event) => set("deadline", event.target.value)} required />

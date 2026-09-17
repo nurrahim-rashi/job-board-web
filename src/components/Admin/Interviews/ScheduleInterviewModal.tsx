@@ -11,16 +11,19 @@ import { defaultSlot, minDateTime, toIso } from "./interviewHelpers";
 
 type Draft = { applicationId: number; name: string; when: string; where: string; notes: string };
 
+export type PreselectedApplicant = { applicationId: number; name: string };
+
 type ScheduleInterviewModalProps = {
   slug: string;
   open: boolean;
   scheduledIds: number[];
+  preselect?: PreselectedApplicant | null;
   onClose: () => void;
 };
 
 const APPLICANT_PAGE_SIZE = 50;
 
-export function ScheduleInterviewModal({ slug, open, scheduledIds, onClose }: ScheduleInterviewModalProps) {
+export function ScheduleInterviewModal({ slug, open, scheduledIds, preselect, onClose }: ScheduleInterviewModalProps) {
   const [step, setStep] = useState<1 | 2>(1);
   const [search, setSearch] = useState("");
   const [drafts, setDrafts] = useState<Draft[]>([]);
@@ -35,13 +38,20 @@ export function ScheduleInterviewModal({ slug, open, scheduledIds, onClose }: Sc
   });
 
   useEffect(() => {
-    if (open) return;
-    setStep(1);
-    setSearch("");
-    setDrafts([]);
-    setSharedPlace("");
-    setTouched(false);
-  }, [open]);
+    if (!open) {
+      setStep(1);
+      setSearch("");
+      setDrafts([]);
+      setSharedPlace("");
+      setTouched(false);
+      return;
+    }
+    if (!preselect) return;
+    setDrafts([
+      { applicationId: preselect.applicationId, name: preselect.name, when: defaultSlot(0, []), where: "", notes: "" },
+    ]);
+    setStep(2);
+  }, [open, preselect]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {

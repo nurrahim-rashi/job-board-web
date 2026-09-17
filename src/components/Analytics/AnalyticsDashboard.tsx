@@ -5,6 +5,7 @@ import { useApplicantInterests } from "../../hooks/api/analytics/useApplicantInt
 import { usePlatformEngagement } from "../../hooks/api/analytics/usePlatformEngagement";
 import { useSalaryTrends } from "../../hooks/api/analytics/useSalaryTrends";
 import { useUserDemographics } from "../../hooks/api/analytics/useUserDemographics";
+import { AdminSelect, type AdminSelectOption } from "../Admin/AdminSelect";
 import { analyticsRanges } from "../../types/analytics";
 import { jobCategories, type JobCategory } from "../../types/job-posting";
 import { DemographicsSection } from "./DemographicsSection";
@@ -12,6 +13,16 @@ import { EngagementSection } from "./EngagementSection";
 import { InterestsSection } from "./InterestsSection";
 import { OverviewSection } from "./OverviewSection";
 import { SalarySection } from "./SalarySection";
+
+const rangeOptions: AdminSelectOption[] = analyticsRanges.map((range) => ({
+  value: String(range.value),
+  label: range.label,
+}));
+
+const categoryOptions: AdminSelectOption[] = [
+  { value: "", label: "All categories" },
+  ...jobCategories.map((item) => ({ value: item.value, label: item.label })),
+];
 
 export function AnalyticsDashboard() {
   const [months, setMonths] = useState(6);
@@ -36,30 +47,20 @@ export function AnalyticsDashboard() {
   return (
     <div className="analytics">
       <div className="analytics-filters">
-        <label>
-          Range
-          <select value={months} onChange={(event) => setMonths(Number(event.target.value))}>
-            {analyticsRanges.map((range) => (
-              <option key={range.value} value={range.value}>
-                {range.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Category
-          <select
-            value={category}
-            onChange={(event) => setCategory(event.target.value as JobCategory | "")}
-          >
-            <option value="">All categories</option>
-            {jobCategories.map((item) => (
-              <option key={item.value} value={item.value}>
-                {item.label}
-              </option>
-            ))}
-          </select>
-        </label>
+        <AdminSelect
+          variant="stacked"
+          label="Range"
+          value={String(months)}
+          onChange={(next) => setMonths(Number(next))}
+          options={rangeOptions}
+        />
+        <AdminSelect
+          variant="stacked"
+          label="Category"
+          value={category}
+          onChange={(next) => setCategory(next as JobCategory | "")}
+          options={categoryOptions}
+        />
         <p>
           {refreshing
             ? "Refreshing…"

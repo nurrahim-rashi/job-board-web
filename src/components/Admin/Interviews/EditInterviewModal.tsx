@@ -9,8 +9,15 @@ import {
   type InterviewStatus,
 } from "../../../types/interview";
 import { Check, Close, Mail } from "../../site/Icons";
+import { AdminSelect, type AdminSelectOption } from "../AdminSelect";
 import { ApplicantAvatar } from "../Applicants/ApplicantAvatar";
 import { countdownLabel, formatSchedule, minDateTime, reminderState, toIso, toLocalInput } from "./interviewHelpers";
+
+const statusOptions: AdminSelectOption[] = [
+  { value: "SCHEDULED", label: "Scheduled" },
+  { value: "COMPLETED", label: "Completed" },
+  { value: "CANCELLED", label: "Cancelled" },
+];
 
 type EditInterviewModalProps = {
   slug: string;
@@ -135,14 +142,13 @@ export function EditInterviewModal({ slug, interview, onClose, onDelete }: EditI
                 onChange={(event) => setWhen(event.target.value)}
               />
             </label>
-            <label>
-              <span>Status</span>
-              <select value={status} onChange={(event) => setStatus(event.target.value as InterviewStatus)}>
-                <option value="SCHEDULED">Scheduled</option>
-                <option value="COMPLETED">Completed</option>
-                <option value="CANCELLED">Cancelled</option>
-              </select>
-            </label>
+            <AdminSelect
+              variant="field"
+              label="Status"
+              value={status}
+              onChange={(next) => setStatus(next as InterviewStatus)}
+              options={statusOptions}
+            />
             <label className="wide">
               <span>Location or meeting link</span>
               <input

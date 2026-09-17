@@ -8,6 +8,11 @@ export interface TestQuestionInput {
   correctAnswer: AnswerOption;
 }
 
+export interface SaveTestPayload {
+  questions: TestQuestionInput[];
+  testDurationMinutes?: number;
+}
+
 export interface TestQuestion extends TestQuestionInput {
   id: number;
 }

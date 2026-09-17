@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { AdminShell } from "../components/Admin/AdminShell";
+import { AdminSelect, type AdminSelectOption } from "../components/Admin/AdminSelect";
 import { ConfirmDialog } from "../components/Admin/ConfirmDialog";
 import { daysLeft, formatDate, formatSalary } from "../components/Admin/adminData";
 import { useJobPostings } from "../hooks/api/job-posting/useJobPostings";
@@ -11,6 +12,25 @@ import { ArrowRight, Search } from "../components/site/Icons";
 import { isNewJob } from "../lib/job-age";
 
 type SortKey = "newest" | "oldest" | "title" | "applicants" | "deadline";
+
+const categoryOptions: AdminSelectOption[] = [
+  { value: "all", label: "All categories" },
+  ...jobCategories.map((item) => ({ value: item.value, label: item.label })),
+];
+
+const statusOptions: AdminSelectOption[] = [
+  { value: "all", label: "All status" },
+  { value: "published", label: "Published" },
+  { value: "draft", label: "Draft" },
+];
+
+const sortOptions: AdminSelectOption[] = [
+  { value: "newest", label: "Newest first" },
+  { value: "oldest", label: "Oldest first" },
+  { value: "title", label: "Title A–Z" },
+  { value: "applicants", label: "Most applicants" },
+  { value: "deadline", label: "Closing soonest" },
+];
 
 const sorting: Record<Exclude<SortKey, "applicants">, Pick<JobListQuery, "sortBy" | "sortOrder">> = {
   newest: { sortBy: "createdAt", sortOrder: "desc" },
@@ -98,29 +118,19 @@ export default function AdminJobsPage() {
           <Search />
           <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search by job title" />
         </label>
-        <select value={category} onChange={(event) => setCategory(event.target.value)}>
-          <option value="all">All categories</option>
-          {jobCategories.map((item) => (
-            <option key={item.value} value={item.value}>
-              {item.label}
-            </option>
-          ))}
-        </select>
-        <select value={status} onChange={(event) => setStatus(event.target.value)}>
-          <option value="all">All status</option>
-          <option value="published">Published</option>
-          <option value="draft">Draft</option>
-        </select>
-        <div className="admin-sort">
-          <label htmlFor="job-sort">Sort</label>
-          <select id="job-sort" value={sort} onChange={(event) => setSort(event.target.value as SortKey)}>
-            <option value="newest">Newest first</option>
-            <option value="oldest">Oldest first</option>
-            <option value="title">Title A–Z</option>
-            <option value="applicants">Most applicants</option>
-            <option value="deadline">Closing soonest</option>
-          </select>
-        </div>
+        <AdminSelect
+          ariaLabel="Filter by category"
+          value={category}
+          onChange={setCategory}
+          options={categoryOptions}
+        />
+        <AdminSelect
+          ariaLabel="Filter by publish status"
+          value={status}
+          onChange={setStatus}
+          options={statusOptions}
+        />
+        <AdminSelect label="Sort" value={sort} onChange={(next) => setSort(next as SortKey)} options={sortOptions} />
       </section>
 
       {isPending ? (

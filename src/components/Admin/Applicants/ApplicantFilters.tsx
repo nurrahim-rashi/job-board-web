@@ -1,4 +1,5 @@
-import { Search, SlidersHorizontal } from "../../site/Icons";
+import { Search } from "../../site/Icons";
+import { AdminSelect, type AdminSelectOption } from "../AdminSelect";
 import { applicationStatuses, educationOptions, statusLabels, type ApplicantQuery, type ApplicationStatus } from "../../../types/applicant";
 
 export type FilterState = {
@@ -33,7 +34,19 @@ const sorting: Record<SortKey, Pick<ApplicantQuery, "sortBy" | "sortOrder">> = {
   name: { sortBy: "name", sortOrder: "asc" },
 };
 
-/** A suggestion label maps back to its search term; anything else is searched verbatim. */
+const statusOptions: AdminSelectOption[] = [
+  { value: "all", label: "All statuses" },
+  ...applicationStatuses.map((status) => ({ value: status, label: statusLabels[status] })),
+];
+
+const sortOptions: AdminSelectOption[] = [
+  { value: "earliest", label: "Earliest applied" },
+  { value: "latest", label: "Latest applied" },
+  { value: "salaryLow", label: "Lowest expected salary" },
+  { value: "salaryHigh", label: "Highest expected salary" },
+  { value: "name", label: "Name A–Z" },
+];
+
 const educationQuery = (value: string) => {
   const typed = value.trim();
   return educationOptions.find((option) => option.label.toLowerCase() === typed.toLowerCase())?.query ?? typed;
@@ -114,31 +127,23 @@ export function ApplicantFilters({ filters, onChange, onReset }: ApplicantFilter
             placeholder="Search applicant name"
           />
         </label>
-        <select value={filters.status} onChange={(event) => set("status", event.target.value)} aria-label="Filter by status">
-          <option value="all">All statuses</option>
-          {applicationStatuses.map((status) => (
-            <option key={status} value={status}>
-              {statusLabels[status]}
-            </option>
-          ))}
-        </select>
-        <div className="admin-sort">
-          <label htmlFor="applicant-sort">Sort</label>
-          <select id="applicant-sort" value={filters.sort} onChange={(event) => set("sort", event.target.value as SortKey)}>
-            <option value="earliest">Earliest applied</option>
-            <option value="latest">Latest applied</option>
-            <option value="salaryLow">Lowest expected salary</option>
-            <option value="salaryHigh">Highest expected salary</option>
-            <option value="name">Name A–Z</option>
-          </select>
-        </div>
+        <AdminSelect
+          ariaLabel="Filter by status"
+          value={filters.status}
+          onChange={(status) => set("status", status)}
+          options={statusOptions}
+        />
+        <AdminSelect
+          label="Sort"
+          value={filters.sort}
+          onChange={(sort) => set("sort", sort as SortKey)}
+          options={sortOptions}
+        />
       </div>
 
       <div className="applicant-filters-grid">
         <div className="applicant-field">
-          <span>
-            <SlidersHorizontal /> Age
-          </span>
+          <span>Age</span>
           <div className="applicant-range">
             <input
               type="number"

@@ -11159,26 +11159,209 @@ input[type="month"]:focus-visible {
   width: 100%;
 }
 .admin-filters select,
-.admin-sort select {
-  background: #f7f3ea;
-  border: 1px solid #e4dfd4;
+
+.admin-picker {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.admin-picker-label {
+  color: #74717a;
+  font-size: 13px;
+}
+.admin-picker-anchor {
+  position: relative;
+}
+.admin-picker-trigger {
+  align-items: center;
+  background: #fffdf7;
+  border: 1px solid #ded9cf;
   border-radius: 999px;
   color: #202129;
+  cursor: pointer;
+  display: inline-flex;
   font:
-    14px "DM Sans",
+    600 14px "DM Sans",
     sans-serif;
-  padding: 10px 12px;
+  gap: 10px;
+  padding: 9px 13px 9px 16px;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
 }
-.admin-sort {
-  align-items: center;
-  color: #74717a;
-  display: flex;
-  font-size: 13px;
-  gap: 8px;
+.admin-picker-trigger:hover {
+  background: #f9f6ee;
+  border-color: #c9c2b5;
 }
-.admin-sort svg {
+.admin-picker-trigger:focus-visible {
+  outline: 2px solid #485eb4;
+  outline-offset: 2px;
+}
+.admin-picker-trigger:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.admin-picker-trigger:disabled:hover {
+  background: #fffdf7;
+  border-color: #ded9cf;
+}
+
+/* Carries `required` for the browser: unstyled but still focusable, so the validation bubble has somewhere to point. */
+.admin-picker-native {
+  border: 0;
+  bottom: 0;
+  height: 1px;
+  left: 14px;
+  opacity: 0;
+  padding: 0;
+  pointer-events: none;
+  position: absolute;
+  width: 1px;
+}
+.admin-picker-trigger[aria-expanded="true"] {
+  background: #fffdf7;
+  border-color: #485eb4;
+  box-shadow: 0 0 0 3px rgb(72 94 180 / 0.13);
+}
+.admin-picker-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.admin-picker-count {
+  background: #f0ece2;
+  border-radius: 999px;
+  color: #67656c;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  padding: 2px 9px;
+  white-space: nowrap;
+}
+.admin-picker-trigger svg {
+  color: #97949c;
+  flex-shrink: 0;
   height: 16px;
+  transition: transform 0.18s ease;
   width: 16px;
+}
+.admin-picker-trigger[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+.admin-picker-menu {
+  background: #fffdf7;
+  border: 1px solid #ded9cf;
+  border-radius: 16px;
+  box-shadow: 0 18px 44px rgb(32 33 41 / 0.15);
+  left: 0;
+  list-style: none;
+  margin: 0;
+  max-height: 320px;
+  max-width: min(440px, calc(100vw - 48px));
+  min-width: 100%;
+  overflow-y: auto;
+  padding: 6px;
+  position: absolute;
+  top: calc(100% + 8px);
+  width: max-content;
+  z-index: 20;
+}
+.admin-picker-menu:focus {
+  outline: none;
+}
+.admin-picker-option {
+  align-items: center;
+  border-radius: 11px;
+  color: #202129;
+  cursor: pointer;
+  display: flex;
+  font-size: 14px;
+  gap: 10px;
+  padding: 9px 12px;
+}
+.admin-picker-option > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.admin-picker-option > em {
+  color: #97949c;
+  font-size: 12px;
+  font-style: normal;
+  margin-left: auto;
+  padding-left: 8px;
+  white-space: nowrap;
+}
+.admin-picker-option svg {
+  color: #485eb4;
+  flex-shrink: 0;
+  height: 16px;
+  visibility: hidden;
+  width: 16px;
+}
+.admin-picker-option.selected {
+  font-weight: 600;
+}
+.admin-picker-option.selected svg {
+  visibility: visible;
+}
+.admin-picker-option.active {
+  background: #f3efe5;
+}
+.admin-picker-option.active > em {
+  color: #74717a;
+}
+.admin-picker-menu.up {
+  bottom: calc(100% + 8px);
+  top: auto;
+}
+
+/* Label above a full-width trigger. */
+.admin-picker.stacked,
+.admin-picker.field {
+  align-items: stretch;
+  display: grid;
+  gap: 6px;
+}
+.admin-picker.stacked .admin-picker-trigger,
+.admin-picker.field .admin-picker-trigger {
+  justify-content: space-between;
+  width: 100%;
+}
+.admin-picker.stacked .admin-picker-label,
+.admin-picker.field .admin-picker-label {
+  color: #67656c;
+  font-size: 12px;
+}
+.admin-picker.stacked .admin-picker-trigger {
+  min-width: 172px;
+}
+
+/* Matches the inputs sitting beside it inside `.admin-fields`. */
+.admin-picker.field {
+  gap: 7px;
+  min-width: 0;
+}
+.admin-picker.field .admin-picker-label {
+  font-size: 13px;
+}
+.admin-picker.field .admin-picker-trigger {
+  background: #fcfaf4;
+  border-radius: 12px;
+  font-weight: 400;
+  min-height: 45px;
+  padding: 11px;
+}
+@media (max-width: 560px) {
+  .admin-picker,
+  .admin-picker-anchor,
+  .admin-picker-trigger {
+    width: 100%;
+  }
+  .admin-picker-value {
+    margin-right: auto;
+  }
 }
 .admin-table {
   background: #fffdf7;
@@ -11351,7 +11534,6 @@ input[type="month"]:focus-visible {
   grid-column: 1 / -1;
 }
 .admin-fields input,
-.admin-fields select,
 .admin-fields textarea,
 .admin-question-field textarea {
   background: #fcfaf4;
@@ -11605,7 +11787,8 @@ input[type="month"]:focus-visible {
   justify-content: space-between;
   margin-top: 22px;
 }
-.admin-alert {
+.admin-alert,
+.admin-dialog .admin-alert {
   background: #fff7d8;
   border: 1px solid #ebd79a;
   border-radius: 12px;
@@ -11800,16 +11983,6 @@ input[type="month"]:focus-visible {
 }
 .applicant-filters-top .admin-search {
   background: #fffdf7;
-}
-.applicant-filters-top select {
-  background: #fffdf7;
-  border: 1px solid #e4dfd4;
-  border-radius: 999px;
-  color: #202129;
-  font:
-    14px "DM Sans",
-    sans-serif;
-  padding: 10px 12px;
 }
 .applicant-filters-grid {
   border-top: 1px solid #e4dfd4;
@@ -12175,7 +12348,7 @@ input[type="month"]:focus-visible {
   overflow-y: auto;
   padding: 20px 26px;
 }
-.interview-dialog-footer {
+.admin-dialog .interview-dialog-footer {
   align-items: center;
   background: #fffdf7;
   border-top: 1px solid #ece7dd;
@@ -12336,12 +12509,12 @@ input[type="month"]:focus-visible {
   padding: 10px 11px;
   width: 100%;
 }
-.interview-draft-error {
+.admin-dialog .interview-draft-error {
   color: #9c3836;
   font-size: 12px;
   margin: 8px 0 0;
 }
-.interview-current {
+.admin-dialog .interview-current {
   align-items: center;
   background: #f7f3ea;
   border: 1px solid #e4dfd4;
@@ -12361,7 +12534,7 @@ input[type="month"]:focus-visible {
 .interview-current b {
   color: #202129;
 }
-.interview-reminder-note {
+.admin-dialog .interview-reminder-note {
   align-items: center;
   color: #74717a;
   display: flex;
@@ -12435,17 +12608,6 @@ input[type="month"]:focus-visible {
   display: grid;
   font-size: 12px;
   gap: 6px;
-}
-.analytics-filters select {
-  background: #f7f3ea;
-  border: 1px solid #e4dfd4;
-  border-radius: 999px;
-  color: #202129;
-  font:
-    14px "DM Sans",
-    sans-serif;
-  min-width: 172px;
-  padding: 10px 13px;
 }
 .analytics-filters p {
   color: #97949c;
@@ -13400,7 +13562,7 @@ input[type="month"]:focus-visible {
   cursor: default;
   opacity: 0.65;
 }
-.interview-reschedule-warning {
+.admin-dialog .interview-reschedule-warning {
   align-items: flex-start;
   background: #fff5d9;
   border-color: #dfc477;
