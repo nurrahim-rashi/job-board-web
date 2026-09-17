@@ -106,40 +106,50 @@ export default function DeveloperSubscriptionsPage() {
                 <p className="eyebrow">Subscription plan</p>
                 <h2>{plan.name}</h2>
 
-                <label>
-                  Price (IDR)
-                  <input
-                    type="number"
-                    min="1"
-                    value={plan.price}
-                    onChange={(event) =>
-                      updatePlanField(
-                        plan.name,
-                        "price",
-                        Number(event.target.value),
-                      )
-                    }
-                  />
-                </label>
+                <div className="subscription-plan-fields">
+                  <label className="subscription-plan-field">
+                    <span>Price</span>
 
-                <label>
-                  Duration (days)
-                  <input
-                    type="number"
-                    min="1"
-                    value={plan.durationDays}
-                    onChange={(event) =>
-                      updatePlanField(
-                        plan.name,
-                        "durationDays",
-                        Number(event.target.value),
-                      )
-                    }
-                  />
-                </label>
+                    <div className="subscription-input-wrap">
+                      <span className="subscription-input-prefix">IDR</span>
+                      <input
+                        type="number"
+                        min="1"
+                        value={plan.price}
+                        onChange={(event) =>
+                          updatePlanField(
+                            plan.name,
+                            "price",
+                            Number(event.target.value),
+                          )
+                        }
+                      />
+                    </div>
+                  </label>
 
-                <div>
-                  <b>Features</b>
+                  <label className="subscription-plan-field">
+                    <span>Duration</span>
+
+                    <div className="subscription-input-wrap">
+                      <input
+                        type="number"
+                        min="1"
+                        value={plan.durationDays}
+                        onChange={(event) =>
+                          updatePlanField(
+                            plan.name,
+                            "durationDays",
+                            Number(event.target.value),
+                          )
+                        }
+                      />
+                      <span className="subscription-input-suffix">days</span>
+                    </div>
+                  </label>
+                </div>
+
+                <div className="subscription-plan-features">
+                  <span>Included features</span>
 
                   <ul>
                     {plan.featuresAccess.cvGenerator ? (

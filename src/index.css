@@ -3211,7 +3211,6 @@ p {
   .company-profile-content .company-role-list > a > span:last-child {
     text-align: left;
   }
-
 }
 .company-about-card {
   order: 1;
@@ -11159,7 +11158,6 @@ input[type="month"]:focus-visible {
   width: 100%;
 }
 .admin-filters select,
-
 .admin-picker {
   align-items: center;
   display: flex;
@@ -14361,7 +14359,6 @@ input[type="month"]:focus-visible {
   .test-sheet-head {
     grid-template-columns: minmax(0, 1fr);
   }
-
 }
 .assign-dialog > div {
   display: flex;
@@ -15100,4 +15097,146 @@ input[type="month"]:focus-visible {
 .company-profile-page .company-profile-content > .company-profile-columns {
   column-gap: 22px !important;
   row-gap: 22px !important;
+}
+
+/* Developer subscription management */
+
+.subscription-management-page .panel-grid {
+  align-items: stretch;
+}
+
+.subscription-management-page .panel-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 430px;
+}
+
+.subscription-management-page .panel-card h2 {
+  font-size: 34px;
+  margin-bottom: 28px;
+}
+
+.subscription-plan-fields {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.subscription-plan-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.subscription-plan-field > span,
+.subscription-plan-features > span {
+  color: #74717a;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.subscription-input-wrap {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #d8d3ca;
+  border-radius: 12px;
+  display: flex;
+  min-height: 48px;
+  overflow: hidden;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.subscription-input-wrap:focus-within {
+  border-color: #536bc6;
+  box-shadow: 0 0 0 3px rgb(83 107 198 / 0.12);
+}
+
+.subscription-input-wrap input {
+  background: transparent;
+  border: 0;
+  color: #24242a;
+  font: inherit;
+  font-size: 15px;
+  min-width: 0;
+  outline: none;
+  padding: 13px 14px;
+  width: 100%;
+}
+
+.subscription-input-prefix,
+.subscription-input-suffix {
+  color: #74717a;
+  flex: 0 0 auto;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.subscription-input-prefix {
+  border-right: 1px solid #e3ded5;
+  padding: 0 0 0 14px;
+  padding-right: 12px;
+}
+
+.subscription-input-suffix {
+  border-left: 1px solid #e3ded5;
+  padding: 0 14px 0 12px;
+}
+
+.subscription-plan-features {
+  border-top: 1px solid #e5e0d7;
+  margin-top: 26px;
+  padding-top: 22px;
+}
+
+.subscription-plan-features ul {
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+}
+
+.subscription-plan-features li {
+  align-items: center;
+  display: flex;
+  font-size: 14px;
+  gap: 10px;
+  line-height: 1.45;
+}
+
+.subscription-plan-features li::before {
+  align-items: center;
+  background: #edf0fb;
+  border-radius: 50%;
+  color: #485eb4;
+  content: "✓";
+  display: inline-flex;
+  flex: 0 0 22px;
+  font-size: 12px;
+  font-weight: 800;
+  height: 22px;
+  justify-content: center;
+}
+
+.subscription-management-page .panel-card > .button {
+  align-self: flex-start;
+  margin-top: auto;
+}
+
+@media (max-width: 700px) {
+  .subscription-plan-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .subscription-management-page .panel-card {
+    min-height: 0;
+  }
+
+  .subscription-management-page .panel-card > .button {
+    margin-top: 28px;
+  }
 }
