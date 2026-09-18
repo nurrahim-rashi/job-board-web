@@ -169,7 +169,7 @@ export default function AssessmentTakePage() {
 
   if (checkingResult) {
     return (
-      <div className="workspace-dashboard">
+      <div className="workspace-dashboard assessment-take-page">
         <Navbar />
         <main>
           <section className="role-panel">
@@ -288,7 +288,7 @@ export default function AssessmentTakePage() {
 
   if (result) {
     return (
-      <div className="workspace-dashboard">
+      <div className="workspace-dashboard assessment-take-page">
         <Navbar />
 
         <main>
@@ -356,7 +356,7 @@ export default function AssessmentTakePage() {
   }
 
   return (
-    <div className="workspace-dashboard">
+    <div className="workspace-dashboard assessment-take-page">
       <Navbar />
 
       <main>
