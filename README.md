@@ -1,15 +1,24 @@
 # Polaris Web
 
-Polaris Web is the frontend for Polaris, a job board that helps job seekers discover relevant work and helps companies manage their hiring journey. The product combines an editorial landing page, location-aware job discovery, authenticated dashboards, profile management, and company-facing workflows.
+Polaris Web is the React frontend for a role-based job platform. Visitors can browse jobs, companies, stories, pricing, and public profiles. Signed-in job seekers can manage applications, interviews, tests, saved jobs, skill assessments, certificates, CV generation, and their public profile. Company administrators manage job postings, applicants, interviews, pre-selection tests, analytics, and company profiles.
 
-## Technology
+## Stack
 
 - React 19 and TypeScript
-- Vite for development and production builds
-- React Router DOM for client-side routing
-- Plain CSS in `src/index.css` with no Tailwind dependency
+- Vite 7
+- React Router DOM
+- TanStack Query
+- Zustand with persisted authentication state
+- Axios and React Hot Toast
+- Plain CSS in `src/index.css`
 
-## Getting Started
+## Requirements
+
+- Node.js 20 or newer
+- npm
+- A running Polaris API (the local default is `http://localhost:8000`)
+
+## Local Setup
 
 ```bash
 cp .env.example .env
@@ -17,57 +26,115 @@ npm install
 npm run dev
 ```
 
-The development server runs on `http://localhost:5173` by default.
+Vite serves the application at `http://localhost:5173` by default.
 
 ## Environment Variables
 
-| Variable | Purpose |
-| --- | --- |
-| `VITE_API_URL` | Base URL for the Polaris API, for example `http://localhost:8000`. |
+| Variable | Required | Description |
+| --- | --- | --- |
+| `VITE_API_URL` | Yes | Polaris API base URL, normally `http://localhost:8000`. |
+| `VITE_GOOGLE_CLIENT_ID` | For Google Sign-In | OAuth 2.0 Web Client ID from Google Cloud. It must match `GOOGLE_CLIENT_ID` in the API. |
 
-## Available Scripts
+Restart Vite after changing an environment variable.
 
-```bash
-npm run dev
-npm run build
-npm run preview
-npm run lint
+### Google Sign-In
+
+Create an OAuth client with application type **Web application** and add these Authorized JavaScript origins for local development:
+
+```text
+http://localhost
+http://localhost:5173
 ```
 
-## Product Areas
+No redirect URI is required because Polaris uses the Google Identity Services JavaScript callback. Google accounts are currently registered as job seekers. Company administrators register with the company registration form.
 
-- **Landing page** — communicates Polaris services and shows the five newest published jobs.
-- **Job discovery** — requests device coordinates when permitted, finds jobs within a 50 km radius, and falls back to newest jobs or a manually selected city.
-- **Authentication** — registration, sign-in, email verification, password reset, protected routes, and logout.
-- **Profile** — personal/company profile editing, password changes, verification prompts, and image avatar upload.
-- **Dashboard** — applicant, company-admin, and developer workspace panels.
-- **Public pages** — jobs, companies, stories, job detail, and about pages.
+## Scripts
 
-## Routes
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start the Vite development server. |
+| `npm run build` | Type-check and create the production build in `dist/`. |
+| `npm run preview` | Preview the production build locally. |
+| `npm run lint` | Run ESLint. |
 
-| Route | Access | Description |
-| --- | --- | --- |
-| `/` | Public / authenticated | Landing page for visitors, homepage for signed-in users. |
-| `/jobs` | Public | Browse jobs. |
-| `/jobs/:slug` | Public | Job detail and application entry point. |
-| `/companies` | Public | Browse companies. |
-| `/stories` | Public | Polaris stories. |
-| `/about` | Public | About Polaris. |
-| `/profile` | Authenticated | User or company profile settings. |
-| `/dashboard` | Authenticated | Role-based workspace dashboard. |
+## Main Routes
+
+### Public
+
+| Route | Description |
+| --- | --- |
+| `/` | Landing page when signed out; personalized home when signed in. |
+| `/jobs` and `/jobs/:slug` | Search jobs and view job details. |
+| `/companies` and `/companies/:companyId` | Browse companies and public company profiles. |
+| `/profile/:userId` | Public applicant or company-admin profile. |
+| `/stories` | Company quality, reviews, and platform outcomes. |
+| `/pricing` | Free, Polaris Plus, and Polaris Pro plans. |
+| `/verify-certificate/:certificateCode` | Verify an assessment certificate. |
+| `/about` | About Polaris. |
+
+### Job seeker
+
+- `/dashboard` and `/dashboard/applications`
+- `/dashboard/interviews`, `/dashboard/tests`, and `/dashboard/closed-jobs`
+- `/dashboard/saved-jobs`
+- `/dashboard/assessments` and assessment result routes
+- `/profile`, `/profile/view`, and `/profile/cv-generator`
+- `/jobs/:slug/pre-selection-test`
+
+### Company administrator
+
+- `/admin`
+- `/admin/jobs/new`, `/admin/jobs/:slug`, and `/admin/jobs/:slug/edit`
+- `/admin/jobs/:slug/test`
+- `/admin/applicants`, `/admin/interviews`, `/admin/tests`, and `/admin/analytics`
+- `/company/profile/edit`
+
+### Developer
+
+- `/dashboard/developer/analytics`
+- `/dashboard/developer/assessments`
+- `/dashboard/developer/subscriptions`
+
+Protected routes remember the original URL and continue that flow after authentication.
+
+## Current Product Areas
+
+- Email/password and Google authentication, verification, password reset, and role guards
+- Worldwide country/state/city search plus device-location sorting
+- Job search, pagination, sharing, saving, and application tracking
+- Application CV upload and immutable education snapshots
+- Public applicant and company profiles with quality scores and badges
+- Job posting, applicant, interview, and pre-selection-test administration
+- Skill assessments, earned badges, results, and verifiable PDF certificates
+- Polaris Plus/Pro subscription purchase flows
+- Company reviews and data-backed Stories content
+- Responsive skeleton, modal, toast, empty, and loading states
 
 ## Project Structure
 
 ```text
 src/
-├── components/       Reusable UI grouped by page or feature
-├── hooks/            Shared React hooks
-├── lib/              API and authentication client helpers
-├── pages/            Route-level page composition
-├── routes/           React Router route declarations
-└── index.css         Global visual system and responsive styles
+├── components/   Feature and shared UI components
+├── constants/    Shared option sets and labels
+├── hooks/        React and API hooks
+├── lib/          Axios, formatting, status, location, and UI helpers
+├── pages/        Route-level pages
+├── routes/       Route declarations and access guards
+├── services/     API service modules
+├── stores/       Persisted Zustand state
+├── types/        Shared frontend contracts
+└── index.css     Global visual system and responsive styles
 ```
 
-## Backend Integration
+## Authentication and API Behavior
 
-The frontend communicates with Polaris API through `src/lib/auth.ts`. Authentication is stored locally as an access token and a safe user profile snapshot. The backend contract and automatically generated database ERD are documented in [`../api/README.md`](../api/README.md).
+The Axios client in `src/lib/axios.ts` attaches the persisted JWT as a Bearer token. API errors are normalized into user-facing errors, returned names are normalized for display, and mutation buttons receive a loading state. Authentication is stored under the `polaris-auth` local-storage key.
+
+The frontend does not call third-party location providers directly. It uses the API's `/regions` endpoints so provider CORS, caching, fallback, and rate limiting remain server-side.
+
+## Production Notes
+
+- Configure the host to serve `index.html` for unknown client-side routes.
+- Set `VITE_API_URL` and `VITE_GOOGLE_CLIENT_ID` at build time.
+- Add the production frontend origin to Google OAuth Authorized JavaScript origins.
+- Preserve the `Cross-Origin-Opener-Policy: same-origin-allow-popups` header when Google popups are used.
