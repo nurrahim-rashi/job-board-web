@@ -13472,6 +13472,23 @@ input[type="month"]:focus-visible {
   border-color: rgb(255 255 255 / 0.16);
   color: #dce5ff;
 }
+.assessment-take-page .site-nav nav {
+  background: rgb(248 245 237 / 0.9);
+  border-color: #ddd9ce;
+  box-shadow: 0 12px 28px rgb(33 34 44 / 0.1);
+}
+
+.assessment-take-page .nav-mark,
+.assessment-take-page .site-nav li a,
+.assessment-take-page .nav-profile {
+  color: #202129;
+}
+
+.assessment-take-page .site-nav li a:hover,
+.assessment-take-page .nav-profile:hover {
+  background: #f0ede5;
+}
+
 .application-priority-card {
   background: linear-gradient(145deg, #f4ecd9, #e5d8ba);
   border: 1px solid #cbb98f;

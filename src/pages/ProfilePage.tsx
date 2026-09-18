@@ -422,7 +422,7 @@ export default function ProfilePage() {
           <button className="profile-submit">Upload photo</button>
         </form>
 
-        {!isCompany && (
+        {user.role === "JOB_SEEKER" && (
           <section className="profile-card">
             <h2>Earned skill badges</h2>
 
