@@ -2,7 +2,7 @@ export const job = {
   title: "Senior Product Designer",
   company: "Fieldnote",
   industry: "Fintech",
-  city: "Jakarta Selatan, Indonesia",
+  city: "Jakarta Selatan, DKI Jakarta, Indonesia",
   type: "Hybrid",
   salary: "Rp 22.000.000 – 30.000.000 / month",
   posted: "Posted 3 days ago",

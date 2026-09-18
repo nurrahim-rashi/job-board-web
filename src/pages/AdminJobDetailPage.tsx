@@ -9,6 +9,7 @@ import { useDeleteJobPosting } from "../hooks/api/job-posting/useDeleteJobPostin
 import { useTogglePublishJobPosting } from "../hooks/api/job-posting/useTogglePublishJobPosting";
 import { categoryLabel } from "../types/job-posting";
 import { ArrowLeft, Clipboard } from "../components/site/Icons";
+import { formatJobLocation } from "../lib/location";
 
 export default function AdminJobDetailPage() {
   const { slug = "" } = useParams();
@@ -47,7 +48,7 @@ export default function AdminJobDetailPage() {
     <AdminShell
       eyebrow="Job posting"
       title={job.title}
-      lead={`${job.cityLocation} · ${formatSalary(job)}`}
+      lead={`${formatJobLocation(job)} · ${formatSalary(job)}`}
       actions={
         <>
           <Link className="admin-btn ghost" to="/admin">

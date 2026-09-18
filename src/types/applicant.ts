@@ -30,16 +30,6 @@ export const statusLabels: Record<ApplicationStatus, string> = {
   REJECTED: applicationStatusLabel("REJECTED"),
 };
 
-/** Maps to the .admin-chip modifiers in index.css. */
-export const statusTones: Record<ApplicationStatus, string> = {
-  PENDING: "",
-  TEST_ASSIGNED: "wait",
-  PROCESS: "info",
-  INTERVIEW: "wait",
-  ACCEPTED: "good",
-  REJECTED: "bad",
-};
-
 /**
  * `lastEducation` is free text, so the suggestion list shows a readable label and
  * searches on the shortest term that still matches every spelling an applicant

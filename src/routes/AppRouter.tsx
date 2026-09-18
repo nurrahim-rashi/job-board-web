@@ -39,6 +39,7 @@ import { useAuth } from "../stores/useAuth";
 import { SignedInFooter } from "../components/SignedInFooter";
 import SeekerApplicationsPage from "../pages/SeekerApplicationsPage";
 import SavedJobsPage from "../pages/SavedJobsPage";
+import { Navbar } from "../components/Navbar";
 
 function hasPreviewSession(search: string) {
   const preview = new URLSearchParams(search).get("loggedIn");
@@ -133,18 +134,33 @@ function DashboardRoute() {
 
 function NotFoundPage() {
   return (
-    <main className="not-found">
-      <h1>404</h1>
-      <h2>That page is not on the map.</h2>
-      <Link className="button button-primary" to="/">
-        Back home
-      </Link>
-    </main>
+    <div className="seeker-profile-page seeker-profile-not-found-page global-not-found-page">
+      <Navbar />
+      <main>
+        <section className="seeker-profile-not-found">
+          <div className="seeker-profile-stars" aria-hidden="true" />
+          <div className="seeker-profile-not-found-copy">
+            <p className="eyebrow light">Page unavailable</p>
+            <h1>That page is not on the map.</h1>
+            <p>It may have been moved, removed, or the link is wrong.</p>
+            <Link to="/">Back home</Link>
+          </div>
+        </section>
+      </main>
+    </div>
   );
 }
 
 export function AppRouter() {
   const loggedIn = useAuth((state) => Boolean(state.token));
+
+  useEffect(() => {
+    document.body.classList.toggle("polaris-signed-in", loggedIn);
+    document.body.classList.toggle("polaris-signed-out", !loggedIn);
+    return () => {
+      document.body.classList.remove("polaris-signed-in", "polaris-signed-out");
+    };
+  }, [loggedIn]);
 
   return (
     <>

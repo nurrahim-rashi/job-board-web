@@ -7,6 +7,8 @@ export type PublicJob = {
   title: string;
   category: string;
   cityLocation: string;
+  provinceLocation: string | null;
+  countryLocation: string;
   latitude: string | null;
   longitude: string | null;
   salaryMin: number | null;
@@ -24,20 +26,44 @@ export type PublicJobDetail = PublicJob & {
   hasPreSelectionTest: boolean;
   testDurationMinutes: number | null;
   applicantCount: number;
-  company: PublicJob["company"] & { id: number; profileContent: string; createdAt: string; postedBy: { id: number; name: string } };
+  company: PublicJob["company"] & {
+    id: number;
+    profileContent: string;
+    createdAt: string;
+    postedBy: { id: number; name: string };
+  };
   relatedJobs: PublicJob[];
 };
 
 export async function getPublicJobs(
-  options: { latitude?: number; longitude?: number; city?: string; title?: string; category?: string; dateFrom?: string; dateTo?: string; sort?: "newest" | "oldest" | "nearest"; limit?: number } = {},
+  options: {
+    latitude?: number;
+    longitude?: number;
+    province?: string;
+    provinceName?: string;
+    country?: string;
+    city?: string;
+    title?: string;
+    category?: string;
+    dateFrom?: string;
+    dateTo?: string;
+    sort?: "newest" | "oldest" | "nearest";
+    limit?: number;
+  } = {},
 ) {
-  const response = await axiosInstance.get<ApiResponse<PublicJob[]>>("/jobs", { params: options });
-  if (!response.data.data) throw new Error(response.data.message ?? "Unable to load jobs");
+  const response = await axiosInstance.get<ApiResponse<PublicJob[]>>("/jobs", {
+    params: options,
+  });
+  if (!response.data.data)
+    throw new Error(response.data.message ?? "Unable to load jobs");
   return response.data.data;
 }
 
 export async function getPublicJob(slug: string) {
-  const response = await axiosInstance.get<ApiResponse<PublicJobDetail>>(`/jobs/${slug}`);
-  if (!response.data.data) throw new Error(response.data.message ?? "Unable to load job");
+  const response = await axiosInstance.get<ApiResponse<PublicJobDetail>>(
+    `/jobs/${slug}`,
+  );
+  if (!response.data.data)
+    throw new Error(response.data.message ?? "Unable to load job");
   return response.data.data;
 }

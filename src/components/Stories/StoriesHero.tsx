@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Building, Users } from "../site/Icons";
-import { milestones } from "./storiesData";
+import { storyMilestones } from "./storiesData";
+import type { ReviewStoriesData } from "../../services/review.service";
 
 const nodes = [
   { x: 18, y: 28, size: 42, label: "AP", delay: 0 },
@@ -25,7 +26,23 @@ const connections: [number, number][] = [
   [5, 3],
 ];
 
-export function StoriesHero() {
+export function StoriesHero({
+  metrics,
+  loading,
+}: {
+  metrics: ReviewStoriesData["metrics"] | null;
+  loading: boolean;
+}) {
+  const milestones = metrics
+    ? storyMilestones(metrics)
+    : [
+        ["—", "matches made on Polaris"],
+        ["—", "median application to offer"],
+        ["—", "listings with a salary range"],
+        ["—", "average verified review rating"],
+        ["—", "rejected applications with a reason"],
+      ];
+
   return (
     <section className="social-garden">
       <div className="social-mesh" />
@@ -46,26 +63,45 @@ export function StoriesHero() {
             </h1>
             <p>
               Every match on Polaris has two sides. Here are the applicants who
-              stopped shouting into the void, and the teams who stopped reading
-              three hundred CVs to find one person.
+              found their next team, told anonymously through verified company
+              reviews and real platform outcomes.
             </p>
           </div>
           <div className="social-stat-cards">
-            <StatCard icon={<Users />} value="1,240" label="matches made" />
+            <StatCard
+              icon={<Users />}
+              value={
+                metrics?.matchesMade.toLocaleString("en-US") ?? null
+              }
+              label="matches made"
+              loading={loading}
+            />
             <StatCard
               icon={<Building />}
-              value="9 days"
-              label="median to offer"
+              value={
+                metrics?.medianDaysToOffer === null || !metrics
+                  ? null
+                  : `${metrics.medianDaysToOffer.toLocaleString("en-US")} days`
+              }
+              label="median application to offer"
+              loading={loading}
             />
           </div>
         </div>
         <dl>
-          {milestones.map(([value, label]) => (
-            <div key={label}>
-              <dt>{value}</dt>
-              <dd>{label}</dd>
-            </div>
-          ))}
+          {loading
+            ? Array.from({ length: 5 }, (_, index) => (
+                <div className="story-milestone-skeleton" key={index}>
+                  <dt />
+                  <dd />
+                </div>
+              ))
+            : milestones.map(([value, label]) => (
+                <div key={label}>
+                  <dt>{value}</dt>
+                  <dd>{label}</dd>
+                </div>
+              ))}
         </dl>
       </div>
     </section>
@@ -76,16 +112,20 @@ function StatCard({
   icon,
   value,
   label,
+  loading,
 }: {
   icon: ReactNode;
-  value: string;
+  value: string | null;
   label: string;
+  loading: boolean;
 }) {
   return (
     <article>
       <i>{icon}</i>
       <p>
-        <b>{value}</b>
+        <b className={loading ? "story-stat-value-skeleton" : ""}>
+          {loading ? null : value ?? "—"}
+        </b>
         <span>{label}</span>
       </p>
     </article>

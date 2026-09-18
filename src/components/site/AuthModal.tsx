@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent, type MouseEvent } from "react";
+import { createPortal } from "react-dom";
 import { Close, Eye } from "./Icons";
 import { login, loginWithGoogle, register } from "../../services/auth.service";
 import { useAuth } from "../../stores/useAuth";
@@ -21,7 +22,6 @@ export function AuthModal({ open, onClose, initialRole = "JOB_SEEKER", initialMo
   );
   const [companyName, setCompanyName] = useState("");
   const [phone, setPhone] = useState("");
-  const [city, setCity] = useState("");
   const [mode, setMode] = useState<"signIn" | "register">("signIn");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -106,7 +106,7 @@ export function AuthModal({ open, onClose, initialRole = "JOB_SEEKER", initialMo
             email,
             password,
             role,
-            ...(role === "COMPANY_ADMIN" ? { companyName, phone, city } : {}),
+            ...(role === "COMPANY_ADMIN" ? { companyName, phone } : {}),
           })
         : await login(email, password);
       finishAuthentication(session);
@@ -125,7 +125,7 @@ export function AuthModal({ open, onClose, initialRole = "JOB_SEEKER", initialMo
     if (event.target === event.currentTarget) onClose();
   }
 
-  return (
+  return createPortal(
     <div
       className="auth-modal"
       role="presentation"
@@ -206,14 +206,6 @@ export function AuthModal({ open, onClose, initialRole = "JOB_SEEKER", initialMo
                   required
                   placeholder="0812..."
                 />
-                <label htmlFor="company-city">City</label>
-                <input
-                  id="company-city"
-                  value={city}
-                  onChange={(event) => setCity(event.target.value)}
-                  required
-                  placeholder="Jakarta"
-                />
               </>
             )}
           </>
@@ -281,6 +273,7 @@ export function AuthModal({ open, onClose, initialRole = "JOB_SEEKER", initialMo
           </button>
         </p>
       </form>
-    </div>
+    </div>,
+    document.body,
   );
 }

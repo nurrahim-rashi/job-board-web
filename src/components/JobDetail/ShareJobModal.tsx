@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Close, Share } from "../site/Icons";
 
 type ShareJobModalProps = {
@@ -75,7 +76,7 @@ export function ShareJobModal({
     window.open(platform.href, "_blank", "noopener,noreferrer");
   }
 
-  return (
+  return createPortal(
     <div
       className="share-job-backdrop"
       role="dialog"
@@ -126,6 +127,7 @@ export function ShareJobModal({
           ))}
         </div>
       </article>
-    </div>
+    </div>,
+    document.body,
   );
 }

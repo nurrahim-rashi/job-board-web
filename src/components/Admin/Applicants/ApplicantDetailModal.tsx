@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import toast from "react-hot-toast";
 
 import { useApplicantDetail } from "../../../hooks/api/applicant/useApplicantDetail";
@@ -10,9 +11,10 @@ import { StatusDecision } from "./StatusDecision";
 import { TestAnswerSheet } from "./TestAnswerSheet";
 import { educationLabel, formatDateTime, formatRupiah } from "./applicantHelpers";
 import { formatDate } from "../adminData";
-import { statusLabels, statusTones } from "../../../types/applicant";
+import { StatusBadge } from "../../site/StatusBadge";
 import { axiosInstance } from "../../../lib/axios";
 import type { PreselectedApplicant } from "../Interviews/ScheduleInterviewModal";
+import { formatLocation } from "../../../lib/location";
 
 export type DetailTab = "profile" | "cv" | "test";
 
@@ -57,10 +59,17 @@ export function ApplicantDetailModal({ slug, applicationId, hasPreSelectionTest,
 
   if (applicationId == null) return null;
 
-  const address = data ? [data.applicant.address, data.applicant.city, data.applicant.province].filter(Boolean).join(", ") : "";
+  const address = data
+    ? [
+        data.applicant.address,
+        formatLocation(data.applicant.city, data.applicant.province, "Indonesia"),
+      ]
+        .filter(Boolean)
+        .join(", ")
+    : "";
   const invite = data ? () => onScheduleInterview({ applicationId: data.id, name: data.applicant.name }) : undefined;
 
-  return (
+  return createPortal(
     <div className="admin-dialog applicant-dialog" role="dialog" aria-modal="true" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
       <div>
         <button type="button" aria-label="Close" onClick={onClose}>
@@ -78,7 +87,7 @@ export function ApplicantDetailModal({ slug, applicationId, hasPreSelectionTest,
               <div>
                 <h2>{data.applicant.name}</h2>
                 <p className="admin-note">{data.applicant.email}</p>
-                <em className={`admin-chip ${statusTones[data.status]}`}>{statusLabels[data.status]}</em>
+                <StatusBadge status={data.status} />
               </div>
               <a
                 className="admin-btn ghost applicant-view-profile"
@@ -151,8 +160,9 @@ export function ApplicantDetailModal({ slug, applicationId, hasPreSelectionTest,
                     <p className="eyebrow">Interview</p>
                     <b>{formatDateTime(data.interview.interviewDate)}</b>
                     <small>
-                      {data.interview.locationOrLink} · {data.interview.status.toLowerCase()}
+                      {data.interview.locationOrLink}
                     </small>
+                    <StatusBadge status={data.interview.status} />
                     {data.interview.notes ? <p className="admin-note">{data.interview.notes}</p> : null}
                     {data.interview.proposedDate ? <p className="admin-alert"><b>Applicant proposed {formatDateTime(data.interview.proposedDate)}</b>{data.interview.proposalNote ? ` · ${data.interview.proposalNote}` : ""}</p> : null}
                   </div>
@@ -189,6 +199,7 @@ export function ApplicantDetailModal({ slug, applicationId, hasPreSelectionTest,
           </>
         )}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

@@ -3,6 +3,8 @@ import { ArrowRight, BadgeCheck, Building, MapPin } from "../site/Icons";
 import { Reveal } from "../../hooks/useReveal";
 import type { PublicCompany } from "../../services/company.service";
 import { DataSkeleton } from "../site/DataSkeleton";
+import { formatCompanyLocation } from "../../lib/location";
+import { hasTopTierQuality } from "../../lib/quality";
 
 export function CompanyResults({
   companies,
@@ -52,11 +54,20 @@ export function CompanyResults({
                     <div>
                       <h2>
                         {company.companyName}
-                        <BadgeCheck />
+                        {company.verified && (
+                          <BadgeCheck aria-label="Verified company email" />
+                        )}
                       </h2>
-                      <p>{company.city}</p>
+                      <p>
+                        {formatCompanyLocation(company)}
+                      </p>
                     </div>
                   </header>
+                  {hasTopTierQuality(company.qualityScore) && (
+                    <span className="top-tier-company-badge">
+                      💎 Top Tier Company
+                    </span>
+                  )}
                   <p className="company-about">{company.profileContent}</p>
                   {company.distance != null && (
                     <small>
@@ -77,7 +88,7 @@ export function CompanyResults({
               </Reveal>
             ))}
         </div>
-        {totalPages > 1 && (
+        {companies.length > 0 && (
           <div className="browse-pagination">
             <button
               type="button"

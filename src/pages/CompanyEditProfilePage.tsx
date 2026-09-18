@@ -47,9 +47,18 @@ export default function CompanyEditProfilePage() {
   useEffect(() => {
     setProducts(user?.company?.products ?? []);
     setCompanyCity(user?.company?.city ?? "");
-  }, [user?.company?.products]);
+  }, [user?.company?.city, user?.company?.products]);
 
   useEffect(() => { getProvinces().then(setProvinces).catch(() => setProvinces([])); }, []);
+  useEffect(() => {
+    if (!user?.company?.province || !provinces.length || provinceCode) return;
+    const match = provinces.find(
+      (item) =>
+        item.name.toLocaleLowerCase("id-ID") ===
+        user.company?.province?.toLocaleLowerCase("id-ID"),
+    );
+    if (match) setProvinceCode(match.code);
+  }, [provinceCode, provinces, user?.company?.province]);
   useEffect(() => { if (!provinceCode) { setCities([]); return; } getRegencies(provinceCode).then(setCities).catch(() => setCities([])); }, [provinceCode]);
 
   if (loading || !user?.company) return <PageLoading label="Loading company profile" variant="admin" />;
@@ -62,6 +71,11 @@ export default function CompanyEditProfilePage() {
         companyName: String(form.get("companyName") ?? ""),
         phone: String(form.get("phone") ?? ""),
         companyCity,
+        companyProvince:
+          provinces.find((item) => item.code === provinceCode)?.name ??
+          company.province ??
+          undefined,
+        companyCountry: company.country || "Indonesia",
         companyTagline: String(form.get("companyTagline") ?? ""),
         companySize: String(form.get("companySize") ?? ""),
         companyFounded: Number(form.get("companyFounded")) || undefined,
@@ -117,8 +131,8 @@ export default function CompanyEditProfilePage() {
         <section className="profile-card company-media-editor">
           <h2>Company visuals</h2>
           <div className="profile-fields">
-            <div className="company-media-field"><label>Company logo<input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => void saveMedia("logo", event.target.files?.[0])} /></label>{company.logo && <button className="file-remove" type="button" onClick={() => void clearMedia("logo")} aria-label="Remove company logo">×</button>}</div>
-            <div className="company-media-field"><label>Hero banner<input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => void saveMedia("banner", event.target.files?.[0])} /></label>{company.banner && <button className="file-remove" type="button" onClick={() => void clearMedia("banner")} aria-label="Remove company banner">×</button>}</div>
+            <div className="company-media-field"><label>Company logo<input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => { const input = event.currentTarget; void saveMedia("logo", input.files?.[0]).finally(() => { input.value = ""; }); }} /></label>{company.logo && <button className="file-remove" type="button" onClick={() => void clearMedia("logo")} aria-label="Delete company logo" title="Delete picture">×</button>}</div>
+            <div className="company-media-field"><label>Hero banner<input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => { const input = event.currentTarget; void saveMedia("banner", input.files?.[0]).finally(() => { input.value = ""; }); }} /></label>{company.banner && <button className="file-remove" type="button" onClick={() => void clearMedia("banner")} aria-label="Delete company banner" title="Delete picture">×</button>}</div>
           </div>
         </section>
         <form className="profile-card" onSubmit={saveCompany}>

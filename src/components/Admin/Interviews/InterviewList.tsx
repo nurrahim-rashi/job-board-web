@@ -1,5 +1,6 @@
-import { interviewStatusLabels, interviewStatusTones, type Interview } from "../../../types/interview";
+import { type Interview } from "../../../types/interview";
 import { ArrowRight, MapPin, Video } from "../../site/Icons";
+import { StatusBadge } from "../../site/StatusBadge";
 import { ApplicantAvatar } from "../Applicants/ApplicantAvatar";
 import { countdownLabel, formatDay, isMeetingLink, reminderState } from "./interviewHelpers";
 
@@ -44,9 +45,7 @@ export function InterviewList({ interviews, onEdit, onDelete }: InterviewListPro
               )}
             </span>
             <span>
-              <em className={`admin-chip ${interviewStatusTones[interview.status]}`}>
-                {interviewStatusLabels[interview.status]}
-              </em>
+              <StatusBadge status={interview.status} />
               <small>H-1 · {reminder.label}</small>
             </span>
             <span className="admin-row-actions">

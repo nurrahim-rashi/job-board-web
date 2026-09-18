@@ -7,6 +7,7 @@ import { isNewJob } from "../../lib/job-age";
 import { categoryLabel } from "../../types/job-posting";
 import { useAuth } from "../../stores/useAuth";
 import { ShareJobModal } from "../JobDetail/ShareJobModal";
+import { formatJobLocation } from "../../lib/location";
 
 function salary(job: PublicJob) {
   if (job.salaryMin === null && job.salaryMax === null)
@@ -29,29 +30,29 @@ export function JobFeedSection({
 }) {
   const [jobs, setJobs] = useState<PublicJob[]>([]);
   const [jobsLoading, setJobsLoading] = useState(true);
-  const [location, setLocation] = useState("");
-  const [locating, setLocating] = useState(false);
-  const [granted, setGranted] = useState(false);
   const user = useAuth((state) => state.user);
   const storageKey = `polaris-saved-jobs-${user?.id ?? "guest"}`;
   const [saved, setSaved] = useState<string[]>([]);
   const [sharing, setSharing] = useState<PublicJob | null>(null);
 
   useEffect(() => {
-    if (user?.role === "JOB_SEEKER") setSaved(JSON.parse(localStorage.getItem(storageKey) ?? "[]") as string[]);
+    if (user?.role === "JOB_SEEKER")
+      setSaved(
+        JSON.parse(localStorage.getItem(storageKey) ?? "[]") as string[],
+      );
   }, [storageKey, user?.role]);
 
   const toggleSaved = (slug: string) => {
-    const next = saved.includes(slug) ? saved.filter((item) => item !== slug) : [...saved, slug];
+    const next = saved.includes(slug)
+      ? saved.filter((item) => item !== slug)
+      : [...saved, slug];
     setSaved(next);
     localStorage.setItem(storageKey, JSON.stringify(next));
   };
 
-  const loadJobs = (
-    options: { latitude?: number; longitude?: number; city?: string } = {},
-  ) => {
+  const loadJobs = () => {
     setJobsLoading(true);
-    return getPublicJobs({ ...options, limit: 4 })
+    return getPublicJobs({ limit: 4 })
       .then(setJobs)
       .catch(() => setJobs([]))
       .finally(() => setJobsLoading(false));
@@ -60,32 +61,6 @@ export function JobFeedSection({
   useEffect(() => {
     loadJobs();
   }, []);
-
-  const useLocation = () => {
-    if (!navigator.geolocation) return;
-    setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        setLocation("your area");
-        setGranted(true);
-        loadJobs({ latitude, longitude }).finally(() => setLocating(false));
-      },
-      () => {
-        setLocating(false);
-        window.alert(
-          "We could not access your location. Allow location permission or choose a city manually.",
-        );
-      },
-      { timeout: 8000 },
-    );
-  };
-
-  const clearLocation = () => {
-    setGranted(false);
-    setLocation("");
-    void loadJobs();
-  };
 
   return (
     <section id="feed" className="dashboard-feed">
@@ -96,23 +71,9 @@ export function JobFeedSection({
               <p className="eyebrow">Discover roles</p>
               <h2>Latest jobs</h2>
             </div>
-            <button onClick={granted ? clearLocation : useLocation} disabled={locating}>
-              <MapPin />
-              {locating
-                ? "Locating…"
-                : granted
-                  ? "Stop using my location"
-                  : "Use my location"}
-            </button>
           </div>
           <div className="location-note">
-            <span>
-              {granted
-                ? "Showing jobs near your current location."
-                : location
-                  ? `Showing the latest jobs in ${location}.`
-                  : "Choose a city, use your location, or browse the newest roles."}
-            </span>
+            <span>Use the search above to find roles in a specific city.</span>
           </div>
         </Reveal>
 
@@ -124,7 +85,25 @@ export function JobFeedSection({
                   {isNewJob(job.createdAt) && (
                     <span className="new-job-badge">NEW</span>
                   )}
-                  {user?.role === "JOB_SEEKER" && <div className="nearby-card-actions"><button type="button" className={saved.includes(job.slug) ? "saved" : ""} aria-label={`${saved.includes(job.slug) ? "Remove" : "Save"} ${job.title}`} onClick={() => toggleSaved(job.slug)}><Bookmark /></button><button type="button" aria-label={`Share ${job.title}`} onClick={() => setSharing(job)}><Share /></button></div>}
+                  {user?.role === "JOB_SEEKER" && (
+                    <div className="nearby-card-actions">
+                      <button
+                        type="button"
+                        className={saved.includes(job.slug) ? "saved" : ""}
+                        aria-label={`${saved.includes(job.slug) ? "Remove" : "Save"} ${job.title}`}
+                        onClick={() => toggleSaved(job.slug)}
+                      >
+                        <Bookmark />
+                      </button>
+                      <button
+                        type="button"
+                        aria-label={`Share ${job.title}`}
+                        onClick={() => setSharing(job)}
+                      >
+                        <Share />
+                      </button>
+                    </div>
+                  )}
                   <div>
                     {job.company.logo ? (
                       <img
@@ -141,7 +120,7 @@ export function JobFeedSection({
                   </div>
                   <h3>{job.title}</h3>
                   <p>
-                    {job.company.companyName} · {job.cityLocation}
+                    {job.company.companyName} · {formatJobLocation(job)}
                     {job.distance !== null && job.distance !== undefined
                       ? ` · ${job.distance.toFixed(1)} km`
                       : ""}
@@ -217,7 +196,15 @@ export function JobFeedSection({
           )}
         </ul>
       </div>
-      {sharing && <ShareJobModal open title={sharing.title} company={sharing.company.companyName} url={`${window.location.origin}/jobs/${sharing.slug}`} onClose={() => setSharing(null)} />}
+      {sharing && (
+        <ShareJobModal
+          open
+          title={sharing.title}
+          company={sharing.company.companyName}
+          url={`${window.location.origin}/jobs/${sharing.slug}`}
+          onClose={() => setSharing(null)}
+        />
+      )}
     </section>
   );
 }

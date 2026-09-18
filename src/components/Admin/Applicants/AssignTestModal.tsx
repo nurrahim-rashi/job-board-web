@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { useApplicants } from "../../../hooks/api/applicant/useApplicants";
 import { useAssignTest } from "../../../hooks/api/pre-selection-test/useAssignTest";
@@ -61,7 +62,7 @@ export function AssignTestModal({ slug, open, durationMinutes, onClose }: Assign
     assignTest.mutate(picked, { onSuccess: onClose });
   }
 
-  return (
+  return createPortal(
     <div
       className="admin-dialog assign-dialog"
       role="dialog"
@@ -141,6 +142,7 @@ export function AssignTestModal({ slug, open, durationMinutes, onClose }: Assign
           </button>
         </footer>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

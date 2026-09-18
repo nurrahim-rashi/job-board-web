@@ -23,6 +23,8 @@ export interface CreateJobPayload {
   description: string;
   category: JobCategory;
   cityLocation: string;
+  provinceLocation?: string;
+  countryLocation: string;
   deadline: string;
   banner?: File | null;
   salaryMin?: number;
@@ -30,7 +32,9 @@ export interface CreateJobPayload {
   tags?: string[];
 }
 
-export type UpdateJobPayload = Partial<CreateJobPayload>;
+export type UpdateJobPayload = Partial<CreateJobPayload> & {
+  removeBanner?: boolean;
+};
 
 export interface JobPosting {
   id: number;
@@ -40,6 +44,8 @@ export interface JobPosting {
   description: string;
   category: JobCategory;
   cityLocation: string;
+  provinceLocation: string | null;
+  countryLocation: string;
   banner: string | null;
   salaryMin: number | null;
   salaryMax: number | null;

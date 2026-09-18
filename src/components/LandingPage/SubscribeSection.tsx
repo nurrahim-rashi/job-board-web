@@ -5,6 +5,7 @@ import { Stars } from "../site/Stars";
 import { Reveal } from "../../hooks/useReveal";
 import { AuthModal } from "../site/AuthModal";
 import { useAuth } from "../../stores/useAuth";
+import { getSubscriptionStatus } from "../../services/auth.service";
 import {
   fetchSubscriptionPlans,
   purchaseSubscription,
@@ -41,6 +42,10 @@ export function SubscribeSection() {
   const [plansError, setPlansError] = useState("");
   const [isPurchasing, setIsPurchasing] = useState<string | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
+  const [currentPlan, setCurrentPlan] = useState<
+    SubscriptionName | "FREE" | null
+  >(null);
+  const [currentPlanLoading, setCurrentPlanLoading] = useState(false);
 
   const user = useAuth((state) => state.user);
 
@@ -66,6 +71,35 @@ export function SubscribeSection() {
 
     void loadPlans();
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (!user || user.role !== "JOB_SEEKER") {
+      setCurrentPlan(null);
+      setCurrentPlanLoading(false);
+      return;
+    }
+
+    setCurrentPlanLoading(true);
+
+    void getSubscriptionStatus()
+      .then(({ active, plan }) => {
+        if (!cancelled) {
+          setCurrentPlan(active && plan ? plan : "FREE");
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setCurrentPlan(null);
+      })
+      .finally(() => {
+        if (!cancelled) setCurrentPlanLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   const subscribe = async (plan: SubscriptionName) => {
     if (!user) {
@@ -146,20 +180,64 @@ export function SubscribeSection() {
                 ))}
               </ul>
 
-              <button type="button" onClick={() => setAuthOpen(true)}>
-                Create free account
+              <button
+                type="button"
+                disabled={Boolean(user)}
+                onClick={() => setAuthOpen(true)}
+              >
+                {!user
+                  ? "Create free account"
+                  : user.role !== "JOB_SEEKER"
+                    ? "Account active"
+                    : currentPlanLoading
+                      ? "Checking your plan..."
+                      : currentPlan === "FREE"
+                        ? "Your current plan"
+                        : "Included in your plan"}
               </button>
             </article>
           </Reveal>
 
           {plansLoading ? (
-            <p>Loading subscription plans...</p>
+            Array.from({ length: 2 }, (_, index) => (
+              <div
+                className="pricing-plan-skeleton"
+                key={`subscription-plan-skeleton-${index}`}
+                role="status"
+                aria-label="Loading subscription plan"
+              >
+                <article
+                  className={index === 0 ? "featured" : ""}
+                  aria-hidden="true"
+                >
+                  {index === 0 ? (
+                    <i className="pricing-skeleton-line pricing-skeleton-badge" />
+                  ) : null}
+                  <i className="pricing-skeleton-line pricing-skeleton-title" />
+                  <i className="pricing-skeleton-line pricing-skeleton-copy" />
+                  <i className="pricing-skeleton-line pricing-skeleton-price" />
+                  <div className="pricing-skeleton-features">
+                    {Array.from({ length: 5 }, (_, featureIndex) => (
+                      <i
+                        className="pricing-skeleton-line"
+                        key={`subscription-feature-skeleton-${featureIndex}`}
+                      />
+                    ))}
+                  </div>
+                  <i className="pricing-skeleton-line pricing-skeleton-button" />
+                </article>
+              </div>
+            ))
           ) : plansError ? (
             <p>{plansError}</p>
           ) : (
             plans.map((plan, index) => {
               const featured = plan.name === "STANDARD";
               const assessmentLimit = plan.featuresAccess.skillAssessmentLimit;
+              const isCurrentPlan = currentPlan === plan.name;
+              const unavailableForRole = Boolean(
+                user && user.role !== "JOB_SEEKER",
+              );
 
               return (
                 <Reveal key={plan.id} delay={(index + 1) * 100}>
@@ -229,10 +307,21 @@ export function SubscribeSection() {
 
                     <button
                       type="button"
-                      disabled={isPurchasing !== null}
+                      disabled={
+                        isPurchasing !== null ||
+                        isCurrentPlan ||
+                        currentPlanLoading ||
+                        unavailableForRole
+                      }
                       onClick={() => void subscribe(plan.name)}
                     >
-                      {isPurchasing === plan.name
+                      {isCurrentPlan
+                        ? "Your current plan"
+                        : unavailableForRole
+                          ? "Available for job seekers"
+                          : currentPlanLoading
+                            ? "Checking your plan..."
+                            : isPurchasing === plan.name
                         ? "Redirecting..."
                         : `Subscribe to ${subscriptionNameLabel(plan.name)}`}
                     </button>

@@ -2,7 +2,8 @@ import { ArrowRight, FileText } from "../../site/Icons";
 import { ApplicantAvatar } from "./ApplicantAvatar";
 import { educationLabel, formatRupiah } from "./applicantHelpers";
 import { formatDate, goodScore } from "../adminData";
-import { statusLabels, statusTones, type ApplicantListItem } from "../../../types/applicant";
+import { type ApplicantListItem } from "../../../types/applicant";
+import { StatusBadge } from "../../site/StatusBadge";
 
 type ApplicantListProps = {
   applicants: ApplicantListItem[];
@@ -44,7 +45,7 @@ export function ApplicantList({ applicants, onOpen, onPreviewCv }: ApplicantList
             )}
           </span>
           <span>
-            <em className={`admin-chip ${statusTones[item.status]}`}>{statusLabels[item.status]}</em>
+            <StatusBadge status={item.status} />
           </span>
           <span className="admin-row-actions">
             <button type="button" onClick={() => onPreviewCv(item.id)} className="link">

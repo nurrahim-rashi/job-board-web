@@ -1,10 +1,15 @@
 import { interviewStatusLabels, interviewStatuses, type InterviewQuery } from "../../../types/interview";
 import { Search } from "../../site/Icons";
 import { AdminSelect, type AdminSelectOption } from "../AdminSelect";
+import { statusColor } from "../../../lib/status";
 
 const statusOptions: AdminSelectOption[] = [
   { value: "all", label: "All statuses" },
-  ...interviewStatuses.map((status) => ({ value: status, label: interviewStatusLabels[status] })),
+  ...interviewStatuses.map((status) => ({
+    value: status,
+    label: interviewStatusLabels[status],
+    color: statusColor(status),
+  })),
 ];
 
 const sortOptions: AdminSelectOption[] = [

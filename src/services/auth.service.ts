@@ -53,9 +53,12 @@ export async function getHomepageData() {
 }
 
 export async function getSubscriptionStatus() {
-  const response = await axiosInstance.get<ApiResponse<{ active: boolean }>>(
-    "/auth/subscription-status",
-  );
+  const response = await axiosInstance.get<
+    ApiResponse<{
+      active: boolean;
+      plan: "STANDARD" | "PROFESSIONAL" | null;
+    }>
+  >("/auth/subscription-status");
   return getData(response, "Unable to check subscription status");
 }
 
@@ -96,6 +99,13 @@ export async function uploadAvatar(file: File) {
     headers: { "Content-Type": file.type },
   });
   const user = getData(response, "Unable to upload avatar.");
+  useAuth.getState().setUser(user);
+  return user;
+}
+
+export async function removeAvatar() {
+  const response = await axiosInstance.delete<ApiResponse<AuthUser>>("/auth/avatar");
+  const user = getData(response, "Unable to remove profile photo.");
   useAuth.getState().setUser(user);
   return user;
 }

@@ -7,6 +7,7 @@ import { categoryLabel } from "../../types/job-posting";
 import { DataSkeleton } from "../site/DataSkeleton";
 import { useAuth } from "../../stores/useAuth";
 import { ShareJobModal } from "../JobDetail/ShareJobModal";
+import { formatJobLocation } from "../../lib/location";
 
 const salary = (job: PublicJob) =>
   job.salaryMin || job.salaryMax
@@ -120,7 +121,7 @@ export function JobsResults({
                         </p>
                         <p className="browse-location">
                           <MapPin />
-                          {job.cityLocation}
+                          {formatJobLocation(job)}
                           {job.distance != null
                             ? ` · ${job.distance.toFixed(0)} km`
                             : ""}
@@ -137,7 +138,7 @@ export function JobsResults({
                     </Reveal>
                   ))}
               </div>
-              {totalPages > 1 && (
+              {jobs.length > 0 && (
                 <div className="browse-pagination">
                   <button
                     type="button"

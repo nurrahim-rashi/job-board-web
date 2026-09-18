@@ -3,8 +3,8 @@ import type { Application } from "../../services/application.service";
 import type { HomepageData } from "../../types/auth";
 import { ApplicationDetailModal } from "../Application/ApplicationDetailModal";
 import { ArrowRight, FileText, Sparkles } from "../site/Icons";
-import { applicationStatusLabel } from "../../lib/application-status";
 import { DataSkeleton } from "../site/DataSkeleton";
+import { StatusBadge } from "../site/StatusBadge";
 
 export function ApplicantPanel({ applications, recommendations, loading = false, error = "" }: {
   applications: Application[];
@@ -17,7 +17,7 @@ export function ApplicantPanel({ applications, recommendations, loading = false,
     <article className="panel-card">
       <p className="eyebrow">Your applications</p><h2>Where things stand</h2>
       {error && <p className="profile-error">{error}</p>}
-      {loading ? <DataSkeleton count={3} /> : <ul className="workspace-list">{applications.slice(0, 5).map((application) => <li key={application.id}><button className="application-row-button" type="button" onClick={() => setSelected(application.id)}><FileText /><span><b>{application.job.title}</b><small>{application.job.company.companyName} · {applicationStatusLabel(application.status)}</small></span><em className={application.status === "REJECTED" ? "wait" : "good"}>{applicationStatusLabel(application.status)}</em></button></li>)}{!applications.length && !error && <li><span><small>No applications yet.</small></span></li>}</ul>}
+      {loading ? <DataSkeleton count={3} /> : <ul className="workspace-list">{applications.slice(0, 5).map((application) => <li key={application.id}><button className="application-row-button" type="button" onClick={() => setSelected(application.id)}><FileText /><span><b>{application.job.title}</b><small>{application.job.company.companyName}</small></span><StatusBadge status={application.status} /></button></li>)}{!applications.length && !error && <li><span><small>No applications yet.</small></span></li>}</ul>}
       <a href="/dashboard/applications">View all applications <ArrowRight /></a>
     </article>
     <article className="panel-card recommendation-card">

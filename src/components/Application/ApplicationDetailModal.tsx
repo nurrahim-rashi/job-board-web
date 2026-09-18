@@ -1,11 +1,13 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { createPortal } from "react-dom";
 import { getMyApplicationDetail, submitExpectedSalary, type Application } from "../../services/application.service";
 import { categoryLabel } from "../../types/job-posting";
 import { Close, FileText, MapPin, Pencil } from "../site/Icons";
-import { applicationStatusLabel } from "../../lib/application-status";
 import { updateProfile } from "../../services/auth.service";
 import { useAuth } from "../../stores/useAuth";
 import { DataSkeleton } from "../site/DataSkeleton";
+import { formatJobLocation } from "../../lib/location";
+import { StatusBadge } from "../site/StatusBadge";
 
 const money = (value: number | null) =>
   value == null ? "Not provided" : `IDR ${value.toLocaleString("id-ID")}`;
@@ -168,7 +170,7 @@ export function ApplicationDetailModal({
     }
   }
 
-  return (
+  return createPortal(
     <div
       className="application-detail-backdrop"
       role="dialog"
@@ -199,13 +201,9 @@ export function ApplicationDetailModal({
               <h2 id="application-detail-title">{application.job.title}</h2>
               <p>
                 {application.job.company.companyName} ·{" "}
-                {application.job.cityLocation}
+                {formatJobLocation(application.job)}
               </p>
-              <em
-                className={`application-status ${application.status === "REJECTED" ? "bad" : application.status === "ACCEPTED" || application.status === "INTERVIEW" ? "good" : "wait"}`}
-              >
-                {applicationStatusLabel(application.status)}
-              </em>
+              <StatusBadge status={application.status} />
             </header>
             <dl className="application-detail-facts">
               <div>
@@ -327,7 +325,10 @@ export function ApplicationDetailModal({
                   <MapPin />
                   {isLink(application.interview.locationOrLink) ? <a href={application.interview.locationOrLink} target="_blank" rel="noreferrer">Open interview link</a> : application.interview.locationOrLink}
                 </p>
-                <small>Status: {application.interview.status.toLocaleLowerCase().replaceAll("_", " ")}</small>
+                <div className="application-interview-status">
+                  <span>Status</span>
+                  <StatusBadge status={application.interview.status} />
+                </div>
                 {application.interview.notes && <p>{application.interview.notes}</p>}
               </section>
             )}
@@ -369,6 +370,7 @@ export function ApplicationDetailModal({
           </>
         )}
       </article>
-    </div>
+    </div>,
+    document.body,
   );
 }

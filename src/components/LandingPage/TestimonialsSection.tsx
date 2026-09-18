@@ -1,38 +1,94 @@
+import { useEffect, useState } from "react";
 import { Reveal } from "../../hooks/useReveal";
 import { SectionHead } from "./SectionHead";
-const reviews = [
-  [
-    "I applied to three roles here and heard back from all three within a week. After eight months of silence elsewhere, that alone was worth it.",
-    "The role summaries actually tell you what the job is. Salary, team size, who you report to, what the first ninety days look like.",
-    "Got hired at a nine-person studio I'd never have found otherwise. Two rounds, clear feedback, offer in eleven days.",
-    "No recruiter spam. Not one. I still don't know how they manage it, but my inbox thanks them.",
-  ],
-  [
-    "I used the salary ranges to renegotiate at my current job instead of leaving. Polaris was fine with that, which says a lot.",
-    "As a hiring manager: fewer applicants, dramatically better ones. We filled a staff role in three weeks.",
-    "The weekly drop is the only newsletter I open. Six roles, hand-written notes, no filler.",
-    "Career-changer here. Their guidance on framing prior experience got me my first product job at 38.",
-  ],
-];
+import {
+  getReviewStories,
+  type ReviewStory,
+} from "../../services/review.service";
+
 export function TestimonialsSection() {
+  const [reviews, setReviews] = useState<ReviewStory[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    void getReviewStories()
+      .then((data) => {
+        if (!cancelled) setReviews(data.reviews.slice(0, 10));
+      })
+      .catch((requestError) => {
+        if (!cancelled) {
+          setError(
+            requestError instanceof Error
+              ? requestError.message
+              : "Unable to load company reviews.",
+          );
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const rows = reviews.length
+    ? [
+        reviews.filter((_, index) => index % 2 === 0),
+        reviews.filter((_, index) => index % 2 === 1),
+      ].filter((row) => row.length > 0)
+    : [];
+
   return (
     <section id="stories" className="testimonials">
       <SectionHead
         eyebrow="Testimonials"
-        title="Stories from those who found their true north with Polaris"
-        body=""
+        title="Verified company stories from people who worked there"
+        body="Every review comes from a job seeker with an accepted Polaris application. Identities stay anonymous; the experience stays honest."
       />
       <div className="marquees">
-        {reviews.map((row, rowIndex) => (
+        {loading ? (
+          Array.from({ length: 2 }, (_, rowIndex) => (
+            <div className="marquee testimonial-skeleton-row" key={rowIndex}>
+              {Array.from({ length: 4 }, (_, index) => (
+                <figure key={index} aria-hidden="true">
+                  <i />
+                  <span />
+                  <span />
+                  <small />
+                </figure>
+              ))}
+            </div>
+          ))
+        ) : error ? (
+          <div className="testimonial-state">
+            <strong>Company reviews could not be loaded.</strong>
+            <p>{error}</p>
+          </div>
+        ) : rows.length === 0 ? (
+          <div className="testimonial-state">
+            <strong>No verified reviews yet.</strong>
+            <p>The first employee story will appear here after it is submitted.</p>
+          </div>
+        ) : rows.map((row, rowIndex) => (
           <div
             className={`marquee ${rowIndex ? "reverse" : ""}`}
             key={rowIndex}
           >
             {[...row, ...row, ...row].map((review, index) => (
-              <figure key={`${review}-${index}`}>
-                <i>★★★★★</i>
-                <blockquote>{review}</blockquote>
-                <figcaption>Hired through Polaris</figcaption>
+              <figure key={`${review.id}-${index}`}>
+                <i>
+                  {"★".repeat(Math.round(review.overallRating))}
+                  {"☆".repeat(5 - Math.round(review.overallRating))}
+                </i>
+                <blockquote>{review.reviewText}</blockquote>
+                <figcaption>
+                  Anonymous {review.jobTitleHeld} · {review.company.companyName}
+                </figcaption>
               </figure>
             ))}
           </div>
