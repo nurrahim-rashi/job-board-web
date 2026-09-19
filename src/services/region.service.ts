@@ -78,3 +78,19 @@ export async function getEducationOptions(
   const payload = response.data as { data?: string[] } | null;
   return Array.isArray(payload?.data) ? payload.data : [];
 }
+
+export type ReverseGeocodedLocation = {
+  city: string;
+  province: string;
+  country: string;
+  countryCode: string;
+};
+
+export async function reverseGeocodeLocation(latitude: number, longitude: number) {
+  const response = await axiosInstance.get<{ data: ReverseGeocodedLocation }>(
+    "/regions/reverse",
+    { params: { latitude, longitude } },
+  );
+  if (!response.data?.data) throw new Error("Unable to determine your location");
+  return response.data.data;
+}

@@ -10,6 +10,7 @@ export type PublicSeekerProfile = {
   lastEducation: string | null;
   city: string | null;
   province: string | null;
+  country: string | null;
   professionalRole: string;
   availability: string;
   salaryExpectation: string;
