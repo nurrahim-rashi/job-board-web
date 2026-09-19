@@ -90,14 +90,14 @@ export async function changePassword(currentPassword: string, newPassword: strin
 }
 
 export async function uploadAvatar(file: File) {
-  if (!file.type.match(/^image\/(jpeg|png)$/)) {
-    throw new Error("Avatar must be a JPG, JPEG, or PNG file.");
+  if (!file.type.match(/^image\/(jpeg|png|webp)$/)) {
+    throw new Error("Avatar must be a JPG, PNG, or WEBP file.");
   }
   if (file.size > 1024 * 1024) throw new Error("Avatar must be 1MB or smaller.");
 
-  const response = await axiosInstance.put<ApiResponse<AuthUser>>("/auth/avatar", file, {
-    headers: { "Content-Type": file.type },
-  });
+  const body = new FormData();
+  body.append("avatar", file);
+  const response = await axiosInstance.put<ApiResponse<AuthUser>>("/auth/avatar", body);
   const user = getData(response, "Unable to upload avatar.");
   useAuth.getState().setUser(user);
   return user;

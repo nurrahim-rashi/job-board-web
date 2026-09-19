@@ -176,7 +176,7 @@ export function AuthModal({ open, onClose, initialRole = "JOB_SEEKER", initialMo
               placeholder="First name"
             />
             <label htmlFor="register-last-name">Last name</label>
-            <input id="register-last-name" type="text" value={lastName} onChange={(event) => setLastName(event.target.value)} placeholder="Last name" />
+            <input id="register-last-name" type="text" value={lastName} onChange={(event) => setLastName(event.target.value)} placeholder="Last name" required />
             <label htmlFor="register-role">Register as</label>
             <select
               id="register-role"

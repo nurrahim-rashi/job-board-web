@@ -26,7 +26,8 @@ import { useProfileView } from "../stores/useProfileView";
 import type { AuthUser } from "../types/auth";
 import { fetchAssessmentBadges, fetchSkillNames } from "../lib/assessment-api";
 import { getPublicJobs } from "../services/job.service";
-import { getProvinces, getRegencies, type Region } from "../services/region.service";
+import { getEducationOptions, getProvinces, getRegencies, type Region } from "../services/region.service";
+import { splitPersonName } from "../lib/person-name";
 import type { AssessmentBadge } from "../types/assessment";
 import {
   getPublicCompanies,
@@ -124,6 +125,9 @@ export default function ProfilePage() {
   const [profileProvinceCode, setProfileProvinceCode] = useState("");
   const [profileCities, setProfileCities] = useState<Region[]>([]);
   const [profileCity, setProfileCity] = useState("");
+  const [degreeSuggestions, setDegreeSuggestions] = useState<string[]>([...educationOptions]);
+  const [majorSuggestions, setMajorSuggestions] = useState<string[]>([]);
+  const [institutionSuggestions, setInstitutionSuggestions] = useState<string[]>([]);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -157,6 +161,16 @@ export default function ProfilePage() {
     getSubscriptionStatus()
       .then(({ active }) => setSubscriptionActive(active))
       .catch(() => setSubscriptionActive(false));
+  }, [user?.role]);
+
+  useEffect(() => {
+    if (user?.role !== "JOB_SEEKER") return;
+    Promise.all([getEducationOptions("degrees"), getEducationOptions("majors")])
+      .then(([degrees, majors]) => {
+        if (degrees.length) setDegreeSuggestions(degrees);
+        setMajorSuggestions(majors);
+      })
+      .catch(() => undefined);
   }, [user?.role]);
 
   useEffect(() => {
@@ -222,6 +236,7 @@ export default function ProfilePage() {
 
   if (!user || profileLoading) return <PageLoading label="Loading profile" variant={user?.role === "COMPANY_ADMIN" ? "admin" : "public"} />;
   const isCompany = user.role === "COMPANY_ADMIN";
+  const personName = splitPersonName(user.name);
 
   async function saveProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -519,11 +534,11 @@ export default function ProfilePage() {
           <div className="profile-fields">
             <label>
               First name
-              <input name="firstName" defaultValue={user.name} required />
+              <input name="firstName" defaultValue={personName.firstName} required />
             </label>
             <label>
               Last name
-              <input name="lastName" placeholder="Add your last name" />
+              <input name="lastName" defaultValue={personName.lastName} placeholder="Add your last name" required />
             </label>
             <label>
               Email
@@ -585,7 +600,7 @@ export default function ProfilePage() {
                     required
                   >
                     <option value="">Select education level</option>
-                    {educationOptions.map((education) => (
+                    {degreeSuggestions.map((education) => (
                       <option key={education} value={education}>
                         {education}
                       </option>
@@ -594,11 +609,29 @@ export default function ProfilePage() {
                 </label>
                 <label>
                   Major / field of study
-                  <input name="educationMajor" defaultValue={educationParts(user.lastEducation).major} placeholder="e.g. Computer Science" required />
+                  <input name="educationMajor" list="education-major-options" defaultValue={educationParts(user.lastEducation).major} placeholder="Start typing a major" required />
+                  <datalist id="education-major-options">{majorSuggestions.map((major) => <option key={major} value={major} />)}</datalist>
                 </label>
                 <label>
                   School / university
-                  <input name="educationInstitution" defaultValue={educationParts(user.lastEducation).institution} placeholder="e.g. University of Indonesia" required />
+                  <input
+                    name="educationInstitution"
+                    list="education-institution-options"
+                    defaultValue={educationParts(user.lastEducation).institution}
+                    placeholder="Start typing a school or university"
+                    onChange={(event) => {
+                      const query = event.currentTarget.value;
+                      if (query.trim().length < 2) {
+                        setInstitutionSuggestions([]);
+                        return;
+                      }
+                      getEducationOptions("institutions", query)
+                        .then(setInstitutionSuggestions)
+                        .catch(() => setInstitutionSuggestions([]));
+                    }}
+                    required
+                  />
+                  <datalist id="education-institution-options">{institutionSuggestions.map((institution) => <option key={institution} value={institution} />)}</datalist>
                 </label>
                 <label>
                   Province

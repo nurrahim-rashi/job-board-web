@@ -82,11 +82,11 @@ export type PublicCompanyDetail = Omit<
 };
 
 export async function uploadCompanyMedia(field: "logo" | "banner", file: File) {
+  const body = new FormData();
+  body.append("media", file);
   const response = await axiosInstance.put<
     ApiResponse<import("../types/auth").AuthUser>
-  >(`/auth/company-media/${field}`, file, {
-    headers: { "Content-Type": file.type },
-  });
+  >(`/auth/company-media/${field}`, body);
   if (!response.data.data)
     throw new Error(response.data.message ?? "Unable to upload company image");
   return response.data.data;
