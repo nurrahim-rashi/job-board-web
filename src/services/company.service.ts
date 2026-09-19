@@ -82,6 +82,12 @@ export type PublicCompanyDetail = Omit<
 };
 
 export async function uploadCompanyMedia(field: "logo" | "banner", file: File) {
+  if (!/^image\/(jpeg|png|webp)$/.test(file.type)) {
+    throw new Error("Company media must be a JPG, PNG, or WEBP image.");
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error("Company media must be 5MB or smaller.");
+  }
   const body = new FormData();
   body.append("media", file);
   const response = await axiosInstance.put<

@@ -93,7 +93,7 @@ export async function uploadAvatar(file: File) {
   if (!file.type.match(/^image\/(jpeg|png|webp)$/)) {
     throw new Error("Avatar must be a JPG, PNG, or WEBP file.");
   }
-  if (file.size > 1024 * 1024) throw new Error("Avatar must be 1MB or smaller.");
+  if (file.size > 3 * 1024 * 1024) throw new Error("Avatar must be 3MB or smaller.");
 
   const body = new FormData();
   body.append("avatar", file);

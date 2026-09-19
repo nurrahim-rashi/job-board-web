@@ -442,7 +442,7 @@ export default function ProfilePage() {
               ref={avatarInputRef}
               name="avatar"
               type="file"
-              accept="image/jpeg,image/png"
+              accept="image/jpeg,image/png,image/webp"
               onChange={(event) =>
                 setAvatarFileName(event.target.files?.[0]?.name ?? "")
               }
@@ -454,7 +454,7 @@ export default function ProfilePage() {
               <small>
                 {avatarFileName
                   ? "Looking good — ready to upload!"
-                  : "Drop it here or click to browse · JPG or PNG · max 1MB"}
+                  : "Drop it here or click to browse · JPG, PNG, or WEBP · max 3MB"}
               </small>
             </span>
           </label>{avatarFileName && <button className="file-remove" type="button" aria-label="Remove selected profile photo" onClick={() => { setAvatarFileName(""); if (avatarInputRef.current) avatarInputRef.current.value = ""; }}><span aria-hidden="true">×</span></button>}</div>
