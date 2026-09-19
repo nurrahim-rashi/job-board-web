@@ -1,12 +1,12 @@
 import { axiosInstance } from "../lib/axios";
 import type { ApiResponse } from "../types/api";
 
-export type Application = { id: number; status: string; cvFile: string; expectedSalary: number | null; expectedSalaryRequestedAt: string | null; rejectionReason: string | null; createdAt: string; updatedAt: string; job: { slug: string; title: string; cityLocation: string; provinceLocation: string | null; countryLocation: string; category: string; salaryMin: number | null; salaryMax: number | null; deadline: string; company: { id: number; companyName: string; logo: string | null } }; interview: { interviewDate: string; locationOrLink: string; notes: string | null; status: string } | null };
+export type Application = { id: number; status: string; cvFile: string; expectedSalary: number | null; expectedSalaryCurrency: string; expectedSalaryRequestedAt: string | null; rejectionReason: string | null; createdAt: string; updatedAt: string; job: { slug: string; title: string; cityLocation: string; provinceLocation: string | null; countryLocation: string; category: string; salaryMin: number | null; salaryMax: number | null; salaryCurrency: string; deadline: string; company: { id: number; companyName: string; logo: string | null } }; interview: { interviewDate: string; locationOrLink: string; notes: string | null; status: string } | null };
 
-export async function submitApplication(slug: string, cv: File, expectedSalary?: number) {
+export async function submitApplication(slug: string, cv: File, expectedSalary?: number, expectedSalaryCurrency = "IDR") {
   if (cv.type !== "application/pdf") throw new Error("CV must be a PDF file.");
   if (cv.size > 1024 * 1024) throw new Error("CV must be 1MB or smaller.");
-  const data = new FormData(); data.set("cv", cv); if (expectedSalary) data.set("expectedSalary", String(expectedSalary));
+  const data = new FormData(); data.set("cv", cv); if (expectedSalary) data.set("expectedSalary", String(expectedSalary)); data.set("expectedSalaryCurrency", expectedSalaryCurrency);
   const response = await axiosInstance.post<ApiResponse<Application>>(`/jobs/${slug}/applications`, data, { headers: { "Content-Type": "multipart/form-data" } });
   if (!response.data.data) throw new Error(response.data.message ?? "Unable to submit application");
   return response.data.data;
@@ -30,8 +30,8 @@ export async function getMyApplicationDetail(applicationId: number) {
   return response.data.data;
 }
 
-export async function submitExpectedSalary(applicationId: number, expectedSalary: number) {
-  const response = await axiosInstance.patch<ApiResponse<{ id: number; expectedSalary: number }>>(`/applications/me/${applicationId}/expected-salary`, { expectedSalary });
+export async function submitExpectedSalary(applicationId: number, expectedSalary: number, expectedSalaryCurrency: string) {
+  const response = await axiosInstance.patch<ApiResponse<{ id: number; expectedSalary: number; expectedSalaryCurrency: string }>>(`/applications/me/${applicationId}/expected-salary`, { expectedSalary, expectedSalaryCurrency });
   if (!response.data.data) throw new Error(response.data.message ?? "Unable to submit expected salary");
   return response.data.data;
 }

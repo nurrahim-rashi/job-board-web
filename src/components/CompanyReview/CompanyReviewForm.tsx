@@ -5,6 +5,7 @@ import {
   type CreateCompanyReviewData,
 } from "../../services/review.service";
 import { ratingLabels, type RatingField } from "./ReviewRating";
+import { CurrencySelect } from "../site/CurrencySelect";
 
 type Props = {
   companyId: string;
@@ -18,6 +19,7 @@ const initialForm: CreateCompanyReviewData = {
   ratingFacility: 5,
   ratingCareer: 5,
   reviewText: "",
+  salaryCurrency: "IDR",
 };
 
 export function CompanyReviewForm({
@@ -82,7 +84,12 @@ export function CompanyReviewForm({
 
       <label>
         Estimated monthly salary
-        <small>Optional · IDR</small>
+        <small>Optional</small>
+        <CurrencySelect
+          value={form.salaryCurrency}
+          onChange={(salaryCurrency) => setForm((current) => ({ ...current, salaryCurrency }))}
+          disabled={submitting}
+        />
         <input
           type="number"
           inputMode="numeric"

@@ -8,17 +8,10 @@ import { categoryLabel } from "../../types/job-posting";
 import { useAuth } from "../../stores/useAuth";
 import { ShareJobModal } from "../JobDetail/ShareJobModal";
 import { formatJobLocation } from "../../lib/location";
+import { formatCurrencyRange } from "../../lib/currency";
 
 function salary(job: PublicJob) {
-  if (job.salaryMin === null && job.salaryMax === null)
-    return "Salary not listed";
-  const format = (amount: number | null) =>
-    amount === null
-      ? ""
-      : `Rp ${(amount / 1_000_000).toLocaleString("id-ID")} jt`;
-  return [format(job.salaryMin), format(job.salaryMax)]
-    .filter(Boolean)
-    .join("–");
+  return formatCurrencyRange(job.salaryMin, job.salaryMax, job.salaryCurrency, true);
 }
 
 export function JobFeedSection({

@@ -23,10 +23,11 @@ import {
 import { applicationStatusLabel } from "../lib/application-status";
 import { formatJobLocation } from "../lib/location";
 import { StatusBadge } from "../components/site/StatusBadge";
+import { formatCurrencyRange } from "../lib/currency";
 
 const salary = (job: PublicJobDetail) =>
   job.salaryMin || job.salaryMax
-    ? `Rp ${(job.salaryMin ?? 0).toLocaleString("id-ID")} – ${(job.salaryMax ?? 0).toLocaleString("id-ID")} / month`
+    ? `${formatCurrencyRange(job.salaryMin, job.salaryMax, job.salaryCurrency)} / month`
     : "Salary not disclosed";
 
 export default function JobDetailPage() {

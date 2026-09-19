@@ -48,11 +48,15 @@ export function formatCompact(value: number) {
   return String(Math.round(value));
 }
 
-export function formatCurrency(value: number | null) {
+export function formatCurrency(value: number | null, currency = "IDR") {
   if (value === null) return "No data";
-  if (value >= 1_000_000) return `Rp ${oneDecimal(value / 1_000_000)} jt`;
-  if (value >= 1_000) return `Rp ${Math.round(value / 1_000)} rb`;
-  return `Rp ${formatNumber(value)}`;
+  return new Intl.NumberFormat("en", {
+    style: "currency",
+    currency,
+    currencyDisplay: "narrowSymbol",
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(value);
 }
 
 export function formatCurrencyAxis(value: number) {

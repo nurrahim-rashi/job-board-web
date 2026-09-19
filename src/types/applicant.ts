@@ -52,6 +52,7 @@ export interface ApplicantListItem {
   id: number;
   status: ApplicationStatus;
   expectedSalary: string | number | null;
+  expectedSalaryCurrency: string;
   cvFile: string;
   appliedAt: string;
   priorityReview: boolean;
@@ -69,6 +70,7 @@ export interface ApplicantDetail {
   id: number;
   status: ApplicationStatus;
   expectedSalary: string | number | null;
+  expectedSalaryCurrency: string;
   expectedSalaryRequestedAt: string | null;
   rejectionReason: string | null;
   appliedAt: string;
@@ -107,6 +109,7 @@ export interface ApplicantQuery {
   maxAge?: number;
   minSalary?: number;
   maxSalary?: number;
+  salaryCurrency?: string;
   education?: string;
   status?: ApplicationStatus;
   sortBy?: "createdAt" | "expectedSalary" | "name";

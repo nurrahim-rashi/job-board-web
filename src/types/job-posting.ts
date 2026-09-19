@@ -29,6 +29,7 @@ export interface CreateJobPayload {
   banner?: File | null;
   salaryMin?: number;
   salaryMax?: number;
+  salaryCurrency: string;
   tags?: string[];
 }
 
@@ -49,6 +50,7 @@ export interface JobPosting {
   banner: string | null;
   salaryMin: number | null;
   salaryMax: number | null;
+  salaryCurrency: string;
   tags: string[] | null;
   deadline: string;
   isPublished: boolean;

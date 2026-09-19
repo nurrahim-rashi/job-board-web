@@ -9,7 +9,7 @@ import { ApplicantAvatar } from "./ApplicantAvatar";
 import { CvPreview } from "./CvPreview";
 import { StatusDecision } from "./StatusDecision";
 import { TestAnswerSheet } from "./TestAnswerSheet";
-import { educationLabel, formatDateTime, formatRupiah } from "./applicantHelpers";
+import { educationLabel, formatDateTime, formatSalary } from "./applicantHelpers";
 import { formatDate } from "../adminData";
 import { StatusBadge } from "../../site/StatusBadge";
 import { axiosInstance } from "../../../lib/axios";
@@ -128,7 +128,7 @@ export function ApplicantDetailModal({ slug, applicationId, hasPreSelectionTest,
                   </div>
                   <div>
                     <dt>Expected salary</dt>
-                    <dd>{formatRupiah(data.expectedSalary)}</dd>
+                    <dd>{formatSalary(data.expectedSalary, data.expectedSalaryCurrency)}</dd>
                   </div>
                   <div>
                     <dt>Applied</dt>

@@ -1,8 +1,8 @@
 import { apiUrl } from "../../../lib/axios";
+import { formatCurrency } from "../../../lib/currency";
 
-export function formatRupiah(value: string | number | null) {
-  if (value == null || value === "") return "Not stated";
-  return `Rp ${Number(value).toLocaleString("id-ID")}`;
+export function formatSalary(value: string | number | null, currency: string) {
+  return formatCurrency(value, currency);
 }
 
 export function formatDateTime(value: string) {

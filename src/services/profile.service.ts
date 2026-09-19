@@ -14,6 +14,7 @@ export type PublicSeekerProfile = {
   professionalRole: string;
   availability: string;
   salaryExpectation: string;
+  salaryExpectationCurrency: string;
   profileStory: string;
   skills: string[];
   profileLinks: { label: string; url: string }[] | null;

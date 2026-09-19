@@ -2,6 +2,7 @@ import { Search } from "../../site/Icons";
 import { AdminSelect, type AdminSelectOption } from "../AdminSelect";
 import { applicationStatuses, educationOptions, statusLabels, type ApplicantQuery, type ApplicationStatus } from "../../../types/applicant";
 import { statusColor } from "../../../lib/status";
+import { CurrencySelect } from "../../site/CurrencySelect";
 
 export type FilterState = {
   name: string;
@@ -9,6 +10,7 @@ export type FilterState = {
   maxAge: string;
   minSalary: string;
   maxSalary: string;
+  salaryCurrency: string;
   education: string;
   status: string;
   sort: SortKey;
@@ -22,6 +24,7 @@ export const emptyFilters: FilterState = {
   maxAge: "",
   minSalary: "",
   maxSalary: "",
+  salaryCurrency: "IDR",
   education: "",
   status: "all",
   sort: "earliest",
@@ -80,6 +83,7 @@ export function toQuery(filters: FilterState): ApplicantQuery {
     ...(maxAge !== undefined && ageOk && { maxAge }),
     ...(minSalary !== undefined && { minSalary }),
     ...(maxSalary !== undefined && salaryOk && { maxSalary }),
+    ...((minSalary !== undefined || maxSalary !== undefined) && { salaryCurrency: filters.salaryCurrency }),
     ...(educationQuery(filters.education) && { education: educationQuery(filters.education) }),
     ...(filters.status !== "all" && { status: filters.status as ApplicationStatus }),
     ...sorting[filters.sort],
@@ -173,7 +177,8 @@ export function ApplicantFilters({ filters, onChange, onReset }: ApplicantFilter
         </div>
 
         <div className="applicant-field">
-          <span>Expected salary (Rp)</span>
+          <span>Expected salary</span>
+          <CurrencySelect value={filters.salaryCurrency} onChange={(currency) => set("salaryCurrency", currency)} />
           <div className="applicant-range">
             <input
               type="number"

@@ -18,6 +18,7 @@ export type AuthUser = {
   availability: string;
   profileIntro: string;
   salaryExpectation: string;
+  salaryExpectationCurrency: string;
   profileStory: string;
   skills: string[];
   profileLinks: { label: string; url: string }[] | null;

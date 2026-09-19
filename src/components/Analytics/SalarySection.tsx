@@ -11,6 +11,7 @@ const salarySeries = [
 ];
 
 export function SalarySection({ data }: { data: SalaryTrends }) {
+  const salary = (value: number | null) => formatCurrency(value, data.currency);
   return (
     <section className="analytics-section">
       <header className="analytics-heading">
@@ -27,17 +28,17 @@ export function SalarySection({ data }: { data: SalaryTrends }) {
       <div className="analytics-metrics three">
         <article>
           <span>Average expectation</span>
-          <b>{formatCurrency(data.expected.average)}</b>
+          <b>{salary(data.expected.average)}</b>
           <small>{samplesNote(data.expected.samples, "application")}</small>
         </article>
         <article>
           <span>Average advertised</span>
-          <b>{formatCurrency(data.offered.average)}</b>
+          <b>{salary(data.offered.average)}</b>
           <small>{samplesNote(data.offered.samples, "posting")}</small>
         </article>
         <article>
           <span>Average reported</span>
-          <b>{formatCurrency(data.reported.average)}</b>
+          <b>{salary(data.reported.average)}</b>
           <small>{samplesNote(data.reported.samples, "review")}</small>
         </article>
       </div>
@@ -53,7 +54,7 @@ export function SalarySection({ data }: { data: SalaryTrends }) {
           {data.byCategory.length ? (
             <BarList
               series={salarySeries}
-              format={formatCurrency}
+              format={salary}
               items={data.byCategory.map((row) => ({
                 label: categoryLabel(row.category),
                 values: [row.expected, row.offered],
@@ -73,7 +74,7 @@ export function SalarySection({ data }: { data: SalaryTrends }) {
           {data.byPosition.length ? (
             <BarList
               series={[{ name: "Reported salary", color: seriesColors[2] }]}
-              format={formatCurrency}
+              format={salary}
               items={data.byPosition.map((row) => ({
                 label: row.label,
                 values: [row.average],
@@ -93,7 +94,7 @@ export function SalarySection({ data }: { data: SalaryTrends }) {
           {data.byLocation.length ? (
             <BarList
               series={[{ name: "Reported salary", color: seriesColors[3] }]}
-              format={formatCurrency}
+              format={salary}
               items={data.byLocation.map((row) => ({
                 label: row.label,
                 values: [row.average],

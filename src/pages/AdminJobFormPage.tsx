@@ -9,6 +9,7 @@ import { useTogglePublishJobPosting } from "../hooks/api/job-posting/useTogglePu
 import { jobCategories, type CreateJobPayload, type JobCategory } from "../types/job-posting";
 import { ArrowLeft, Close, Upload } from "../components/site/Icons";
 import { getProvinces, getRegencies, type Region } from "../services/region.service";
+import { CurrencySelect } from "../components/site/CurrencySelect";
 
 type FormState = {
   title: string;
@@ -20,6 +21,7 @@ type FormState = {
   deadline: string;
   salaryMin: string;
   salaryMax: string;
+  salaryCurrency: string;
   tags: string[];
   published: boolean;
 };
@@ -34,6 +36,7 @@ const draft: FormState = {
   deadline: "",
   salaryMin: "",
   salaryMax: "",
+  salaryCurrency: "IDR",
   tags: [],
   published: false,
 };
@@ -104,6 +107,7 @@ export default function AdminJobFormPage() {
       deadline: job.deadline.slice(0, 10),
       salaryMin: job.salaryMin?.toString() ?? "",
       salaryMax: job.salaryMax?.toString() ?? "",
+      salaryCurrency: job.salaryCurrency ?? "IDR",
       tags: job.tags ?? [],
       published: job.isPublished,
     });
@@ -141,6 +145,7 @@ export default function AdminJobFormPage() {
       deadline: form.deadline,
       ...(form.salaryMin && { salaryMin: Number(form.salaryMin) }),
       ...(form.salaryMax && { salaryMax: Number(form.salaryMax) }),
+      salaryCurrency: form.salaryCurrency,
       ...(form.tags.length && { tags: form.tags }),
       ...(banner && { banner }),
       ...(editing && removeExistingBanner && !banner
@@ -278,6 +283,14 @@ export default function AdminJobFormPage() {
         <div className="admin-card">
           <h2>Salary & tags</h2>
           <div className="admin-fields">
+            <label className="wide">
+              Salary currency
+              <CurrencySelect
+                value={form.salaryCurrency}
+                onChange={(currency) => set("salaryCurrency", currency)}
+                disabled={saving}
+              />
+            </label>
             <label>
               Salary minimum <small>optional</small>
               <input type="number" inputMode="numeric" min="1" max="2147483647" value={form.salaryMin} onChange={(event) => set("salaryMin", event.target.value)} placeholder="18000000" />

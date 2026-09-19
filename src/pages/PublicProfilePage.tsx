@@ -233,7 +233,7 @@ export default function PublicProfilePage() {
             {location && <span>{location}</span>}
             {profile.lastEducation && <span>{profile.lastEducation}</span>}
             {profile.salaryExpectation && (
-              <span>{profile.salaryExpectation}</span>
+              <span>{profile.salaryExpectationCurrency} {profile.salaryExpectation}</span>
             )}
           </div>
           {isOwnProfile && (

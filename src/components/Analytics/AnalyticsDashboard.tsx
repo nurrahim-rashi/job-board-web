@@ -13,6 +13,7 @@ import { EngagementSection } from "./EngagementSection";
 import { InterestsSection } from "./InterestsSection";
 import { OverviewSection } from "./OverviewSection";
 import { SalarySection } from "./SalarySection";
+import { currencyOptions } from "../../lib/currency";
 
 const rangeOptions: AdminSelectOption[] = analyticsRanges.map((range) => ({
   value: String(range.value),
@@ -27,10 +28,11 @@ const categoryOptions: AdminSelectOption[] = [
 export function AnalyticsDashboard() {
   const [months, setMonths] = useState(6);
   const [category, setCategory] = useState<JobCategory | "">("");
+  const [currency, setCurrency] = useState("IDR");
 
   const query = useMemo(
-    () => ({ months, ...(category ? { category } : {}) }),
-    [months, category],
+    () => ({ months, currency, ...(category ? { category } : {}) }),
+    [months, category, currency],
   );
 
   const overview = useAnalyticsOverview(query);
@@ -60,6 +62,13 @@ export function AnalyticsDashboard() {
           value={category}
           onChange={(next) => setCategory(next as JobCategory | "")}
           options={categoryOptions}
+        />
+        <AdminSelect
+          variant="stacked"
+          label="Salary currency"
+          value={currency}
+          onChange={setCurrency}
+          options={currencyOptions}
         />
         <p>
           {refreshing
