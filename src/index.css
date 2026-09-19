@@ -7013,6 +7013,34 @@ body.polaris-signed-out .job-hero > div:last-child {
   font-size: 12px;
   padding: 10px;
 }
+
+/* Searchable form comboboxes should look like Polaris inputs, never native selects. */
+.admin-fields label > .country-combobox,
+.currency-combobox {
+  background: #fcfaf4;
+  border: 1px solid #ded9cf;
+  border-radius: 12px;
+  color: #202129;
+  margin-top: 7px;
+  min-height: 45px;
+  padding: 0 11px;
+  width: 100%;
+}
+.admin-fields label > .country-combobox > input:not([type="hidden"]),
+.company-review-form .currency-combobox > input:not([type="hidden"]),
+.application-salary-request .currency-combobox > input:not([type="hidden"]),
+.currency-combobox > input:not([type="hidden"]) {
+  background: transparent;
+  border: 0;
+  margin: 0;
+  min-height: 0;
+  outline: 0;
+  padding: 0;
+}
+.company-review-form .currency-combobox,
+.application-salary-request .currency-combobox {
+  margin: 7px 0 10px;
+}
 .browse-search {
   align-items: center;
   display: flex;

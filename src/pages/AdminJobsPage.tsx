@@ -10,7 +10,6 @@ import { useTogglePublishJobPosting } from "../hooks/api/job-posting/useTogglePu
 import { categoryLabel, jobCategories, type JobCategory, type JobListQuery } from "../types/job-posting";
 import { ArrowRight, Search } from "../components/site/Icons";
 import { isNewJob } from "../lib/job-age";
-import { formatJobLocation } from "../lib/location";
 
 type SortKey = "newest" | "oldest" | "title" | "applicants" | "deadline";
 
@@ -157,7 +156,7 @@ export default function AdminJobsPage() {
               <span className="admin-role">
                 <b>{job.title} {isNewJob(job.createdAt) && <i className="new-job-badge">NEW</i>}</b>
                 <small>
-                  {formatJobLocation(job)} · {formatSalary(job)}
+                  {job.cityLocation} · {formatSalary(job)}
                 </small>
               </span>
               <span>

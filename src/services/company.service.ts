@@ -83,11 +83,11 @@ export type PublicCompanyDetail = Omit<
 };
 
 export async function uploadCompanyMedia(field: "logo" | "banner", file: File) {
-  if (!/^image\/(jpeg|png|webp)$/.test(file.type)) {
-    throw new Error("Company media must be a JPG, PNG, or WEBP image.");
+  if (!/^image\/(jpeg|jpg|png|webp|gif|avif|heic|heif)$/.test(file.type) && !/\.(jpe?g|png|webp|gif|avif|heic|heif)$/i.test(file.name)) {
+    throw new Error("Company media must be a JPG, PNG, WEBP, GIF, AVIF, or HEIC image.");
   }
-  if (file.size > 5 * 1024 * 1024) {
-    throw new Error("Company media must be 5MB or smaller.");
+  if (file.size > 4 * 1024 * 1024) {
+    throw new Error("Company media must be 4MB or smaller.");
   }
   const body = new FormData();
   body.append("media", file);

@@ -90,8 +90,8 @@ export async function changePassword(currentPassword: string, newPassword: strin
 }
 
 export async function uploadAvatar(file: File) {
-  if (!file.type.match(/^image\/(jpeg|png|webp)$/)) {
-    throw new Error("Avatar must be a JPG, PNG, or WEBP file.");
+  if (!file.type.match(/^image\/(jpeg|jpg|png|webp|gif|avif|heic|heif)$/) && !/\.(jpe?g|png|webp|gif|avif|heic|heif)$/i.test(file.name)) {
+    throw new Error("Avatar must be a JPG, PNG, WEBP, GIF, AVIF, or HEIC file.");
   }
   if (file.size > 3 * 1024 * 1024) throw new Error("Avatar must be 3MB or smaller.");
 

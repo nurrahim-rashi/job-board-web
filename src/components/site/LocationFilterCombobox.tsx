@@ -26,6 +26,7 @@ export function LocationFilterCombobox({
   onChange,
 }: Props) {
   const [query, setQuery] = useState(value === "all" ? "" : value);
+  const [debouncedQuery, setDebouncedQuery] = useState(query);
   const [open, setOpen] = useState(false);
   const blurTimer = useRef<number | null>(null);
 
@@ -34,15 +35,20 @@ export function LocationFilterCombobox({
     else if (!open) setQuery("");
   }, [open, value]);
 
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedQuery(query), 250);
+    return () => window.clearTimeout(timer);
+  }, [query]);
+
   const matches = useMemo(() => {
-    const term = query.trim().toLocaleLowerCase("en");
+    const term = debouncedQuery.trim().toLocaleLowerCase("en");
     return (Array.isArray(options) ? options : []).filter(
       (option) =>
         !term ||
         option.value.toLocaleLowerCase("en").includes(term) ||
         option.label.toLocaleLowerCase("en").includes(term),
     );
-  }, [options, query]);
+  }, [debouncedQuery, options]);
 
   const select = (nextValue: string) => {
     setQuery(nextValue === "all" ? "" : nextValue);
