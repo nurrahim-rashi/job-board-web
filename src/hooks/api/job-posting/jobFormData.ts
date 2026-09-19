@@ -12,6 +12,7 @@ export const toJobFormData = (payload: UpdateJobPayload) => {
   if (payload.deadline !== undefined) form.append("deadline", payload.deadline);
   if (payload.salaryMin !== undefined) form.append("salaryMin", String(payload.salaryMin));
   if (payload.salaryMax !== undefined) form.append("salaryMax", String(payload.salaryMax));
+  if (payload.salaryCurrency !== undefined) form.append("salaryCurrency", payload.salaryCurrency);
   if (payload.tags?.length) form.append("tags", payload.tags.join(","));
   if (payload.banner) form.append("banner", payload.banner);
   if (payload.removeBanner) form.append("removeBanner", "true");

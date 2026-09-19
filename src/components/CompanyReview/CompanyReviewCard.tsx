@@ -1,10 +1,6 @@
 import type { CompanyReview } from "../../services/review.service";
 import { ratingLabels, ReviewRating } from "./ReviewRating";
-
-function formatSalary(value: number | null) {
-  if (value === null) return "Not disclosed";
-  return `Rp ${value.toLocaleString("id-ID")}`;
-}
+import { formatCurrency } from "../../lib/currency";
 
 function formatReviewDate(value: string) {
   return new Intl.DateTimeFormat("en-GB", {
@@ -30,7 +26,7 @@ export function CompanyReviewCard({ review }: { review: CompanyReview }) {
 
       <div className="company-review-salary">
         <span>Estimated salary</span>
-        <strong>{formatSalary(review.salaryEstimate)}</strong>
+        <strong>{review.salaryEstimate == null ? "Not disclosed" : formatCurrency(review.salaryEstimate, review.salaryCurrency)}</strong>
       </div>
 
       <div className="company-review-ratings">

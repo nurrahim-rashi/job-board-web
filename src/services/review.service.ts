@@ -5,6 +5,7 @@ export type CompanyReview = {
   id: number;
   jobTitleHeld: string;
   salaryEstimate: number | null;
+  salaryCurrency: string;
   ratingCulture: number;
   ratingWorkLife: number;
   ratingFacility: number;
@@ -82,6 +83,7 @@ export type ReviewStoriesData = {
 
 export type CreateCompanyReviewData = {
   salaryEstimate?: number;
+  salaryCurrency: string;
   ratingCulture: number;
   ratingWorkLife: number;
   ratingFacility: number;

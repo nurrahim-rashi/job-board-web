@@ -20,14 +20,7 @@ import {
 } from "../lib/location";
 import { BadgeCheck } from "../components/site/Icons";
 import { hasTopTierQuality } from "../lib/quality";
-
-function formatSalary(minimum: number | null, maximum: number | null) {
-  if (!minimum && !maximum) return "Salary not disclosed";
-  const format = (value: number) => `Rp ${value.toLocaleString("id-ID")}`;
-  if (!minimum) return `Up to ${format(maximum!)}`;
-  if (!maximum) return `From ${format(minimum)}`;
-  return `${format(minimum)}–${format(maximum)}`;
-}
+import { formatCurrencyRange } from "../lib/currency";
 
 function CompanyNotFound() {
   return (
@@ -265,7 +258,7 @@ export default function CompanyDetailPage() {
                       </span>
                       <span>
                         <small>
-                          {formatSalary(job.salaryMin, job.salaryMax)}
+                          {formatCurrencyRange(job.salaryMin, job.salaryMax, job.salaryCurrency)}
                         </small>
                         <b>View role →</b>
                       </span>

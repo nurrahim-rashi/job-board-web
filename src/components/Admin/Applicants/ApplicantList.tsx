@@ -1,6 +1,6 @@
 import { ArrowRight, FileText } from "../../site/Icons";
 import { ApplicantAvatar } from "./ApplicantAvatar";
-import { educationLabel, formatRupiah } from "./applicantHelpers";
+import { educationLabel, formatSalary } from "./applicantHelpers";
 import { formatDate, goodScore } from "../adminData";
 import { type ApplicantListItem } from "../../../types/applicant";
 import { StatusBadge } from "../../site/StatusBadge";
@@ -33,7 +33,7 @@ export function ApplicantList({ applicants, onOpen, onPreviewCv }: ApplicantList
           </span>
           <span>{item.applicant.age ?? "—"}</span>
           <span>{educationLabel(item.applicant.lastEducation)}</span>
-          <span>{formatRupiah(item.expectedSalary)}</span>
+          <span>{formatSalary(item.expectedSalary, item.expectedSalaryCurrency)}</span>
           <span>{formatDate(item.appliedAt)}</span>
           <span>
             {item.testScore == null ? (

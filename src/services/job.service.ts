@@ -13,6 +13,7 @@ export type PublicJob = {
   longitude: string | null;
   salaryMin: number | null;
   salaryMax: number | null;
+  salaryCurrency: string;
   tags: unknown;
   createdAt: string;
   distance?: number | null;

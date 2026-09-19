@@ -31,6 +31,7 @@ import { splitPersonName } from "../lib/person-name";
 import { CountryCombobox } from "../components/site/CountryCombobox";
 import { LocationFilterCombobox } from "../components/site/LocationFilterCombobox";
 import { EducationCombobox } from "../components/Profile/EducationCombobox";
+import { CurrencySelect } from "../components/site/CurrencySelect";
 import type { AssessmentBadge } from "../types/assessment";
 import {
   getPublicCompanies,
@@ -289,6 +290,7 @@ export default function ProfilePage() {
           address: String(form.get("address") ?? "") || undefined,
           availability: availability || undefined,
           salaryExpectation: String(form.get("salaryExpectation") ?? "") || undefined,
+          salaryExpectationCurrency: String(form.get("salaryExpectationCurrency") ?? "IDR"),
           profileStory: String(form.get("profileStory") ?? "") || undefined,
           skills: form.getAll("skills").map(String).filter(Boolean),
           experiences: sortExperiences(experiences).map((experience) => ({
@@ -708,8 +710,15 @@ export default function ProfilePage() {
                   </select>
                 </label>
                 <label>
+                  Salary expectation currency
+                  <CurrencySelect
+                    name="salaryExpectationCurrency"
+                    defaultValue={user.salaryExpectationCurrency ?? "IDR"}
+                  />
+                </label>
+                <label>
                   Salary expectation
-                  <input name="salaryExpectation" defaultValue={user.salaryExpectation} placeholder="Rp 25–35 juta / month" />
+                  <input name="salaryExpectation" defaultValue={user.salaryExpectation} placeholder="25,000,000–35,000,000 / month" />
                 </label>
                 <label className="profile-wide">
                   My story

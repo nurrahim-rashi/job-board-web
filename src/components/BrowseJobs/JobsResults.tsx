@@ -8,11 +8,10 @@ import { DataSkeleton } from "../site/DataSkeleton";
 import { useAuth } from "../../stores/useAuth";
 import { ShareJobModal } from "../JobDetail/ShareJobModal";
 import { formatJobLocation } from "../../lib/location";
+import { formatCurrencyRange } from "../../lib/currency";
 
 const salary = (job: PublicJob) =>
-  job.salaryMin || job.salaryMax
-    ? `Rp ${(job.salaryMin ?? 0).toLocaleString("id-ID")}–${(job.salaryMax ?? 0).toLocaleString("id-ID")}`
-    : "Salary not disclosed";
+  formatCurrencyRange(job.salaryMin, job.salaryMax, job.salaryCurrency);
 const posted = (date: string) => {
   const days = Math.max(
     0,

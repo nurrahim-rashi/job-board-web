@@ -76,6 +76,7 @@ export type PublicCompanyDetail = Omit<
     category: string;
     salaryMin: number | null;
     salaryMax: number | null;
+    salaryCurrency: string;
     createdAt: string;
     deadline: string;
   }[];

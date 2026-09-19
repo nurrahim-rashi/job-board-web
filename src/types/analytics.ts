@@ -11,6 +11,7 @@ export interface AnalyticsQuery {
   months?: number;
   category?: JobCategory;
   limit?: number;
+  currency?: string;
 }
 
 export interface AnalyticsMetric {
@@ -73,6 +74,7 @@ export interface SalaryAverage {
 }
 
 export interface SalaryTrends {
+  currency: string;
   expected: SalaryAverage;
   offered: SalaryAverage;
   reported: SalaryAverage;
