@@ -36,7 +36,7 @@ export function LocationFilterCombobox({
 
   const matches = useMemo(() => {
     const term = query.trim().toLocaleLowerCase("en");
-    return options.filter(
+    return (Array.isArray(options) ? options : []).filter(
       (option) =>
         !term ||
         option.value.toLocaleLowerCase("en").includes(term) ||

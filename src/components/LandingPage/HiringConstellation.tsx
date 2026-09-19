@@ -246,17 +246,18 @@ export function HiringConstellation() {
             >
               ←
             </button>
-            <div>
-              {steps.map((step, index) => (
-                <button
-                  key={`${track}-${step.title}-mobile`}
-                  type="button"
-                  className={index === active ? "active" : ""}
-                  onClick={() => goToStep(index)}
-                  aria-label={`Show ${step.title}`}
-                  aria-current={index === active ? "step" : undefined}
-                />
-              ))}
+            <div className="constellation-mobile-slider">
+              <input
+                type="range"
+                min="0"
+                max={steps.length - 1}
+                step="1"
+                value={active}
+                onChange={(event) => goToStep(Number(event.target.value))}
+                aria-label="Hiring process step"
+                aria-valuetext={`${steps[active].time}: ${steps[active].title}`}
+              />
+              <span>{active + 1} / {steps.length}</span>
             </div>
             <button
               type="button"

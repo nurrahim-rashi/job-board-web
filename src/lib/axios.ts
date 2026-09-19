@@ -7,7 +7,15 @@ import {
   endRequestButtonFeedback,
 } from "./request-button-feedback";
 
-export const apiUrl = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+const configuredApiUrl = import.meta.env.VITE_API_URL?.trim();
+const defaultApiUrl = import.meta.env.PROD
+  ? "https://job-board-backend-sage.vercel.app"
+  : "http://localhost:8000";
+
+// Never fall back to the frontend origin in production. An empty Vercel build
+// variable previously made POST /auth/register hit the static frontend and
+// return 405 instead of reaching the API.
+export const apiUrl = (configuredApiUrl || defaultApiUrl).replace(/\/+$/, "");
 
 export const axiosInstance = axios.create({
   baseURL: apiUrl,

@@ -58,7 +58,11 @@ export function CountryCombobox({ value, countries, onChange }: Props) {
 
   const matches = useMemo(() => {
     const term = query.trim().toLocaleLowerCase("en");
-    const merged = [...countries, ...remoteCountries];
+    const availableCountries = Array.isArray(countries) ? countries : [];
+    const availableRemoteCountries = Array.isArray(remoteCountries)
+      ? remoteCountries
+      : [];
+    const merged = [...availableCountries, ...availableRemoteCountries];
     const seen = new Set<string>();
     const filtered = merged
       .filter((country) => !term || country.name.toLocaleLowerCase("en").includes(term))
@@ -128,7 +132,9 @@ export function CountryCombobox({ value, countries, onChange }: Props) {
             </button>
           ))}
           {loading && <span>Searching countries…</span>}
-          {!loading && !query && countries.length === 0 && (
+          {!loading &&
+            !query &&
+            (!Array.isArray(countries) || countries.length === 0) && (
             <span>Loading countries…</span>
           )}
           {!loading && query.length >= 2 && matches.length === 0 && (
