@@ -212,10 +212,10 @@ export function HiringConstellation() {
                   className={`constellation-point ${reached ? "reached" : ""} ${isCurrent ? "active" : ""}`}
                   style={{ left: `${step.x}%`, top: `${step.y}%` }}
                   onClick={() => goToStep(index)}
-                  aria-label={`${step.label} — ${step.title}`}
+                  aria-label={`${step.time} — ${step.title}`}
                 >
                   <i />
-                  <span>{step.label}</span>
+                  <span>{step.time}</span>
                 </button>
               );
             })}
@@ -237,6 +237,36 @@ export function HiringConstellation() {
           <div className="constellation-progress">
             <i style={{ width: `${progress * 100}%` }} />
           </div>
+          <nav className="constellation-mobile-controls" aria-label="Hiring process steps">
+            <button
+              type="button"
+              onClick={() => goToStep(Math.max(0, active - 1))}
+              disabled={active === 0}
+              aria-label="Previous hiring step"
+            >
+              ←
+            </button>
+            <div>
+              {steps.map((step, index) => (
+                <button
+                  key={`${track}-${step.title}-mobile`}
+                  type="button"
+                  className={index === active ? "active" : ""}
+                  onClick={() => goToStep(index)}
+                  aria-label={`Show ${step.title}`}
+                  aria-current={index === active ? "step" : undefined}
+                />
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => goToStep(Math.min(steps.length - 1, active + 1))}
+              disabled={active === steps.length - 1}
+              aria-label="Next hiring step"
+            >
+              →
+            </button>
+          </nav>
         </div>
       </div>
     </section>
