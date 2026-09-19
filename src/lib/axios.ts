@@ -19,11 +19,15 @@ export const apiUrl = (configuredApiUrl || defaultApiUrl).replace(/\/+$/, "");
 
 export const axiosInstance = axios.create({
   baseURL: apiUrl,
-  headers: { "Content-Type": "application/json" },
 });
 
 axiosInstance.interceptors.request.use((config) => {
   beginRequestButtonFeedback(config);
+  // Let the browser generate the multipart boundary. A JSON content type here
+  // makes Multer receive an empty req.file even when a valid image was chosen.
+  if (typeof FormData !== "undefined" && config.data instanceof FormData) {
+    config.headers.delete("Content-Type");
+  }
   const token = useAuth.getState().token;
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
