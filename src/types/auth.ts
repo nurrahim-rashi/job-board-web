@@ -13,6 +13,7 @@ export type AuthUser = {
   address: string | null;
   city: string | null;
   province: string | null;
+  country: string | null;
   professionalRole: string;
   availability: string;
   profileIntro: string;

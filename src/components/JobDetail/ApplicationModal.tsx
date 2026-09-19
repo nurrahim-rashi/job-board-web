@@ -5,7 +5,7 @@ import { submitApplication } from "../../services/application.service";
 import { useAuth } from "../../stores/useAuth";
 import { Close, Pencil, Upload } from "../site/Icons";
 import { educationOptions } from "../../constants/education";
-import { getProvinces, getRegencies, type Region } from "../../services/region.service";
+import { getCountries, getWorldwideCities, getWorldwideStates, type Region } from "../../services/region.service";
 import { fetchSkillNames } from "../../lib/assessment-api";
 import { formatLocation } from "../../lib/location";
 
@@ -26,7 +26,9 @@ export function ApplicationModal({ open, title, slug, onClose, onSubmitted }: Pr
   const [editSecondary, setEditSecondary] = useState("");
   const [savingProfile, setSavingProfile] = useState(false);
   const [provinces, setProvinces] = useState<Region[]>([]);
-  const [provinceCode, setProvinceCode] = useState("");
+  const [countries, setCountries] = useState<Region[]>([]);
+  const [locationCountry, setLocationCountry] = useState("");
+  const [locationProvince, setLocationProvince] = useState("");
   const [cities, setCities] = useState<Region[]>([]);
   const [skillNames, setSkillNames] = useState<string[]>([]);
   const [skillQuery, setSkillQuery] = useState("");
@@ -38,14 +40,19 @@ export function ApplicationModal({ open, title, slug, onClose, onSubmitted }: Pr
     setStep("application"); setFile(null); setSalary(""); setError("");
     setCheckingSubscription(true);
     getSubscriptionStatus().then(({ active }) => setChoosingCv(active)).catch(() => setChoosingCv(false)).finally(() => setCheckingSubscription(false));
-    getProvinces().then(setProvinces).catch(() => setProvinces([]));
+    getCountries().then(setCountries).catch(() => setCountries([]));
     fetchSkillNames().then(setSkillNames).catch(() => setSkillNames([]));
   }, [open]);
 
   useEffect(() => {
-    if (!provinceCode) return setCities([]);
-    getRegencies(provinceCode).then(setCities).catch(() => setCities([]));
-  }, [provinceCode]);
+    if (!locationCountry) return setProvinces([]);
+    getWorldwideStates(locationCountry).then(setProvinces).catch(() => setProvinces([]));
+  }, [locationCountry]);
+
+  useEffect(() => {
+    if (!locationCountry || !locationProvince) return setCities([]);
+    getWorldwideCities(locationCountry, locationProvince).then(setCities).catch(() => setCities([]));
+  }, [locationCountry, locationProvince]);
 
   if (!open || !user) return null;
 
@@ -62,7 +69,10 @@ export function ApplicationModal({ open, title, slug, onClose, onSubmitted }: Pr
 
   function beginEdit(field: string, value: string, secondary = "") {
     setEditingField(field); setEditValue(value); setEditSecondary(secondary); setError("");
-    if (field === "location") setProvinceCode(provinces.find((province) => province.name === secondary)?.code ?? "");
+    if (field === "location") {
+      setLocationCountry(user?.country ?? "Indonesia");
+      setLocationProvince(secondary);
+    }
     if (field === "skills") { setDraftSkills(user?.skills ?? []); setSkillQuery(""); }
   }
 
@@ -70,7 +80,7 @@ export function ApplicationModal({ open, title, slug, onClose, onSubmitted }: Pr
     if (!editingField) return;
     setSavingProfile(true); setError("");
     try {
-      const payload = editingField === "location" ? { city: editValue, province: provinces.find((province) => province.code === provinceCode)?.name ?? editSecondary }
+      const payload = editingField === "location" ? { city: editValue, province: locationProvince || editSecondary, country: locationCountry }
         : editingField === "skills" ? { skills: draftSkills }
         : editingField === "lastEducation" ? { lastEducation: `${editValue} in ${editSecondary.split("|")[0] ?? ""} at ${editSecondary.split("|")[1] ?? ""}` }
         : { [editingField]: editValue };
@@ -120,7 +130,7 @@ export function ApplicationModal({ open, title, slug, onClose, onSubmitted }: Pr
           <section><header><span>Education</span><button type="button" onClick={() => { const parts = educationValue(user.lastEducation); beginEdit("lastEducation", parts.level, `${parts.major}|${parts.institution}`); }}><Pencil /></button></header>{editingField === "lastEducation" ? <div className="apply-inline-edit"><select value={editValue} onChange={(event) => setEditValue(event.target.value)}><option value="">Education level</option>{educationOptions.map((option) => <option key={option}>{option}</option>)}</select><input value={editSecondary.split("|")[0] ?? ""} placeholder="Major / field of study" onChange={(event) => setEditSecondary(`${event.target.value}|${editSecondary.split("|")[1] ?? ""}`)} /><input value={editSecondary.split("|")[1] ?? ""} placeholder="School / university" onChange={(event) => setEditSecondary(`${editSecondary.split("|")[0] ?? ""}|${event.target.value}`)} /><button type="button" onClick={() => void saveProfileField()}>{savingProfile ? "Saving…" : "Save"}</button></div> : <strong>{user.lastEducation || "Not added"}</strong>}</section>
           <section><header><span>Age</span><button type="button" onClick={() => beginEdit("birthDate", user.birthDate?.slice(0, 10) ?? "")}><Pencil /></button></header>{editingField === "birthDate" ? <ProfileEdit type="date" value={editValue} onChange={setEditValue} onSave={saveProfileField} saving={savingProfile} /> : <strong>{ageFromBirthday(user.birthDate)}</strong>}</section>
           <section><header><span>Gender</span><button type="button" onClick={() => beginEdit("gender", user.gender ?? "")}><Pencil /></button></header>{editingField === "gender" ? <div className="apply-inline-edit"><select value={editValue} onChange={(event) => setEditValue(event.target.value)}><option value="">Select gender</option><option value="MALE">Male</option><option value="FEMALE">Female</option></select><button type="button" onClick={() => void saveProfileField()}>{savingProfile ? "Saving…" : "Save"}</button></div> : <strong>{user.gender === "MALE" ? "Male" : user.gender === "FEMALE" ? "Female" : "Not added"}</strong>}</section>
-          <section className="wide"><header><span>Location</span><button type="button" onClick={() => beginEdit("location", user.city ?? "", user.province ?? "")}><Pencil /></button></header>{editingField === "location" ? <div className="apply-inline-edit two"><select value={provinceCode} onChange={(event) => { setProvinceCode(event.target.value); setEditValue(""); }}><option value="">Select province</option>{provinces.map((province) => <option key={province.code} value={province.code}>{province.name}</option>)}</select><select value={editValue} disabled={!provinceCode} onChange={(event) => setEditValue(event.target.value)}><option value="">{provinceCode ? "Select city / regency" : "Choose province first"}</option>{cities.map((city) => <option key={city.code} value={city.name}>{city.name}</option>)}</select><button type="button" onClick={() => void saveProfileField()}>{savingProfile ? "Saving…" : "Save"}</button></div> : <strong>{formatLocation(user.city, user.province, "Indonesia") || "Not added"}</strong>}</section>
+          <section className="wide"><header><span>Location</span><button type="button" onClick={() => beginEdit("location", user.city ?? "", user.province ?? "")}><Pencil /></button></header>{editingField === "location" ? <div className="apply-inline-edit"><select value={locationCountry} onChange={(event) => { setLocationCountry(event.target.value); setLocationProvince(""); setEditValue(""); }}><option value="">Select country</option>{countries.map((country) => <option key={country.code} value={country.name}>{country.name}</option>)}</select><select value={locationProvince} disabled={!locationCountry} onChange={(event) => { setLocationProvince(event.target.value); setEditValue(""); }}><option value="">{locationCountry ? "Select province / state" : "Choose country first"}</option>{provinces.map((province) => <option key={province.code} value={province.name}>{province.name}, {locationCountry}</option>)}</select><select value={editValue} disabled={!locationProvince} onChange={(event) => setEditValue(event.target.value)}><option value="">{locationProvince ? "Select city" : "Choose province / state first"}</option>{cities.map((city) => <option key={city.code} value={city.name}>{city.name}, {locationProvince}, {locationCountry}</option>)}</select><button type="button" onClick={() => void saveProfileField()}>{savingProfile ? "Saving…" : "Save"}</button></div> : <strong>{formatLocation(user.city, user.province, user.country) || "Not added"}</strong>}</section>
           <section className="wide"><header><span>Address</span><button type="button" onClick={() => beginEdit("address", user.address ?? "")}><Pencil /></button></header>{editingField === "address" ? <ProfileEdit textarea value={editValue} onChange={setEditValue} onSave={saveProfileField} saving={savingProfile} /> : <strong>{user.address || "Not added"}</strong>}</section>
           <section className="wide"><header><span>My story</span><button type="button" onClick={() => beginEdit("profileStory", user.profileStory)}><Pencil /></button></header>{editingField === "profileStory" ? <ProfileEdit textarea value={editValue} onChange={setEditValue} onSave={saveProfileField} saving={savingProfile} /> : <strong>{user.profileStory || "No story added yet."}</strong>}</section>
           <section className="wide"><header><span>Skills</span><button type="button" onClick={() => beginEdit("skills", "")}><Pencil /></button></header>{editingField === "skills" ? <div className="apply-skill-editor"><div className="apply-skill-chips">{draftSkills.map((skill) => <button type="button" key={skill} onClick={() => setDraftSkills((items) => items.filter((item) => item !== skill))}>{skill} ×</button>)}</div><input value={skillQuery} onChange={(event) => setSkillQuery(event.target.value)} placeholder="Type to search skills" />{skillQuery && <div className="apply-skill-results">{skillNames.filter((skill) => skill.toLowerCase().includes(skillQuery.toLowerCase()) && !draftSkills.includes(skill)).slice(0, 6).map((skill) => <button type="button" key={skill} onClick={() => { setDraftSkills((items) => [...items, skill]); setSkillQuery(""); }}>{skill}</button>)}</div>}<button className="apply-skill-save" type="button" onClick={() => void saveProfileField()}>{savingProfile ? "Saving…" : "Save skills"}</button></div> : <strong>{user.skills.length ? user.skills.join(", ") : "No skills added yet."}</strong>}</section>

@@ -182,7 +182,7 @@ export default function PublicProfilePage() {
     );
   }
 
-  const location = formatLocation(profile.city, profile.province, "Indonesia");
+  const location = formatLocation(profile.city, profile.province, profile.country);
   const experiences = [...(profile.experiences ?? [])].sort(
     (a, b) => experienceTime(b.period) - experienceTime(a.period),
   );

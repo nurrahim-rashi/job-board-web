@@ -11,7 +11,7 @@ import {
   SocialLinksFields,
   socialLinksFromFormData,
 } from "../components/Profile/SocialLinks";
-import { Calendar, Upload } from "../components/site/Icons";
+import { Calendar, MapPin, Upload } from "../components/site/Icons";
 import {
   changePassword,
   getProfile,
@@ -26,8 +26,11 @@ import { useProfileView } from "../stores/useProfileView";
 import type { AuthUser } from "../types/auth";
 import { fetchAssessmentBadges, fetchSkillNames } from "../lib/assessment-api";
 import { getPublicJobs } from "../services/job.service";
-import { getEducationOptions, getProvinces, getRegencies, type Region } from "../services/region.service";
+import { getCountries, getEducationOptions, getWorldwideCities, getWorldwideStates, reverseGeocodeLocation, type Region } from "../services/region.service";
 import { splitPersonName } from "../lib/person-name";
+import { CountryCombobox } from "../components/site/CountryCombobox";
+import { LocationFilterCombobox } from "../components/site/LocationFilterCombobox";
+import { EducationCombobox } from "../components/Profile/EducationCombobox";
 import type { AssessmentBadge } from "../types/assessment";
 import {
   getPublicCompanies,
@@ -121,10 +124,14 @@ export default function ProfilePage() {
   const [subscriptionActive, setSubscriptionActive] = useState<boolean | null>(null);
   const [skillNames, setSkillNames] = useState<string[]>([]);
   const [roleSuggestions, setRoleSuggestions] = useState<string[]>([]);
+  const [countries, setCountries] = useState<Region[]>([]);
+  const [profileCountry, setProfileCountry] = useState("");
   const [provinces, setProvinces] = useState<Region[]>([]);
-  const [profileProvinceCode, setProfileProvinceCode] = useState("");
+  const [profileProvince, setProfileProvince] = useState("");
   const [profileCities, setProfileCities] = useState<Region[]>([]);
   const [profileCity, setProfileCity] = useState("");
+  const [usingDeviceLocation, setUsingDeviceLocation] = useState(false);
+  const [locating, setLocating] = useState(false);
   const [degreeSuggestions, setDegreeSuggestions] = useState<string[]>([...educationOptions]);
   const [majorSuggestions, setMajorSuggestions] = useState<string[]>([]);
   const [institutionSuggestions, setInstitutionSuggestions] = useState<string[]>([]);
@@ -194,17 +201,20 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!user) return;
     setProfileCity(user.city ?? "");
-    getProvinces().then((items) => {
-      setProvinces(items);
-      const match = items.find((item) => item.name.toLowerCase() === user.province?.toLowerCase());
-      if (match) setProfileProvinceCode(match.code);
-    }).catch(() => setProvinces([]));
+    setProfileProvince(user.province ?? "");
+    setProfileCountry(user.country ?? user.company?.country ?? "Indonesia");
+    getCountries().then(setCountries).catch(() => setCountries([]));
   }, [user?.id]);
 
   useEffect(() => {
-    if (!profileProvinceCode) { setProfileCities([]); return; }
-    getRegencies(profileProvinceCode).then(setProfileCities).catch(() => setProfileCities([]));
-  }, [profileProvinceCode]);
+    if (!profileCountry) { setProvinces([]); return; }
+    getWorldwideStates(profileCountry).then(setProvinces).catch(() => setProvinces([]));
+  }, [profileCountry]);
+
+  useEffect(() => {
+    if (!profileCountry || !profileProvince) { setProfileCities([]); return; }
+    getWorldwideCities(profileCountry, profileProvince).then(setProfileCities).catch(() => setProfileCities([]));
+  }, [profileCountry, profileProvince]);
 
   useEffect(() => {
     if (user?.role !== "JOB_SEEKER") return;
@@ -251,7 +261,7 @@ export default function ProfilePage() {
       if (!isCompany && (!isEducationLevel(educationLevel) || !educationMajor || !educationInstitution)) {
         throw new Error("Education level, major, and school or university are required.");
       }
-      if (!isCompany && (!form.get("birthDate") || !form.get("gender") || !String(form.get("address") ?? "").trim() || !profileCity || !(profileProvinceCode || user?.province))) throw new Error("Birth date, gender, education, and complete address are required.");
+      if (!isCompany && (!form.get("birthDate") || !form.get("gender") || !String(form.get("address") ?? "").trim() || !profileCity || !profileProvince || !profileCountry)) throw new Error("Birth date, gender, education, and complete address are required.");
       if (!isCompany && availability && !isAvailability(availability)) {
         throw new Error("Please select a valid availability status.");
       }
@@ -267,7 +277,8 @@ export default function ProfilePage() {
         name: [String(form.get("firstName") ?? "").trim(), String(form.get("lastName") ?? "").trim()].filter(Boolean).join(" "),
         email: String(form.get("email") ?? ""),
         city: profileCity || undefined,
-        province: provinces.find((item) => item.code === profileProvinceCode)?.name || user?.province || undefined,
+        province: profileProvince || undefined,
+        country: profileCountry || undefined,
         professionalRole: String(form.get("professionalRole") ?? "") || undefined,
         profileLinks: socialLinksFromFormData(form),
         ...(!isCompany ? {
@@ -390,6 +401,41 @@ export default function ProfilePage() {
           ? requestError.message
           : "Unable to delete profile photo.",
       );
+    }
+  }
+
+  async function toggleDeviceLocation() {
+    if (usingDeviceLocation) {
+      setUsingDeviceLocation(false);
+      toast.success("You can edit your location manually again.");
+      return;
+    }
+    if (!navigator.geolocation) {
+      toast.error("Location access is not supported by this browser.");
+      return;
+    }
+    setLocating(true);
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) =>
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 12_000,
+          maximumAge: 60_000,
+        }),
+      );
+      const location = await reverseGeocodeLocation(
+        position.coords.latitude,
+        position.coords.longitude,
+      );
+      setProfileCountry(location.country);
+      setProfileProvince(location.province);
+      setProfileCity(location.city);
+      setUsingDeviceLocation(true);
+      toast.success(`Using ${location.city}, ${location.province}, ${location.country}.`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to determine your location.");
+    } finally {
+      setLocating(false);
     }
   }
 
@@ -559,14 +605,9 @@ export default function ProfilePage() {
                     placeholder="Hiring Manager"
                   />
                 </label>
-                <label>
-                  Province
-                  <select value={profileProvinceCode} onChange={(event) => { setProfileProvinceCode(event.target.value); setProfileCity(""); }}><option value="">{user.province || "Select province"}</option>{provinces.map((item) => <option key={item.code} value={item.code}>{item.name}</option>)}</select>
-                </label>
-                <label>
-                  City / regency
-                  <select value={profileCity} onChange={(event) => setProfileCity(event.target.value)}><option value="">{profileProvinceCode ? "Select city / regency" : user.city || "Choose province first"}</option>{profileCities.map((item) => <option key={item.code} value={item.name}>{item.name}</option>)}</select>
-                </label>
+                <label>Country<CountryCombobox value={profileCountry || "all"} countries={countries} onChange={(country) => { setProfileCountry(country === "all" ? "" : country); setProfileProvince(""); setProfileCity(""); setUsingDeviceLocation(false); }} /></label>
+                <label>Province / state<LocationFilterCombobox value={profileProvince || "all"} options={provinces.map((item) => ({ value: item.name, label: `${item.name}, ${profileCountry}` }))} placeholder="Select province / state" loadingLabel="Loading provinces / states…" disabled={!profileCountry} onChange={(province) => { setProfileProvince(province === "all" ? "" : province); setProfileCity(""); setUsingDeviceLocation(false); }} /></label>
+                <label>City<LocationFilterCombobox value={profileCity || "all"} options={profileCities.map((item) => ({ value: item.name, label: `${item.name}, ${profileProvince}, ${profileCountry}` }))} placeholder="Select city" loadingLabel="Loading cities…" disabled={!profileProvince} onChange={(city) => { setProfileCity(city === "all" ? "" : city); setUsingDeviceLocation(false); }} /></label>
                 <SocialLinksFields links={user.profileLinks ?? []} />
               </>
             )}
@@ -609,38 +650,40 @@ export default function ProfilePage() {
                 </label>
                 <label>
                   Major / field of study
-                  <input name="educationMajor" list="education-major-options" defaultValue={educationParts(user.lastEducation).major} placeholder="Start typing a major" required />
-                  <datalist id="education-major-options">{majorSuggestions.map((major) => <option key={major} value={major} />)}</datalist>
+                  <EducationCombobox
+                    name="educationMajor"
+                    defaultValue={educationParts(user.lastEducation).major}
+                    suggestions={majorSuggestions}
+                    placeholder="Start typing a major"
+                    onQuery={(query) => getEducationOptions("majors", query).then(setMajorSuggestions).catch(() => undefined)}
+                    required
+                  />
                 </label>
                 <label>
                   School / university
-                  <input
+                  <EducationCombobox
                     name="educationInstitution"
-                    list="education-institution-options"
                     defaultValue={educationParts(user.lastEducation).institution}
                     placeholder="Start typing a school or university"
-                    onChange={(event) => {
-                      const query = event.currentTarget.value;
-                      if (query.trim().length < 2) {
-                        setInstitutionSuggestions([]);
-                        return;
-                      }
-                      getEducationOptions("institutions", query)
+                    suggestions={institutionSuggestions}
+                    onQuery={(query) => {
+                      if (query.trim().length < 2) return setInstitutionSuggestions([]);
+                      void getEducationOptions("institutions", query)
                         .then(setInstitutionSuggestions)
                         .catch(() => setInstitutionSuggestions([]));
                     }}
                     required
                   />
-                  <datalist id="education-institution-options">{institutionSuggestions.map((institution) => <option key={institution} value={institution} />)}</datalist>
                 </label>
-                <label>
-                  Province
-                  <select value={profileProvinceCode} onChange={(event) => { setProfileProvinceCode(event.target.value); setProfileCity(""); }}><option value="">{user.province || "Select province"}</option>{provinces.map((item) => <option key={item.code} value={item.code}>{item.name}</option>)}</select>
-                </label>
-                <label>
-                  City / regency
-                  <select value={profileCity} onChange={(event) => setProfileCity(event.target.value)}><option value="">{profileProvinceCode ? "Select city / regency" : user.city || "Choose province first"}</option>{profileCities.map((item) => <option key={item.code} value={item.name}>{item.name}</option>)}</select>
-                </label>
+                <label>Country<CountryCombobox value={profileCountry || "all"} countries={countries} onChange={(country) => { setProfileCountry(country === "all" ? "" : country); setProfileProvince(""); setProfileCity(""); setUsingDeviceLocation(false); }} /></label>
+                <label>Province / state<LocationFilterCombobox value={profileProvince || "all"} options={provinces.map((item) => ({ value: item.name, label: `${item.name}, ${profileCountry}` }))} placeholder="Select province / state" loadingLabel="Loading provinces / states…" disabled={!profileCountry} onChange={(province) => { setProfileProvince(province === "all" ? "" : province); setProfileCity(""); setUsingDeviceLocation(false); }} /></label>
+                <label>City<LocationFilterCombobox value={profileCity || "all"} options={profileCities.map((item) => ({ value: item.name, label: `${item.name}, ${profileProvince}, ${profileCountry}` }))} placeholder="Select city" loadingLabel="Loading cities…" disabled={!profileProvince} onChange={(city) => { setProfileCity(city === "all" ? "" : city); setUsingDeviceLocation(false); }} /></label>
+                <div className="profile-wide profile-location-action">
+                  <button type="button" className={usingDeviceLocation ? "location-active" : ""} aria-pressed={usingDeviceLocation} disabled={locating} onClick={() => void toggleDeviceLocation()}>
+                    <MapPin />{locating ? "Finding your location…" : usingDeviceLocation ? "Stop using my location" : "Use my current location"}
+                  </button>
+                  {usingDeviceLocation && <small>Location was filled from your device. Editing a field switches back to manual mode.</small>}
+                </div>
                 <label className="profile-wide">
                   Address
                   <textarea name="address" defaultValue={user.address ?? ""} required />
