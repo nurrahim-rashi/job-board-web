@@ -57,8 +57,9 @@ export function SubscribeSection() {
 
         const response = await fetchSubscriptionPlans();
 
-        setPlans(response.data);
+        setPlans(Array.isArray(response.data) ? response.data : []);
       } catch (error) {
+        setPlans([]);
         setPlansError(
           error instanceof Error
             ? error.message
