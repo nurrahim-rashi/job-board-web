@@ -9314,14 +9314,21 @@ body.polaris-signed-out .job-hero > div:last-child {
   background: transparent;
   border: 0;
   cursor: pointer;
+  height: 0;
+  line-height: 1;
+  padding: 0;
   position: absolute;
-  transform: translate(-50%, -50%);
+  width: 0;
 }
 .constellation-point i {
   background: rgb(255 255 255 / 0.3);
   border-radius: 50%;
   display: block;
   height: 8px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  transform: translate(-50%, -50%);
   transition: all 0.5s;
   width: 8px;
 }
@@ -9342,7 +9349,11 @@ body.polaris-signed-out .job-hero > div:last-child {
   color: rgb(255 255 255 / 0.45);
   display: block;
   font-size: 12px;
-  margin-top: 11px;
+  left: 0;
+  margin-top: 0;
+  position: absolute;
+  top: 13px;
+  transform: translateX(-50%);
   white-space: nowrap;
 }
 .constellation-point.active span {
@@ -9490,14 +9501,21 @@ body.polaris-signed-out .job-hero > div:last-child {
   background: transparent;
   border: 0;
   cursor: pointer;
+  height: 0;
+  line-height: 1;
+  padding: 0;
   position: absolute;
-  transform: translate(-50%, -50%);
+  width: 0;
 }
 .constellation-point i {
   background: rgb(255 255 255 / 0.3);
   border-radius: 50%;
   display: block;
   height: 8px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  transform: translate(-50%, -50%);
   transition: all 0.5s;
   width: 8px;
 }
@@ -9518,7 +9536,11 @@ body.polaris-signed-out .job-hero > div:last-child {
   color: rgb(255 255 255 / 0.45);
   display: block;
   font-size: 12px;
-  margin-top: 11px;
+  left: 0;
+  margin-top: 0;
+  position: absolute;
+  top: 13px;
+  transform: translateX(-50%);
   white-space: nowrap;
 }
 .constellation-point.active span {
@@ -17629,5 +17651,21 @@ button,
   .mobile-nav-menu button:last-child:hover {
     background: #3d52a1;
     color: #fff;
+  }
+}
+
+/* Job details are public, but their compact summary hero should keep the same
+   height before and after authentication. Other signed-out heroes stay tall. */
+body.polaris-signed-out .job-detail-page .job-hero {
+  height: var(--polaris-signed-in-hero-height) !important;
+  max-height: var(--polaris-signed-in-hero-height) !important;
+  min-height: var(--polaris-signed-in-hero-height) !important;
+}
+
+@media (max-width: 700px) {
+  body.polaris-signed-out .job-detail-page .job-hero {
+    height: auto !important;
+    max-height: none !important;
+    min-height: var(--polaris-signed-in-hero-height) !important;
   }
 }

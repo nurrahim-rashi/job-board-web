@@ -7,7 +7,9 @@ import { EditProfileHero } from "../components/Profile/EditProfileHero";
 import { getProfile, updateProfile } from "../services/auth.service";
 import { useAuth } from "../stores/useAuth";
 import { removeCompanyMedia, uploadCompanyMedia } from "../services/company.service";
-import { getProvinces, getRegencies, type Region } from "../services/region.service";
+import { getCountries, getWorldwideCities, getWorldwideStates, type Region } from "../services/region.service";
+import { CountryCombobox } from "../components/site/CountryCombobox";
+import { LocationFilterCombobox } from "../components/site/LocationFilterCombobox";
 
 const lines = (value: FormDataEntryValue | null) =>
   String(value ?? "").split("\n").map((item) => item.trim()).filter(Boolean);
@@ -33,8 +35,10 @@ export default function CompanyEditProfilePage() {
     { name: string; url: string; description: string }[]
   >([]);
   const setUser = useAuth((state) => state.setUser);
-  const [provinces, setProvinces] = useState<Region[]>([]);
-  const [provinceCode, setProvinceCode] = useState("");
+  const [countries, setCountries] = useState<Region[]>([]);
+  const [companyCountry, setCompanyCountry] = useState("");
+  const [states, setStates] = useState<Region[]>([]);
+  const [companyProvince, setCompanyProvince] = useState("");
   const [cities, setCities] = useState<Region[]>([]);
   const [companyCity, setCompanyCity] = useState("");
 
@@ -47,19 +51,19 @@ export default function CompanyEditProfilePage() {
   useEffect(() => {
     setProducts(user?.company?.products ?? []);
     setCompanyCity(user?.company?.city ?? "");
-  }, [user?.company?.city, user?.company?.products]);
+    setCompanyProvince(user?.company?.province ?? "");
+    setCompanyCountry(user?.company?.country ?? "Indonesia");
+  }, [user?.company?.city, user?.company?.country, user?.company?.products, user?.company?.province]);
 
-  useEffect(() => { getProvinces().then(setProvinces).catch(() => setProvinces([])); }, []);
+  useEffect(() => { getCountries().then(setCountries).catch(() => setCountries([])); }, []);
   useEffect(() => {
-    if (!user?.company?.province || !provinces.length || provinceCode) return;
-    const match = provinces.find(
-      (item) =>
-        item.name.toLocaleLowerCase("id-ID") ===
-        user.company?.province?.toLocaleLowerCase("id-ID"),
-    );
-    if (match) setProvinceCode(match.code);
-  }, [provinceCode, provinces, user?.company?.province]);
-  useEffect(() => { if (!provinceCode) { setCities([]); return; } getRegencies(provinceCode).then(setCities).catch(() => setCities([])); }, [provinceCode]);
+    if (!companyCountry) { setStates([]); return; }
+    getWorldwideStates(companyCountry).then(setStates).catch(() => setStates([]));
+  }, [companyCountry]);
+  useEffect(() => {
+    if (!companyCountry || !companyProvince) { setCities([]); return; }
+    getWorldwideCities(companyCountry, companyProvince).then(setCities).catch(() => setCities([]));
+  }, [companyCountry, companyProvince]);
 
   if (loading || !user?.company) return <PageLoading label="Loading company profile" variant="admin" />;
 
@@ -67,15 +71,15 @@ export default function CompanyEditProfilePage() {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     try {
+      if (!companyCountry || !companyProvince || !companyCity) {
+        throw new Error("Country, province or state, and city are required.");
+      }
       await updateProfile({
         companyName: String(form.get("companyName") ?? ""),
         phone: String(form.get("phone") ?? ""),
         companyCity,
-        companyProvince:
-          provinces.find((item) => item.code === provinceCode)?.name ??
-          company.province ??
-          undefined,
-        companyCountry: company.country || "Indonesia",
+        companyProvince: companyProvince || undefined,
+        companyCountry,
         companyTagline: String(form.get("companyTagline") ?? ""),
         companySize: String(form.get("companySize") ?? ""),
         companyFounded: Number(form.get("companyFounded")) || undefined,
@@ -140,8 +144,9 @@ export default function CompanyEditProfilePage() {
           <div className="profile-fields">
             <label>Company name<input name="companyName" defaultValue={company.companyName} required /></label>
             <label>Phone<input name="phone" defaultValue={company.phone} required /></label>
-            <label>Company province<select value={provinceCode} onChange={(event) => { setProvinceCode(event.target.value); setCompanyCity(""); }} required><option value="">Select province</option>{provinces.map((item) => <option key={item.code} value={item.code}>{item.name}</option>)}</select></label>
-            <label>Company city / regency<select value={companyCity} onChange={(event) => setCompanyCity(event.target.value)} required><option value="">{provinceCode ? "Select city / regency" : company.city || "Choose province first"}</option>{cities.map((item) => <option key={item.code} value={item.name}>{item.name}</option>)}</select></label>
+            <label>Company country<CountryCombobox value={companyCountry || "all"} countries={countries} onChange={(country) => { setCompanyCountry(country === "all" ? "" : country); setCompanyProvince(""); setCompanyCity(""); }} /></label>
+            <label>Company province / state<LocationFilterCombobox value={companyProvince || "all"} options={states.map((item) => ({ value: item.name, label: `${item.name}, ${companyCountry}` }))} placeholder="Select province / state" loadingLabel="Loading states…" disabled={!companyCountry} onChange={(province) => { setCompanyProvince(province === "all" ? "" : province); setCompanyCity(""); }} /></label>
+            <label>Company city<LocationFilterCombobox value={companyCity || "all"} options={cities.map((item) => ({ value: item.name, label: `${item.name}, ${companyProvince}, ${companyCountry}` }))} placeholder="Select city" loadingLabel="Loading cities…" disabled={!companyProvince} onChange={(city) => setCompanyCity(city === "all" ? "" : city)} /></label>
             <label>Company size<select name="companySize" defaultValue={companySizes.includes(company.size) ? company.size : ""}><option value="">Select company size</option>{companySizes.map((size) => <option key={size} value={size}>{size}</option>)}</select></label>
             <label>Founded year<select name="companyFounded" defaultValue={company.founded ?? ""}><option value="">Select year</option>{foundedYears.map((year) => <option key={year} value={year}>{year}</option>)}</select></label>
             <label className="profile-wide">Company website<input name="companyWebsite" type="url" defaultValue={company.website} placeholder="https://company.com" /></label>

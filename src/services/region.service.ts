@@ -63,3 +63,18 @@ export async function searchWorldwideLocations(query: string) {
   }
   return payload.data;
 }
+
+export type EducationOptionKind = "degrees" | "majors" | "institutions";
+
+export async function getEducationOptions(
+  kind: EducationOptionKind,
+  query = "",
+  country?: string,
+) {
+  const response = await axiosInstance.get<{ data: string[] }>(
+    `/regions/education/${kind}`,
+    { params: { ...(query ? { q: query } : {}), ...(country ? { country } : {}) } },
+  );
+  const payload = response.data as { data?: string[] } | null;
+  return Array.isArray(payload?.data) ? payload.data : [];
+}
