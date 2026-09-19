@@ -2,6 +2,15 @@
 
 Polaris Web is the React frontend for a role-based job platform. Visitors can browse jobs, companies, stories, pricing, and public profiles. Signed-in job seekers can manage applications, interviews, tests, saved jobs, skill assessments, certificates, CV generation, and their public profile. Company administrators manage job postings, applicants, interviews, pre-selection tests, analytics, and company profiles.
 
+## Production
+
+- Frontend: [https://www.polarisjobs.my.id](https://www.polarisjobs.my.id)
+- Canonical domain: `www.polarisjobs.my.id`
+- API: [https://job-board-backend-sage.vercel.app](https://job-board-backend-sage.vercel.app)
+- Hosting: Vercel
+
+The apex domain `https://polarisjobs.my.id` redirects to the canonical `www` domain. The SPA rewrite in `vercel.json` sends direct visits such as `/jobs` and `/companies/1` to `index.html`, allowing React Router to render the route.
+
 ## Stack
 
 - React 19 and TypeScript
@@ -44,6 +53,13 @@ Create an OAuth client with application type **Web application** and add these A
 ```text
 http://localhost
 http://localhost:5173
+```
+
+For production, also add:
+
+```text
+https://polarisjobs.my.id
+https://www.polarisjobs.my.id
 ```
 
 No redirect URI is required because Polaris uses the Google Identity Services JavaScript callback. Google accounts are currently registered as job seekers. Company administrators register with the company registration form.
@@ -132,9 +148,33 @@ The Axios client in `src/lib/axios.ts` attaches the persisted JWT as a Bearer to
 
 The frontend does not call third-party location providers directly. It uses the API's `/regions` endpoints so provider CORS, caching, fallback, and rate limiting remain server-side.
 
-## Production Notes
+## Production Deployment
 
-- Configure the host to serve `index.html` for unknown client-side routes.
-- Set `VITE_API_URL` and `VITE_GOOGLE_CLIENT_ID` at build time.
-- Add the production frontend origin to Google OAuth Authorized JavaScript origins.
-- Preserve the `Cross-Origin-Opener-Policy: same-origin-allow-popups` header when Google popups are used.
+Create the Vercel project with **Root Directory** set to `web` and configure these Production environment variables:
+
+```env
+VITE_API_URL=https://job-board-backend-sage.vercel.app
+VITE_GOOGLE_CLIENT_ID=your-google-oauth-web-client-id.apps.googleusercontent.com
+```
+
+`VITE_*` values are embedded at build time. Redeploy the frontend after changing either value.
+
+Vercel uses:
+
+```bash
+npm install
+npm run build
+```
+
+The output directory is `dist`. The committed `vercel.json` provides the SPA fallback, so refreshing a nested route must return the application instead of Vercel's 404 page.
+
+Production checklist:
+
+1. Both `polarisjobs.my.id` and `www.polarisjobs.my.id` are attached to the frontend Vercel project.
+2. The apex domain redirects to `www`.
+3. `VITE_API_URL` points to the production API and contains no trailing slash.
+4. The Google OAuth Web Client includes both production origins.
+5. The backend CORS `FRONTEND_URL` is `https://www.polarisjobs.my.id`.
+6. Build and inspect `/`, `/jobs`, `/companies`, `/stories`, `/pricing`, and a direct nested-route refresh.
+
+Preserve the `Cross-Origin-Opener-Policy: same-origin-allow-popups` header when Google popups are used.
