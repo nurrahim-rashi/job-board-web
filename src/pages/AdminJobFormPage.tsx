@@ -8,8 +8,9 @@ import { useUpdateJobPosting } from "../hooks/api/job-posting/useUpdateJobPostin
 import { useTogglePublishJobPosting } from "../hooks/api/job-posting/useTogglePublishJobPosting";
 import { jobCategories, type CreateJobPayload, type JobCategory } from "../types/job-posting";
 import { ArrowLeft, Close, Upload } from "../components/site/Icons";
-import { getProvinces, getRegencies, type Region } from "../services/region.service";
+import { getCountries, getWorldwideCities, getWorldwideStates, type Region } from "../services/region.service";
 import { CurrencySelect } from "../components/site/CurrencySelect";
+import { LocationFilterCombobox } from "../components/site/LocationFilterCombobox";
 
 type FormState = {
   title: string;
@@ -64,35 +65,50 @@ export default function AdminJobFormPage() {
   const [banner, setBanner] = useState<File | null>(null);
   const [removeExistingBanner, setRemoveExistingBanner] = useState(false);
   const [tag, setTag] = useState("");
-  const [provinces, setProvinces] = useState<Region[]>([]);
-  const [provinceCode, setProvinceCode] = useState("");
-  const [locations, setLocations] = useState<Region[]>([]);
-  const [regionsLoading, setRegionsLoading] = useState(false);
+  const [countries, setCountries] = useState<Region[]>([]);
+  const [states, setStates] = useState<Region[]>([]);
+  const [cities, setCities] = useState<Region[]>([]);
+  const [statesLoading, setStatesLoading] = useState(false);
+  const [citiesLoading, setCitiesLoading] = useState(false);
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
   const job = existing.data;
 
   useEffect(() => {
     let active = true;
-    getProvinces()
-      .then((items) => active && setProvinces(items))
-      .catch(() => active && setProvinces([]));
+    getCountries()
+      .then((items) => active && setCountries(items))
+      .catch(() => active && setCountries([]));
     return () => { active = false; };
   }, []);
 
   useEffect(() => {
-    if (!provinceCode) {
-      setLocations([]);
+    if (!form.countryLocation) {
+      setStates([]);
       return;
     }
     let active = true;
-    setRegionsLoading(true);
-    getRegencies(provinceCode)
-      .then((items) => active && setLocations(items))
-      .catch(() => active && setLocations([]))
-      .finally(() => active && setRegionsLoading(false));
+    setStatesLoading(true);
+    getWorldwideStates(form.countryLocation)
+      .then((items) => active && setStates(items))
+      .catch(() => active && setStates([]))
+      .finally(() => active && setStatesLoading(false));
     return () => { active = false; };
-  }, [provinceCode]);
+  }, [form.countryLocation]);
+
+  useEffect(() => {
+    if (!form.countryLocation || !form.provinceLocation) {
+      setCities([]);
+      return;
+    }
+    let active = true;
+    setCitiesLoading(true);
+    getWorldwideCities(form.countryLocation, form.provinceLocation)
+      .then((items) => active && setCities(items))
+      .catch(() => active && setCities([]))
+      .finally(() => active && setCitiesLoading(false));
+    return () => { active = false; };
+  }, [form.countryLocation, form.provinceLocation]);
 
   useEffect(() => {
     if (!job) return;
@@ -112,16 +128,6 @@ export default function AdminJobFormPage() {
       published: job.isPublished,
     });
   }, [job]);
-
-  useEffect(() => {
-    if (!job?.provinceLocation || !provinces.length || provinceCode) return;
-    const match = provinces.find(
-      (province) =>
-        province.name.toLocaleLowerCase("id-ID") ===
-        job.provinceLocation?.toLocaleLowerCase("id-ID"),
-    );
-    if (match) setProvinceCode(match.code);
-  }, [job, provinceCode, provinces]);
 
   const editing = Boolean(slug);
   const saving = createJob.isPending || updateJob.isPending || togglePublish.isPending;
@@ -199,25 +205,18 @@ export default function AdminJobFormPage() {
     );
   }
 
-  const provinceOptions: AdminSelectOption[] = [
-    { value: "", label: "Choose province" },
-    ...provinces.map((province) => ({ value: province.code, label: province.name })),
-  ];
-
-  const cityOptions: AdminSelectOption[] = [
-    {
-      value: "",
-      label: regionsLoading
-        ? "Loading locations…"
-        : provinceCode
-          ? "Choose city / regency"
-          : form.cityLocation || "Choose province first",
-    },
-    ...(form.cityLocation && !locations.some((location) => location.name === form.cityLocation)
-      ? [{ value: form.cityLocation, label: form.cityLocation }]
-      : []),
-    ...locations.map((location) => ({ value: location.name, label: location.name })),
-  ];
+  const countryOptions = countries.map((country) => ({
+    value: country.name,
+    label: country.name,
+  }));
+  const stateOptions = states.map((state) => ({
+    value: state.name,
+    label: `${state.name}, ${form.countryLocation}`,
+  }));
+  const cityOptions = cities.map((city) => ({
+    value: city.name,
+    label: `${city.name}, ${form.provinceLocation}, ${form.countryLocation}`,
+  }));
 
   return (
     <AdminShell
@@ -245,29 +244,48 @@ export default function AdminJobFormPage() {
               onChange={(next) => set("category", next as JobCategory)}
               options={categoryOptions}
             />
-            <AdminSelect
-              variant="field"
-              label="Work province"
-              value={provinceCode}
-              onChange={(next) => {
-                setProvinceCode(next);
-                set(
-                  "provinceLocation",
-                  provinces.find((province) => province.code === next)?.name ?? "",
-                );
-                set("cityLocation", "");
-              }}
-              options={provinceOptions}
-            />
-            <AdminSelect
-              variant="field"
-              label="Work location"
-              value={form.cityLocation}
-              onChange={(next) => set("cityLocation", next)}
-              options={cityOptions}
-              disabled={!provinceCode && !form.cityLocation}
-              required
-            />
+            <label>
+              Work country
+              <LocationFilterCombobox
+                value={form.countryLocation || "all"}
+                options={countryOptions}
+                placeholder="Choose country"
+                loadingLabel="Loading countries…"
+                loading={!countries.length}
+                onChange={(next) => {
+                  set("countryLocation", next === "all" ? "" : next);
+                  set("provinceLocation", "");
+                  set("cityLocation", "");
+                }}
+              />
+            </label>
+            <label>
+              Work province / state
+              <LocationFilterCombobox
+                value={form.provinceLocation || "all"}
+                options={stateOptions}
+                placeholder="Choose province / state"
+                loadingLabel="Loading provinces / states…"
+                loading={statesLoading}
+                disabled={!form.countryLocation}
+                onChange={(next) => {
+                  set("provinceLocation", next === "all" ? "" : next);
+                  set("cityLocation", "");
+                }}
+              />
+            </label>
+            <label>
+              Work city
+              <LocationFilterCombobox
+                value={form.cityLocation || "all"}
+                options={cityOptions}
+                placeholder="Choose city"
+                loadingLabel="Loading cities…"
+                loading={citiesLoading}
+                disabled={!form.provinceLocation}
+                onChange={(next) => set("cityLocation", next === "all" ? "" : next)}
+              />
+            </label>
             <label>
               Application deadline
               <input type="date" min={dateInputLimit(0)} max={dateInputLimit(360)} value={form.deadline} onChange={(event) => set("deadline", event.target.value)} required />
@@ -336,8 +354,8 @@ export default function AdminJobFormPage() {
           <h2>Banner <small>optional</small></h2>
           <div className="file-upload-row"><label className="admin-upload">
             <Upload />
-            {banner?.name || (!removeExistingBanner && job?.banner) || "Upload a banner image (JPG or PNG, max 2MB)"}
-            <input ref={bannerInputRef} type="file" accept="image/png,image/jpeg" onChange={(event) => { setBanner(event.target.files?.[0] ?? null); setRemoveExistingBanner(false); }} />
+            {banner?.name || (!removeExistingBanner && job?.banner) || "Upload a banner image (JPG, PNG, WEBP, GIF, AVIF, or HEIC; max 2MB)"}
+            <input ref={bannerInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.gif,.avif,.heic,.heif" onChange={(event) => { setBanner(event.target.files?.[0] ?? null); setRemoveExistingBanner(false); }} />
           </label>{(banner || (!removeExistingBanner && job?.banner)) && <button className="file-remove" type="button" aria-label={banner ? "Remove selected banner" : "Delete uploaded banner"} onClick={() => { if (banner) setBanner(null); else setRemoveExistingBanner(true); if (bannerInputRef.current) bannerInputRef.current.value = ""; }}><Close /></button>}</div>
         </div>
 

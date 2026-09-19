@@ -2,8 +2,17 @@ import { ArrowRight, FileText } from "../../site/Icons";
 import { ApplicantAvatar } from "./ApplicantAvatar";
 import { educationLabel, formatSalary } from "./applicantHelpers";
 import { formatDate, goodScore } from "../adminData";
-import { type ApplicantListItem } from "../../../types/applicant";
-import { StatusBadge } from "../../site/StatusBadge";
+import { statusLabels, type ApplicantListItem, type ApplicationStatus } from "../../../types/applicant";
+
+/** Matches the original applicant-table chip styling. */
+const statusTones: Record<ApplicationStatus, string> = {
+  PENDING: "",
+  TEST_ASSIGNED: "wait",
+  PROCESS: "info",
+  INTERVIEW: "wait",
+  ACCEPTED: "good",
+  REJECTED: "bad",
+};
 
 type ApplicantListProps = {
   applicants: ApplicantListItem[];
@@ -45,7 +54,7 @@ export function ApplicantList({ applicants, onOpen, onPreviewCv }: ApplicantList
             )}
           </span>
           <span>
-            <StatusBadge status={item.status} />
+            <em className={`admin-chip ${statusTones[item.status]}`}>{statusLabels[item.status]}</em>
           </span>
           <span className="admin-row-actions">
             <button type="button" onClick={() => onPreviewCv(item.id)} className="link">
