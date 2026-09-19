@@ -4,7 +4,7 @@ import { Stars } from "../site/Stars";
 type EditProfileHeroProps = {
   eyebrow: string;
   title: string;
-  description: string;
+  description?: string;
   action?: ReactNode;
   admin?: boolean;
 };
@@ -23,7 +23,7 @@ export function EditProfileHero({
       <div className="edit-profile-hero-inner">
         <p className="eyebrow light">{eyebrow}</p>
         <h1>{title}</h1>
-        <p>{description}</p>
+        {description && <p>{description}</p>}
         {action && <div className="edit-profile-hero-action">{action}</div>}
       </div>
     </section>

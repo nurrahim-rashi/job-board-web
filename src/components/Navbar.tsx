@@ -4,6 +4,7 @@ import { logout } from "../services/auth.service";
 import { useAuth } from "../stores/useAuth";
 import { useProfileView } from "../stores/useProfileView";
 import { navigateAfterLogout } from "../lib/logout-navigation";
+import { useLocation } from "react-router-dom";
 
 const links = [
   { label: "Jobs", href: "/jobs" },
@@ -14,6 +15,7 @@ const links = [
 ];
 
 export function Navbar() {
+  const { pathname } = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const loggedIn = useAuth((state) => Boolean(state.token));
@@ -26,6 +28,17 @@ export function Navbar() {
     { label: "My Company", href: companyId ? `/companies/${companyId}` : "/profile" },
     { label: "My Profile", href: userId ? "/profile/view" : "/profile" },
   ];
+  const isLinkActive = (label: string, href: string) => {
+    if (label === "My Profile") {
+      return pathname === "/profile" || pathname.startsWith("/profile/view");
+    }
+    if (label === "Dashboard") {
+      return isAdmin
+        ? pathname === "/admin" || pathname.startsWith("/admin/")
+        : pathname === "/dashboard" || pathname.startsWith("/dashboard/");
+    }
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
   useEffect(() => {
     const update = () => setScrolled(window.scrollY > 24);
     update();
@@ -61,14 +74,26 @@ export function Navbar() {
               ]
           ).map((link) => (
             <li key={link.label}>
-              <a href={link.href} onClick={() => link.label === "My Profile" && userId && openProfile(userId)}>{link.label}</a>
+              <a
+                href={link.href}
+                className={isLinkActive(link.label, link.href) ? "active" : undefined}
+                aria-current={isLinkActive(link.label, link.href) ? "page" : undefined}
+                onClick={() => link.label === "My Profile" && userId && openProfile(userId)}
+              >
+                {link.label}
+              </a>
             </li>
           ))}
         </ul>
         {loggedIn ? (
           <>
             {!isAdmin && (
-              <a className="nav-profile" href={userId ? "/profile/view" : "/profile"} onClick={() => userId && openProfile(userId)}>
+              <a
+                className={`nav-profile${isLinkActive("My Profile", userId ? "/profile/view" : "/profile") ? " active" : ""}`}
+                aria-current={isLinkActive("My Profile", userId ? "/profile/view" : "/profile") ? "page" : undefined}
+                href={userId ? "/profile/view" : "/profile"}
+                onClick={() => userId && openProfile(userId)}
+              >
                 My Profile
               </a>
             )}

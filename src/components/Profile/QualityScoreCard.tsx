@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { AnimatedMetric } from "../site/AnimatedMetric";
-import { Info } from "../site/Icons";
+import { Info, ShieldCheck } from "../site/Icons";
 
 export type QualityMetric = {
   key: string;
@@ -10,10 +10,20 @@ export type QualityMetric = {
   explanation: string;
 };
 
+export type QualityBadge = {
+  key: string;
+  category: string;
+  label: string;
+  tier: "TOP" | "MIDDLE" | "LOWER" | "UNRATED";
+  value: string;
+  description: string;
+};
+
 export function QualityScoreCard({
   title,
   score,
   metrics,
+  badges = [],
   children,
   company = false,
   animated = true,
@@ -21,6 +31,7 @@ export function QualityScoreCard({
   title: string;
   score: number;
   metrics: QualityMetric[];
+  badges?: QualityBadge[];
   children?: ReactNode;
   company?: boolean;
   animated?: boolean;
@@ -63,6 +74,27 @@ export function QualityScoreCard({
         )}
         <small>Community quality</small>
       </div>
+      {badges.length > 0 && (
+        <section className="quality-badges" aria-label="Quality badges">
+          <h3>Quality badges</h3>
+          <ul>
+            {badges.map((badge) => (
+              <li
+                key={badge.key}
+                className={`quality-badge quality-badge-${badge.tier.toLowerCase()}`}
+                title={badge.description}
+              >
+                <ShieldCheck />
+                <span>
+                  <small>{badge.category}</small>
+                  <b>{badge.label}</b>
+                  <em>{badge.value}</em>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
       {children}
     </article>
   );

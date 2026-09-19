@@ -3,17 +3,7 @@ import { ArrowRight, Clipboard, FileText, Sparkles } from "../site/Icons";
 import { Reveal } from "../../hooks/useReveal";
 import type { HomepageData } from "../../types/auth";
 import { ApplicationDetailModal } from "../Application/ApplicationDetailModal";
-import { applicationStatusLabel } from "../../lib/application-status";
-
-const statusDetails: Record<string, { label: string; tone: string }> = {
-  DRAFT: { label: "Draft", tone: "wait" },
-  PENDING: { label: "Pending", tone: "wait" },
-  TEST_ASSIGNED: { label: "Test Assigned", tone: "wait" },
-  PROCESS: { label: "Process", tone: "wait" },
-  INTERVIEW: { label: "Interview", tone: "good" },
-  ACCEPTED: { label: "Accepted", tone: "good" },
-  REJECTED: { label: "Rejected", tone: "bad" },
-};
+import { StatusBadge } from "../site/StatusBadge";
 
 type SidebarProps = Pick<
   HomepageData,
@@ -36,12 +26,7 @@ export function Sidebar({
             <div className="dashboard-side-placeholder is-loading" />
           ) : applications.length ? (
             <ul>
-              {applications.map((application) => {
-                const status = statusDetails[application.status] ?? {
-                  label: applicationStatusLabel(application.status),
-                  tone: "wait",
-                };
-                return (
+              {applications.map((application) => (
                   <li key={application.id}>
                     <button className="application-row-button" type="button" onClick={() => setSelectedApplicationId(application.id)}>
                       <FileText />
@@ -49,11 +34,10 @@ export function Sidebar({
                         <b>{application.job.title}</b>
                         <small>{application.job.company.companyName}</small>
                       </span>
-                      <em className={status.tone}>{status.label}</em>
+                      <StatusBadge status={application.status} />
                     </button>
                   </li>
-                );
-              })}
+                ))}
             </ul>
           ) : (
             <p>You have not submitted any applications yet.</p>

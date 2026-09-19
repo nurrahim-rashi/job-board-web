@@ -6,6 +6,7 @@ import {
   metricCards,
   statusLabels,
 } from "./analyticsData";
+import { statusColor } from "../../lib/status";
 import { AreaChart } from "./charts/AreaChart";
 import { BarList } from "./charts/BarList";
 import { ChartCard, ChartEmpty } from "./charts/ChartCard";
@@ -92,6 +93,7 @@ export function OverviewSection({ data }: { data: AnalyticsOverview }) {
                 label: statusLabels[stage.status],
                 values: [stage.count],
                 note: `${stage.share}% of applications`,
+                color: statusColor(stage.status),
               }))}
             />
           ) : (

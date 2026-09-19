@@ -18,10 +18,22 @@ import type {
 } from "../types/assessment";
 
 export const fetchSkillNames = async () => {
-  const response = await axiosInstance.get<{ data: { skillName: string }[] }>(
+  const response = await axiosInstance.get<{ data: AssessmentSkillOption[] }>(
     "/assessment/skills",
   );
   return response.data.data.map((item) => item.skillName);
+};
+
+export type AssessmentSkillOption = {
+  id: number;
+  skillName: string;
+};
+
+export const fetchAssessmentSkillOptions = async () => {
+  const response = await axiosInstance.get<{ data: AssessmentSkillOption[] }>(
+    "/assessment/skills",
+  );
+  return response.data.data;
 };
 
 export const fetchAssessments = async () => {

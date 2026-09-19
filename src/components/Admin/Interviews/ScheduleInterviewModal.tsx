@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import toast from "react-hot-toast";
 
 import { useApplicants } from "../../../hooks/api/applicant/useApplicants";
 import { useCreateInterviews } from "../../../hooks/api/interview/useCreateInterviews";
-import { statusLabels, statusTones, type ApplicantListItem } from "../../../types/applicant";
+import { type ApplicantListItem } from "../../../types/applicant";
 import { MAX_SCHEDULES_PER_REQUEST, type ScheduleInput } from "../../../types/interview";
 import { Calendar, Check, Close, Search, Users } from "../../site/Icons";
+import { StatusBadge } from "../../site/StatusBadge";
 import { ApplicantAvatar } from "../Applicants/ApplicantAvatar";
 import { defaultSlot, minDateTime, toIso } from "./interviewHelpers";
 
@@ -168,7 +170,7 @@ export function ScheduleInterviewModal({ slug, open, scheduledIds, preselect, on
 
   if (!open) return null;
 
-  return (
+  return createPortal(
     <div
       className="admin-dialog interview-dialog"
       role="dialog"
@@ -248,7 +250,7 @@ export function ScheduleInterviewModal({ slug, open, scheduledIds, preselect, on
                                   : "No pre-selection test"}
                             </small>
                           </span>
-                          <em className={`admin-chip ${statusTones[item.status]}`}>{statusLabels[item.status]}</em>
+                          <StatusBadge status={item.status} />
                         </label>
                       </li>
                     );
@@ -379,6 +381,7 @@ export function ScheduleInterviewModal({ slug, open, scheduledIds, preselect, on
           )}
         </footer>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

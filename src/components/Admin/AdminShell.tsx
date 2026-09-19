@@ -4,6 +4,7 @@ import { Briefcase, Building, Calendar, Clipboard, Gauge, Users } from "../site/
 import { useAuth } from "../../stores/useAuth";
 import { logout } from "../../services/auth.service";
 import { navigateAfterLogout } from "../../lib/logout-navigation";
+import { formatCompanyLocation } from "../../lib/location";
 
 const menu = [
   { label: "Job postings", to: "/admin", icon: Briefcase },
@@ -41,7 +42,7 @@ export function AdminShell({ eyebrow, title, lead, actions, showHeader = true, c
           </nav>
           <div className="admin-side-note">
             <b>{company?.companyName ?? "Your company"}</b>
-            <small>{["Verified company", company?.city].filter(Boolean).join(" · ")}</small>
+            <small>{["Verified company", company ? formatCompanyLocation(company) : ""].filter(Boolean).join(" · ")}</small>
           </div>
           <button className="admin-side-signout" type="button" onClick={handleLogout}>
             Sign out

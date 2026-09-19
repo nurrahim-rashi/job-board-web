@@ -1,22 +1,23 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import toast from "react-hot-toast";
 
 import { useUpdateInterview } from "../../../hooks/api/interview/useUpdateInterview";
 import {
-  interviewStatusLabels,
-  interviewStatusTones,
   type Interview,
   type InterviewStatus,
 } from "../../../types/interview";
+import { statusColor } from "../../../lib/status";
 import { Check, Close, Mail } from "../../site/Icons";
+import { StatusBadge } from "../../site/StatusBadge";
 import { AdminSelect, type AdminSelectOption } from "../AdminSelect";
 import { ApplicantAvatar } from "../Applicants/ApplicantAvatar";
 import { countdownLabel, formatSchedule, minDateTime, reminderState, toIso, toLocalInput } from "./interviewHelpers";
 
 const statusOptions: AdminSelectOption[] = [
-  { value: "SCHEDULED", label: "Scheduled" },
-  { value: "COMPLETED", label: "Completed" },
-  { value: "CANCELLED", label: "Cancelled" },
+  { value: "SCHEDULED", label: "Scheduled", color: statusColor("SCHEDULED") },
+  { value: "COMPLETED", label: "Completed", color: statusColor("COMPLETED") },
+  { value: "CANCELLED", label: "Cancelled", color: statusColor("CANCELLED") },
 ];
 
 type EditInterviewModalProps = {
@@ -92,7 +93,7 @@ export function EditInterviewModal({ slug, interview, onClose, onDelete }: EditI
     );
   }
 
-  return (
+  return createPortal(
     <div
       className="admin-dialog interview-dialog edit"
       role="dialog"
@@ -109,9 +110,7 @@ export function EditInterviewModal({ slug, interview, onClose, onDelete }: EditI
           <div>
             <h2>{interview.applicant.name}</h2>
             <p className="admin-note">{interview.applicant.email}</p>
-            <em className={`admin-chip ${interviewStatusTones[interview.status]}`}>
-              {interviewStatusLabels[interview.status]}
-            </em>
+            <StatusBadge status={interview.status} />
           </div>
         </header>
 
@@ -212,6 +211,7 @@ export function EditInterviewModal({ slug, interview, onClose, onDelete }: EditI
           </button>
         </footer>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

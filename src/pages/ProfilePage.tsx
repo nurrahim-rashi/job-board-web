@@ -1,17 +1,23 @@
 import { Link } from "react-router-dom";
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { createPortal } from "react-dom";
 import toast from "react-hot-toast";
 import { Navbar } from "../components/Navbar";
 import { PageLoading } from "../components/site/PageLoading";
 import { AdminShell } from "../components/Admin/AdminShell";
 import { EditProfileHero } from "../components/Profile/EditProfileHero";
 import { SelectedWorkModal } from "../components/Profile/ProfileEntryModals";
+import {
+  SocialLinksFields,
+  socialLinksFromFormData,
+} from "../components/Profile/SocialLinks";
 import { Calendar, Upload } from "../components/site/Icons";
 import {
   changePassword,
   getProfile,
   getSubscriptionStatus,
   resendVerification,
+  removeAvatar,
   updateProfile,
   uploadAvatar,
 } from "../services/auth.service";
@@ -36,12 +42,6 @@ import {
   isAvailability,
   normalizeAvailability,
 } from "../constants/availability";
-
-const lines = (value: FormDataEntryValue | null) =>
-  String(value ?? "").split("\n").map((item) => item.trim()).filter(Boolean);
-
-const columns = (value: FormDataEntryValue | null) =>
-  lines(value).map((item) => item.split("|").map((part) => part.trim()));
 
 const periodParts = (period: string) => {
   const [start = "", end = ""] = period.split(/\s+[–-]\s+/);
@@ -254,7 +254,7 @@ export default function ProfilePage() {
         city: profileCity || undefined,
         province: provinces.find((item) => item.code === profileProvinceCode)?.name || user?.province || undefined,
         professionalRole: String(form.get("professionalRole") ?? "") || undefined,
-        profileLinks: columns(form.get("profileLinks")).map(([label, url]) => ({ label, url })).filter((item) => item.label && item.url),
+        profileLinks: socialLinksFromFormData(form),
         ...(!isCompany ? {
           isPublicProfile: form.get("isPublicProfile") === "on",
           birthDate: String(form.get("birthDate") ?? "") || undefined,
@@ -363,6 +363,21 @@ export default function ProfilePage() {
     }
   }
 
+  async function deleteProfilePhoto() {
+    try {
+      await removeAvatar();
+      setAvatarFileName("");
+      if (avatarInputRef.current) avatarInputRef.current.value = "";
+      toast.success("Profile photo deleted.");
+    } catch (requestError) {
+      setError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Unable to delete profile photo.",
+      );
+    }
+  }
+
   const profileContent = (
       <main className={isCompany ? "admin-profile-content" : "profile-shell profile-edit-content"}>
         {!user.emailVerifiedAt && (
@@ -389,14 +404,23 @@ export default function ProfilePage() {
         <form className="profile-card avatar-card" onSubmit={uploadPhoto}>
           <h2>Profile photo</h2>
           {user.avatar && (
-            <img
-              src={
-                user.avatar.startsWith("http")
-                  ? user.avatar
-                  : `${import.meta.env.VITE_API_URL ?? "http://localhost:8000"}${user.avatar}`
-              }
-              alt="Your profile"
-            />
+            <div className="avatar-preview">
+              <img
+                src={
+                  user.avatar.startsWith("http")
+                    ? user.avatar
+                    : `${import.meta.env.VITE_API_URL ?? "http://localhost:8000"}${user.avatar}`
+                }
+                alt="Your profile"
+              />
+              <button
+                className="avatar-delete"
+                type="button"
+                onClick={() => void deleteProfilePhoto()}
+              >
+                Delete picture
+              </button>
+            </div>
           )}
           <div className="file-upload-row"><label className="profile-file-picker">
             <input
@@ -528,13 +552,7 @@ export default function ProfilePage() {
                   City / regency
                   <select value={profileCity} onChange={(event) => setProfileCity(event.target.value)}><option value="">{profileProvinceCode ? "Select city / regency" : user.city || "Choose province first"}</option>{profileCities.map((item) => <option key={item.code} value={item.name}>{item.name}</option>)}</select>
                 </label>
-                <label className="profile-wide">
-                  Profile links <small>one per line: Label | URL</small>
-                  <textarea
-                    name="profileLinks"
-                    defaultValue={(user.profileLinks ?? []).map((item) => `${item.label} | ${item.url}`).join("\n")}
-                  />
-                </label>
+                <SocialLinksFields links={user.profileLinks ?? []} />
               </>
             )}
             {!isCompany && (
@@ -902,16 +920,13 @@ export default function ProfilePage() {
                     </section>
                   ))}
                 </div>
-                <label className="profile-wide">
-                  Profile links <small>one per line: Label | URL</small>
-                  <textarea name="profileLinks" defaultValue={(user.profileLinks ?? []).map((item) => `${item.label} | ${item.url}`).join("\n")} placeholder={"Portfolio | https://example.com\nEmail | mailto:you@example.com"} />
-                </label>
+                <SocialLinksFields links={user.profileLinks ?? []} />
               </>
             )}
           </div>
           <button className="profile-submit">Save changes</button>
         </form>
-        {experienceModalOpen && (
+        {experienceModalOpen && createPortal(
           <div
             className="experience-modal"
             role="presentation"
@@ -1024,7 +1039,8 @@ export default function ProfilePage() {
                 <button type="submit" className="profile-submit">Save for now</button>
               </footer>
             </form>
-          </div>
+          </div>,
+          document.body,
         )}
         {selectedWorkModalOpen && (
           <SelectedWorkModal
@@ -1119,7 +1135,6 @@ export default function ProfilePage() {
       <EditProfileHero
         eyebrow="Your account"
         title="Build a profile that stands out."
-        description="Keep your details, experience, and skills current so companies can understand your strengths."
         action={<Link className="button button-light" to="/profile/view" onClick={() => useProfileView.getState().openProfile(user.id)}>View public profile</Link>}
       />
       {profileContent}

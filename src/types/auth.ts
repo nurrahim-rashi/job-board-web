@@ -51,6 +51,8 @@ export type AuthUser = {
     logo: string | null;
     banner?: string | null;
     city: string;
+    province: string | null;
+    country: string;
   } | null;
 };
 
@@ -63,13 +65,14 @@ export type RegisterInput = {
   role: "JOB_SEEKER" | "COMPANY_ADMIN";
   companyName?: string;
   phone?: string;
-  city?: string;
 };
 
 export type UpdateProfileInput = Partial<AuthUser> & {
   companyName?: string;
   phone?: string;
   companyCity?: string;
+  companyProvince?: string;
+  companyCountry?: string;
   profileContent?: string;
   companyTagline?: string;
   companySize?: string;
@@ -104,6 +107,8 @@ export type HomepageData = {
     slug: string;
     title: string;
     cityLocation: string;
+    provinceLocation: string | null;
+    countryLocation: string;
     category: string;
     createdAt: string;
     score: number;

@@ -14,6 +14,12 @@ import { PageLoading } from "../components/site/PageLoading";
 import { ExpandableContent } from "../components/site/ExpandableContent";
 import { useMatchedCardMinHeights } from "../hooks/useMatchedCardMinHeights";
 import { CompanyReviews } from "../components/CompanyReview/CompanyReviews";
+import {
+  formatCompanyLocation,
+  formatJobLocation,
+} from "../lib/location";
+import { BadgeCheck } from "../components/site/Icons";
+import { hasTopTierQuality } from "../lib/quality";
 
 function formatSalary(minimum: number | null, maximum: number | null) {
   if (!minimum && !maximum) return "Salary not disclosed";
@@ -116,9 +122,19 @@ export default function CompanyDetailPage() {
             />
           )}
           <p>
-            {company.city} · {size} · Est. {founded}
+            {formatCompanyLocation(company)} · {size} · Est. {founded}
           </p>
-          <h1>{company.companyName}</h1>
+          <h1>
+            {company.companyName}
+            {company.companyAdmin.emailVerifiedAt && (
+              <BadgeCheck aria-label="Verified company email" />
+            )}
+          </h1>
+          {hasTopTierQuality(company.quality.score) && (
+            <span className="top-tier-company-badge company-hero-tier-badge">
+              💎 Top Tier Company
+            </span>
+          )}
           <p className="company-profile-tagline">{tagline}</p>
           {company.website && (
             <a
@@ -221,6 +237,7 @@ export default function CompanyDetailPage() {
               title="Company quality score"
               score={company.quality.score}
               metrics={company.quality.metrics}
+              badges={company.quality.badges}
             />
             <article className="company-paper-card company-open-roles">
               <header>
@@ -243,7 +260,7 @@ export default function CompanyDetailPage() {
                           )}
                         </strong>
                         <small>
-                          {categoryLabel(job.category)} · {job.cityLocation}
+                          {categoryLabel(job.category)} · {formatJobLocation(job)}
                         </small>
                       </span>
                       <span>

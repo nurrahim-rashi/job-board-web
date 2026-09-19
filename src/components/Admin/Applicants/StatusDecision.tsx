@@ -2,7 +2,9 @@ import { useState } from "react";
 
 import { useUpdateApplicantStatus } from "../../../hooks/api/applicant/useUpdateApplicantStatus";
 import { Check, Close } from "../../site/Icons";
-import { nextStatuses, statusLabels, type ApplicationStatus, type DecisionStatus } from "../../../types/applicant";
+import { StatusBadge } from "../../site/StatusBadge";
+import { statusPalette } from "../../../lib/status";
+import { nextStatuses, type ApplicationStatus, type DecisionStatus } from "../../../types/applicant";
 
 const actionLabels: Record<DecisionStatus, string> = {
   PROCESS: "Move to process",
@@ -28,7 +30,7 @@ export function StatusDecision({ slug, applicationId, status, onInviteToIntervie
   if (!allowed.length) {
     return (
       <p className="admin-note">
-        This applicant is already {statusLabels[status].toLowerCase()} — the decision is final.
+        This applicant is already <StatusBadge status={status} /> — the decision is final.
       </p>
     );
   }
@@ -69,6 +71,11 @@ export function StatusDecision({ slug, applicationId, status, onInviteToIntervie
             key={next}
             type="button"
             className={`admin-btn ${next === "REJECTED" ? "danger" : next === "ACCEPTED" ? "primary" : "ghost"}`}
+            style={{
+              backgroundColor: statusPalette[next].background,
+              borderColor: statusPalette[next].border,
+              color: statusPalette[next].color,
+            }}
             disabled={updateStatus.isPending}
             onClick={() => decide(next)}
           >

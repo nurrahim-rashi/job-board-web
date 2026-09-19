@@ -21,6 +21,8 @@ import {
   Wallet,
 } from "../components/site/Icons";
 import { applicationStatusLabel } from "../lib/application-status";
+import { formatJobLocation } from "../lib/location";
+import { StatusBadge } from "../components/site/StatusBadge";
 
 const salary = (job: PublicJobDetail) =>
   job.salaryMin || job.salaryMax
@@ -190,7 +192,7 @@ export default function JobDetailPage() {
                   )}
                 </h1>
                 <p>
-                  {job.company.companyName} · {job.cityLocation}
+                  {job.company.companyName} · {formatJobLocation(job)}
                 </p>
               </span>
             </section>
@@ -226,7 +228,7 @@ export default function JobDetailPage() {
                     <MapPin />
                     <span>
                       <small>Location</small>
-                      <b>{job.cityLocation}</b>
+                      <b>{formatJobLocation(job)}</b>
                     </span>
                   </div>
                   <div>
@@ -265,12 +267,10 @@ export default function JobDetailPage() {
                   </p>
                   {application ? (
                     <>
-                      <p>
-                        Current status:{" "}
-                        <strong>
-                          {applicationStatusLabel(applicationStatus!)}
-                        </strong>
-                      </p>
+                      <div className="job-application-current-status">
+                        <span>Current status</span>
+                        <StatusBadge status={applicationStatus!} />
+                      </div>
                       <ApplicationTimeline application={application} />
                     </>
                   ) : (
@@ -322,7 +322,7 @@ export default function JobDetailPage() {
                               <i className="new-job-badge">NEW</i>
                             )}
                           </b>
-                          <small>{related.cityLocation}</small>
+                          <small>{formatJobLocation(related)}</small>
                         </span>
                       </a>
                     ))}

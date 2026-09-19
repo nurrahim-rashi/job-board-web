@@ -1,6 +1,7 @@
 import { Search } from "../../site/Icons";
 import { AdminSelect, type AdminSelectOption } from "../AdminSelect";
 import { applicationStatuses, educationOptions, statusLabels, type ApplicantQuery, type ApplicationStatus } from "../../../types/applicant";
+import { statusColor } from "../../../lib/status";
 
 export type FilterState = {
   name: string;
@@ -36,7 +37,11 @@ const sorting: Record<SortKey, Pick<ApplicantQuery, "sortBy" | "sortOrder">> = {
 
 const statusOptions: AdminSelectOption[] = [
   { value: "all", label: "All statuses" },
-  ...applicationStatuses.map((status) => ({ value: status, label: statusLabels[status] })),
+  ...applicationStatuses.map((status) => ({
+    value: status,
+    label: statusLabels[status],
+    color: statusColor(status),
+  })),
 ];
 
 const sortOptions: AdminSelectOption[] = [

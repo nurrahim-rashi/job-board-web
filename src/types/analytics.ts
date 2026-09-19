@@ -104,6 +104,8 @@ export interface ApplicantInterests {
     companyName: string;
     category: JobCategory;
     city: string;
+    province: string | null;
+    country: string;
     applications: number;
   }>;
   cities: LabelShare[];
@@ -114,6 +116,8 @@ export interface PlatformEngagement {
     id: number;
     companyName: string;
     city: string;
+    province: string | null;
+    country: string;
     jobs: number;
     applications: number;
     hires: number;

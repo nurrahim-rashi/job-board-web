@@ -1,8 +1,17 @@
 import { BadgeCheck } from "../site/Icons";
 import { Reveal } from "../../hooks/useReveal";
 import { StoryRail } from "./StoryRail";
-import { applicantStories } from "./storiesData";
-export function ApplicantStoriesSection() {
+import type { Story } from "./storiesData";
+
+export function ApplicantStoriesSection({
+  stories,
+  loading,
+  error,
+}: {
+  stories: Story[];
+  loading: boolean;
+  error: string;
+}) {
   return (
     <section className="stories-applicants">
       <div>
@@ -12,14 +21,16 @@ export function ApplicantStoriesSection() {
             Applicants
           </p>
           <h2>
-            They found work that actually fit — not just work that was
-            available.
+            Honest experiences from people who joined teams through Polaris.
           </h2>
         </Reveal>
         <StoryRail
           id="applicant-stories"
-          stories={applicantStories}
+          stories={stories}
           tone="light"
+          loading={loading}
+          error={error}
+          emptyCopy="No verified employee stories have been published yet."
         />
       </div>
     </section>

@@ -1,20 +1,14 @@
 import type { ApplicationStatus } from "./applicant";
+import { platformStatusLabel } from "../lib/status";
 
 export const interviewStatuses = ["SCHEDULED", "COMPLETED", "CANCELLED"] as const;
 
 export type InterviewStatus = (typeof interviewStatuses)[number];
 
 export const interviewStatusLabels: Record<InterviewStatus, string> = {
-  SCHEDULED: "Scheduled",
-  COMPLETED: "Completed",
-  CANCELLED: "Cancelled",
-};
-
-/** Maps to the .admin-chip modifiers in index.css. */
-export const interviewStatusTones: Record<InterviewStatus, string> = {
-  SCHEDULED: "info",
-  COMPLETED: "good",
-  CANCELLED: "bad",
+  SCHEDULED: platformStatusLabel("SCHEDULED"),
+  COMPLETED: platformStatusLabel("COMPLETED"),
+  CANCELLED: platformStatusLabel("CANCELLED"),
 };
 
 export interface Interview {

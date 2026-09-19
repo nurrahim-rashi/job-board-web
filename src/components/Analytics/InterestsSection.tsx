@@ -4,6 +4,7 @@ import { formatNumber } from "./analyticsData";
 import { BarList } from "./charts/BarList";
 import { ChartCard, ChartEmpty } from "./charts/ChartCard";
 import { seriesColors } from "./charts/chartUtils";
+import { formatLocation } from "../../lib/location";
 
 export function InterestsSection({ data }: { data: ApplicantInterests }) {
   const busiest = data.categories.find((category) => category.jobs > 0);
@@ -104,7 +105,7 @@ export function InterestsSection({ data }: { data: ApplicantInterests }) {
                   <span>
                     <em className="admin-chip">{categoryLabel(job.category)}</em>
                   </span>
-                  <span>{job.city}</span>
+                  <span>{formatLocation(job.city, job.province, job.country)}</span>
                   <span className="figure">{formatNumber(job.applications)}</span>
                 </div>
               ))}

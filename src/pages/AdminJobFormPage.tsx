@@ -14,6 +14,8 @@ type FormState = {
   title: string;
   category: JobCategory;
   cityLocation: string;
+  provinceLocation: string;
+  countryLocation: string;
   description: string;
   deadline: string;
   salaryMin: string;
@@ -26,6 +28,8 @@ const draft: FormState = {
   title: "",
   category: jobCategories[0].value,
   cityLocation: "",
+  provinceLocation: "",
+  countryLocation: "Indonesia",
   description: "",
   deadline: "",
   salaryMin: "",
@@ -55,6 +59,7 @@ export default function AdminJobFormPage() {
 
   const [form, setForm] = useState<FormState>(draft);
   const [banner, setBanner] = useState<File | null>(null);
+  const [removeExistingBanner, setRemoveExistingBanner] = useState(false);
   const [tag, setTag] = useState("");
   const [provinces, setProvinces] = useState<Region[]>([]);
   const [provinceCode, setProvinceCode] = useState("");
@@ -88,10 +93,13 @@ export default function AdminJobFormPage() {
 
   useEffect(() => {
     if (!job) return;
+    setRemoveExistingBanner(false);
     setForm({
       title: job.title,
       category: job.category,
       cityLocation: job.cityLocation,
+      provinceLocation: job.provinceLocation ?? "",
+      countryLocation: job.countryLocation ?? "Indonesia",
       description: job.description,
       deadline: job.deadline.slice(0, 10),
       salaryMin: job.salaryMin?.toString() ?? "",
@@ -100,6 +108,16 @@ export default function AdminJobFormPage() {
       published: job.isPublished,
     });
   }, [job]);
+
+  useEffect(() => {
+    if (!job?.provinceLocation || !provinces.length || provinceCode) return;
+    const match = provinces.find(
+      (province) =>
+        province.name.toLocaleLowerCase("id-ID") ===
+        job.provinceLocation?.toLocaleLowerCase("id-ID"),
+    );
+    if (match) setProvinceCode(match.code);
+  }, [job, provinceCode, provinces]);
 
   const editing = Boolean(slug);
   const saving = createJob.isPending || updateJob.isPending || togglePublish.isPending;
@@ -112,17 +130,22 @@ export default function AdminJobFormPage() {
     setTag("");
   }
 
-  function buildPayload(): CreateJobPayload {
+  function buildPayload(): CreateJobPayload & { removeBanner?: boolean } {
     return {
       title: form.title,
       description: form.description,
       category: form.category,
       cityLocation: form.cityLocation,
+      provinceLocation: form.provinceLocation || undefined,
+      countryLocation: form.countryLocation,
       deadline: form.deadline,
       ...(form.salaryMin && { salaryMin: Number(form.salaryMin) }),
       ...(form.salaryMax && { salaryMax: Number(form.salaryMax) }),
       ...(form.tags.length && { tags: form.tags }),
       ...(banner && { banner }),
+      ...(editing && removeExistingBanner && !banner
+        ? { removeBanner: true }
+        : {}),
     };
   }
 
@@ -223,6 +246,10 @@ export default function AdminJobFormPage() {
               value={provinceCode}
               onChange={(next) => {
                 setProvinceCode(next);
+                set(
+                  "provinceLocation",
+                  provinces.find((province) => province.code === next)?.name ?? "",
+                );
                 set("cityLocation", "");
               }}
               options={provinceOptions}
@@ -296,9 +323,9 @@ export default function AdminJobFormPage() {
           <h2>Banner <small>optional</small></h2>
           <div className="file-upload-row"><label className="admin-upload">
             <Upload />
-            {banner?.name || job?.banner || "Upload a banner image (JPG or PNG, max 2MB)"}
-            <input ref={bannerInputRef} type="file" accept="image/png,image/jpeg" onChange={(event) => setBanner(event.target.files?.[0] ?? null)} />
-          </label>{banner && <button className="file-remove" type="button" aria-label="Remove selected banner" onClick={() => { setBanner(null); if (bannerInputRef.current) bannerInputRef.current.value = ""; }}><Close /></button>}</div>
+            {banner?.name || (!removeExistingBanner && job?.banner) || "Upload a banner image (JPG or PNG, max 2MB)"}
+            <input ref={bannerInputRef} type="file" accept="image/png,image/jpeg" onChange={(event) => { setBanner(event.target.files?.[0] ?? null); setRemoveExistingBanner(false); }} />
+          </label>{(banner || (!removeExistingBanner && job?.banner)) && <button className="file-remove" type="button" aria-label={banner ? "Remove selected banner" : "Delete uploaded banner"} onClick={() => { if (banner) setBanner(null); else setRemoveExistingBanner(true); if (bannerInputRef.current) bannerInputRef.current.value = ""; }}><Close /></button>}</div>
         </div>
 
         <footer className="admin-form-footer">

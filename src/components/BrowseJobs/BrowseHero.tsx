@@ -21,12 +21,18 @@ export function BrowseHero({ locating, located, onLocate }: BrowseHeroProps) {
               : "freshest listings first."}
           </span>
         </h1>
-        <button type="button" onClick={onLocate}>
+        <button
+          type="button"
+          className={located ? "location-active" : ""}
+          aria-pressed={located}
+          disabled={locating}
+          onClick={onLocate}
+        >
           <MapPin />
           {locating
             ? "Locating…"
             : located
-              ? "Refresh my location"
+              ? "Stop using my location"
               : "Use my location"}
         </button>
       </div>

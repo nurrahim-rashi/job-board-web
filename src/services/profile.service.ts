@@ -20,6 +20,8 @@ export type PublicSeekerProfile = {
     title: string;
     company: string;
     companyId?: number;
+    companyLogo?: string | null;
+    hiredThroughPolaris?: boolean;
     period: string;
     note: string;
   }[] | null;
@@ -31,7 +33,11 @@ export type PublicSeekerProfile = {
     date?: string;
   }[] | null;
   company: { id: number; companyName: string } | null;
-  quality: { score: number; metrics: import("../components/Profile/QualityScoreCard").QualityMetric[] };
+  quality: {
+    score: number;
+    metrics: import("../components/Profile/QualityScoreCard").QualityMetric[];
+    badges: import("../components/Profile/QualityScoreCard").QualityBadge[];
+  };
   applicationInsights: {
     interviewResponseRate: number;
     letterResponseRate: number;

@@ -1,10 +1,11 @@
 import { Close } from "../site/Icons";
+import { createPortal } from "react-dom";
 
 type ConfirmDialogProps = { open: boolean; title: string; body: string; confirmLabel: string; onCancel: () => void; onConfirm: () => void };
 
 export function ConfirmDialog({ open, title, body, confirmLabel, onCancel, onConfirm }: ConfirmDialogProps) {
   if (!open) return null;
-  return (
+  return createPortal(
     <div className="admin-dialog">
       <div>
         <button type="button" aria-label="Close" onClick={onCancel}>
@@ -21,6 +22,7 @@ export function ConfirmDialog({ open, title, body, confirmLabel, onCancel, onCon
           </button>
         </footer>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

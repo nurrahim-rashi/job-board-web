@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import toast from "react-hot-toast";
 import { Navbar } from "../components/Navbar";
 import {
@@ -6,7 +7,7 @@ import {
   type PublicSeekerProfile,
 } from "../services/profile.service";
 import { useAuth } from "../stores/useAuth";
-import { Pencil, Plus } from "../components/site/Icons";
+import { Clipboard, Pencil, Plus } from "../components/site/Icons";
 import { getSubscriptionStatus, updateProfile } from "../services/auth.service";
 import {
   getPublicCompanies,
@@ -17,13 +18,25 @@ import {
 import {
   QuickExperienceModal,
   SelectedWorkModal,
+  SkillsModal,
 } from "../components/Profile/ProfileEntryModals";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { DataSkeleton } from "../components/site/DataSkeleton";
 import { QualityScoreCard } from "../components/Profile/QualityScoreCard";
 import { PageLoading } from "../components/site/PageLoading";
 import { ExpandableContent } from "../components/site/ExpandableContent";
+import {
+  hasSupportedSocialLinks,
+  SocialLinkIcons,
+  SocialLinksModal,
+} from "../components/Profile/SocialLinks";
 import { useMatchedCardMinHeights } from "../hooks/useMatchedCardMinHeights";
+import {
+  fetchAssessmentSkillOptions,
+  startAssessment,
+  type AssessmentSkillOption,
+} from "../lib/assessment-api";
+import { formatLocation } from "../lib/location";
 
 const experienceTime = (period: string) => {
   const [start = "", end = ""] = period.split(/\s+[–-]\s+/);
@@ -41,6 +54,7 @@ const workDateLabel = (value?: string) => {
 };
 
 export default function PublicProfilePage() {
+  const navigate = useNavigate();
   const columnsRef = useRef<HTMLElement>(null);
   const currentUser = useAuth((state) => state.user);
   const { userId: publicUserId } = useParams();
@@ -64,6 +78,11 @@ export default function PublicProfilePage() {
   const [editingWorkIndex, setEditingWorkIndex] = useState<number | null>(null);
   const [storyModalOpen, setStoryModalOpen] = useState(false);
   const [storyDraft, setStoryDraft] = useState("");
+  const [skillsModalOpen, setSkillsModalOpen] = useState(false);
+  const [socialLinksModalOpen, setSocialLinksModalOpen] = useState(false);
+  const [assessmentSkills, setAssessmentSkills] = useState<
+    AssessmentSkillOption[]
+  >([]);
   useMatchedCardMinHeights(
     columnsRef,
     ":scope > .profile-left-column > article",
@@ -104,6 +123,13 @@ export default function PublicProfilePage() {
   }, [profile?.role]);
 
   useEffect(() => {
+    if (!skillsModalOpen) return;
+    fetchAssessmentSkillOptions()
+      .then(setAssessmentSkills)
+      .catch(() => setAssessmentSkills([]));
+  }, [skillsModalOpen]);
+
+  useEffect(() => {
     if (profile?.role !== "COMPANY_ADMIN" || !profile.company?.id) {
       setAdminCompany(null);
       setAdminCompanyLoading(false);
@@ -122,13 +148,19 @@ export default function PublicProfilePage() {
 
   if (notFound) {
     return (
-      <div className="seeker-profile-not-found">
+      <div className="seeker-profile-page seeker-profile-not-found-page">
         <Navbar />
-        <div>
-          <h1>We couldn't find this profile</h1>
-          <p>It may have been removed, or the link is wrong.</p>
-          <a href="/jobs">Browse jobs</a>
-        </div>
+        <main>
+          <section className="seeker-profile-not-found">
+            <div className="seeker-profile-stars" aria-hidden="true" />
+            <div className="seeker-profile-not-found-copy">
+              <p className="eyebrow light">Profile unavailable</p>
+              <h1>We couldn't find this profile</h1>
+              <p>It may have been removed, made private, or the link is wrong.</p>
+              <a href="/jobs">Browse jobs</a>
+            </div>
+          </section>
+        </main>
       </div>
     );
   }
@@ -150,7 +182,7 @@ export default function PublicProfilePage() {
     );
   }
 
-  const location = [profile.city, profile.province].filter(Boolean).join(", ");
+  const location = formatLocation(profile.city, profile.province, "Indonesia");
   const experiences = [...(profile.experiences ?? [])].sort(
     (a, b) => experienceTime(b.period) - experienceTime(a.period),
   );
@@ -158,6 +190,7 @@ export default function PublicProfilePage() {
     (b.date ?? "").localeCompare(a.date ?? ""),
   );
   const links = profile.profileLinks ?? [];
+  const hasSocialLinks = hasSupportedSocialLinks(links);
   const isOwnProfile = currentUser?.id === profile.id;
   const isCompanyAdmin = profile.role === "COMPANY_ADMIN";
   const roleLine =
@@ -236,47 +269,58 @@ export default function PublicProfilePage() {
                 <ExpandableContent maxHeight={440}>
                   {experiences.length > 0 ? (
                     <div className="seeker-profile-entries">
-                      {experiences.map((experience, index) => (
-                        <div
-                          className="seeker-experience-entry"
-                          key={`${experience.title}-${index}`}
-                        >
-                          {experience.companyId &&
-                            companies.find(
+                      {experiences.map((experience, index) => {
+                        const linkedCompany = experience.companyId
+                          ? companies.find(
                               (company) => company.id === experience.companyId,
-                            )?.logo && (
-                              <img
-                                className="seeker-experience-logo"
-                                src={(() => {
-                                  const logo = companies.find(
-                                    (company) =>
-                                      company.id === experience.companyId,
-                                  )!.logo!;
-                                  return logo.startsWith("http")
-                                    ? logo
-                                    : `${apiUrl}${logo}`;
-                                })()}
-                                alt=""
-                              />
-                            )}
-                          <div>
-                            <header>
-                              <h3>
-                                {experience.title} ·{" "}
-                                {experience.companyId ? (
-                                  <a
-                                    href={`/companies/${experience.companyId}`}
-                                  >
-                                    {experience.company}
-                                  </a>
-                                ) : (
-                                  experience.company
-                                )}
-                              </h3>
-                              <span className="seeker-entry-actions">
-                                {experience.period}
+                            )
+                          : undefined;
+                        const logo =
+                          experience.companyLogo ?? linkedCompany?.logo ?? null;
+                        const logoUrl = logo
+                          ? logo.startsWith("http")
+                            ? logo
+                            : `${apiUrl}${logo}`
+                          : null;
+                        const companyInitials = experience.company
+                          .split(/\s+/)
+                          .filter(Boolean)
+                          .slice(0, 2)
+                          .map((word) => word[0]?.toUpperCase())
+                          .join("");
+
+                        return (
+                          <div
+                            className="seeker-experience-entry"
+                            key={`${experience.title}-${index}`}
+                          >
+                            <span
+                              className={`seeker-experience-logo ${logoUrl ? "has-image" : ""}`}
+                              aria-hidden="true"
+                            >
+                              {logoUrl ? (
+                                <img src={logoUrl} alt="" />
+                              ) : (
+                                companyInitials || "CO"
+                              )}
+                            </span>
+                            <div>
+                              <header>
+                                <h3>
+                                  {experience.title} ·{" "}
+                                  {experience.companyId ? (
+                                    <a
+                                      href={`/companies/${experience.companyId}`}
+                                    >
+                                      {experience.company}
+                                    </a>
+                                  ) : (
+                                    experience.company
+                                  )}
+                                </h3>
                                 {isOwnProfile && (
                                   <button
+                                    className="seeker-entry-edit"
                                     type="button"
                                     aria-label={`Edit ${experience.title} experience`}
                                     onClick={() => {
@@ -291,12 +335,21 @@ export default function PublicProfilePage() {
                                     <Pencil />
                                   </button>
                                 )}
-                              </span>
-                            </header>
-                            {experience.note && <p>{experience.note}</p>}
+                              </header>
+                              <div className="seeker-experience-meta">
+                                <small>{experience.period}</small>
+                                {experience.hiredThroughPolaris && (
+                                  <span className="polaris-hire-badge">
+                                    <b aria-hidden="true">✦</b>
+                                    Hired through Polaris
+                                  </span>
+                                )}
+                              </div>
+                              {experience.note && <p>{experience.note}</p>}
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   ) : (
                     <div className="seeker-profile-empty">
@@ -380,119 +433,6 @@ export default function PublicProfilePage() {
               </section>
             </article>
           )}
-          <article className="seeker-paper-card profile-about-card">
-            <ExpandableContent maxHeight={390}>
-              <div className="seeker-profile-main">
-                <div>
-                  {profile.company && (
-                    <section>
-                      <h2>Company</h2>
-                      <div className="seeker-profile-entries">
-                        <div>
-                          <h3>
-                            <a href={`/companies/${profile.company.id}`}>
-                              {profile.company.companyName}
-                            </a>
-                          </h3>
-                          <p>{profile.professionalRole || "Company admin"}</p>
-                        </div>
-                      </div>
-                    </section>
-                  )}
-                  {!isCompanyAdmin && (
-                    <section>
-                      <div className="seeker-section-heading">
-                        <h2>My story</h2>
-                        {isOwnProfile && (
-                          <button
-                            type="button"
-                            aria-label="Edit my story"
-                            onClick={() => {
-                              setStoryDraft(profile.profileStory);
-                              setStoryModalOpen(true);
-                            }}
-                          >
-                            <Pencil />
-                          </button>
-                        )}
-                      </div>
-                      {profile.profileStory ? (
-                        <p>{profile.profileStory}</p>
-                      ) : (
-                        <div className="seeker-profile-empty compact">
-                          <p>No story has been added yet.</p>
-                        </div>
-                      )}
-                    </section>
-                  )}
-                </div>
-
-                <aside>
-                  {!isCompanyAdmin && (
-                    <section>
-                      <div className="seeker-section-heading">
-                        <h2>Skills</h2>
-                        {isOwnProfile && (
-                          <a href="/profile" aria-label="Add skills">
-                            <Plus />
-                          </a>
-                        )}
-                      </div>
-                      {profile.skills.length > 0 ? (
-                        <div className="seeker-profile-tags">
-                          {profile.skills.map((skill) => (
-                            <span key={skill}>{skill}</span>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="seeker-profile-empty compact">
-                          <p>No skills have been added yet.</p>
-                        </div>
-                      )}
-                    </section>
-                  )}
-                  {links.length > 0 && (
-                    <section>
-                      <h2>Get in touch</h2>
-                      <div className="seeker-profile-tags">
-                        {links.map((link) => (
-                          <a
-                            key={link.label}
-                            href={link.url}
-                            target={
-                              link.url.startsWith("mailto:")
-                                ? undefined
-                                : "_blank"
-                            }
-                            rel="noreferrer"
-                          >
-                            {link.label}
-                          </a>
-                        ))}
-                      </div>
-                    </section>
-                  )}
-                </aside>
-              </div>
-            </ExpandableContent>
-          </article>
-        </div>
-        <aside className="profile-right-column">
-          {!isCompanyAdmin && (
-            <QualityScoreCard
-              title="Applicant quality score"
-              score={profile.quality.score}
-              metrics={profile.quality.metrics}
-            />
-          )}
-          {isCompanyAdmin && adminCompany && (
-            <QualityScoreCard
-              animated={false}
-              title={`${adminCompany.companyName} quality score`}
-              score={adminCompany.quality.score}
-              metrics={adminCompany.quality.metrics}
-            />
-          )}
           {isOwnProfile && !isCompanyAdmin && (
             <section className="profile-cv-cta">
               <div className="stars" aria-hidden="true">
@@ -527,6 +467,163 @@ export default function PublicProfilePage() {
               </div>
             </section>
           )}
+          {isCompanyAdmin && (
+            <article className="seeker-paper-card profile-about-card">
+              <div className="seeker-profile-main single-column">
+                <div>
+                  {profile.company && (
+                    <section>
+                      <h2>Company</h2>
+                      <div className="seeker-profile-entries">
+                        <div>
+                          <h3>
+                            <a href={`/companies/${profile.company.id}`}>
+                              {profile.company.companyName}
+                            </a>
+                          </h3>
+                          <p>{profile.professionalRole || "Company admin"}</p>
+                        </div>
+                      </div>
+                    </section>
+                  )}
+                  {links.length > 0 && (
+                    <section>
+                      <h2>Get in touch</h2>
+                      <div className="seeker-profile-tags">
+                        {links.map((link) => (
+                          <a
+                            key={link.label}
+                            href={link.url}
+                            target={link.url.startsWith("mailto:") ? undefined : "_blank"}
+                            rel="noreferrer"
+                          >
+                            {link.label}
+                          </a>
+                        ))}
+                      </div>
+                    </section>
+                  )}
+                </div>
+              </div>
+            </article>
+          )}
+        </div>
+        <aside className="profile-right-column">
+          {!isCompanyAdmin && (
+            <QualityScoreCard
+              title="Applicant quality score"
+              score={profile.quality.score}
+              metrics={profile.quality.metrics}
+              badges={profile.quality.badges}
+            />
+          )}
+          {!isCompanyAdmin && (
+            <article className="seeker-paper-card profile-about-card profile-story-skills-card">
+              <section>
+                <div className="seeker-section-heading">
+                  <h2>My story</h2>
+                  {isOwnProfile && (
+                    <button
+                      type="button"
+                      aria-label="Edit my story"
+                      onClick={() => {
+                        setStoryDraft(profile.profileStory);
+                        setStoryModalOpen(true);
+                      }}
+                    >
+                      <Pencil />
+                    </button>
+                  )}
+                </div>
+                {profile.profileStory ? (
+                  <p>{profile.profileStory}</p>
+                ) : (
+                  <div className="seeker-profile-empty compact">
+                    <p>No story has been added yet.</p>
+                  </div>
+                )}
+              </section>
+              <section>
+                <div className="seeker-section-heading">
+                  <h2>Skills</h2>
+                  {isOwnProfile && (
+                    <button
+                      type="button"
+                      aria-label="Add skills"
+                      onClick={() => setSkillsModalOpen(true)}
+                    >
+                      <Plus />
+                    </button>
+                  )}
+                </div>
+                {profile.skills.length > 0 ? (
+                  <div className="seeker-profile-tags">
+                    {profile.skills.map((skill) => (
+                      <span key={skill}>{skill}</span>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="seeker-profile-empty compact">
+                    <p>No skills have been added yet.</p>
+                  </div>
+                )}
+              </section>
+              <section>
+                <div className="seeker-section-heading">
+                  <h2>Social links</h2>
+                  {isOwnProfile && (
+                    <button
+                      type="button"
+                      aria-label={hasSocialLinks ? "Edit social links" : "Add social links"}
+                      onClick={() => setSocialLinksModalOpen(true)}
+                    >
+                      {hasSocialLinks ? <Pencil /> : <Plus />}
+                    </button>
+                  )}
+                </div>
+                {hasSocialLinks ? (
+                  <SocialLinkIcons links={links} />
+                ) : (
+                  <div className="seeker-profile-empty compact">
+                    <p>No social links have been added yet.</p>
+                  </div>
+                )}
+              </section>
+            </article>
+          )}
+          {isOwnProfile && !isCompanyAdmin && (
+            <article className="seeker-paper-card home-assessment-card profile-assessment-cta">
+              <div className="home-promo-icon">
+                <Clipboard />
+              </div>
+              <p className="eyebrow">Verified skills</p>
+              <h2>Applicants with skill badges are more likely to get noticed</h2>
+              <p>
+                Prove your strengths with a Polaris assessment and add verified
+                skill badges to your profile.
+              </p>
+              <a
+                href={
+                  subscriptionActive === true
+                    ? "/dashboard/assessments"
+                    : "/pricing"
+                }
+              >
+                {subscriptionActive === true
+                  ? "Take a skill assessment"
+                  : "Upgrade to Polaris Plus"}
+              </a>
+            </article>
+          )}
+          {isCompanyAdmin && adminCompany && (
+            <QualityScoreCard
+              animated={false}
+              title={`${adminCompany.companyName} quality score`}
+              score={adminCompany.quality.score}
+              metrics={adminCompany.quality.metrics}
+              badges={adminCompany.quality.badges}
+            />
+          )}
         </aside>
         {experienceModalOpen && profile && (
           <QuickExperienceModal
@@ -538,6 +635,29 @@ export default function PublicProfilePage() {
                 : (profile.experiences ?? [])[editingExperienceIndex]
             }
             onDismiss={() => setExperienceModalOpen(false)}
+            onDelete={
+              editingExperienceIndex === null
+                ? undefined
+                : async () => {
+                    try {
+                      await updateProfile({
+                        experiences: (profile.experiences ?? []).filter(
+                          (_, index) => index !== editingExperienceIndex,
+                        ),
+                      });
+                      await refreshProfile();
+                      setExperienceModalOpen(false);
+                      setEditingExperienceIndex(null);
+                      toast.success("Experience deleted.");
+                    } catch (error) {
+                      toast.error(
+                        error instanceof Error
+                          ? error.message
+                          : "Unable to delete experience.",
+                      );
+                    }
+                  }
+            }
             onSave={async (experience) => {
               try {
                 const current = profile.experiences ?? [];
@@ -586,6 +706,29 @@ export default function PublicProfilePage() {
                 : (profile.selectedWork ?? [])[editingWorkIndex]
             }
             onDismiss={() => setWorkModalOpen(false)}
+            onDelete={
+              editingWorkIndex === null
+                ? undefined
+                : async () => {
+                    try {
+                      await updateProfile({
+                        selectedWork: (profile.selectedWork ?? []).filter(
+                          (_, index) => index !== editingWorkIndex,
+                        ),
+                      });
+                      await refreshProfile();
+                      setWorkModalOpen(false);
+                      setEditingWorkIndex(null);
+                      toast.success("Selected work deleted.");
+                    } catch (error) {
+                      toast.error(
+                        error instanceof Error
+                          ? error.message
+                          : "Unable to delete selected work.",
+                      );
+                    }
+                  }
+            }
             onSave={async (work) => {
               try {
                 const current = profile.selectedWork ?? [];
@@ -617,7 +760,61 @@ export default function PublicProfilePage() {
             }}
           />
         )}
-        {storyModalOpen && profile && (
+        {skillsModalOpen && profile && (
+          <SkillsModal
+            availableSkills={assessmentSkills.map((item) => item.skillName)}
+            assessmentSkills={assessmentSkills}
+            subscriptionActive={subscriptionActive}
+            initialSkills={profile.skills}
+            onDismiss={() => setSkillsModalOpen(false)}
+            onGetSkillBadge={async (assessmentId) => {
+              if (!subscriptionActive) {
+                navigate("/pricing");
+                return;
+              }
+
+              const response = await startAssessment(assessmentId);
+              navigate(`/dashboard/assessments/${assessmentId}/take`, {
+                state: response.data,
+              });
+            }}
+            onSave={async (skills) => {
+              try {
+                await updateProfile({ skills });
+                await refreshProfile();
+                setSkillsModalOpen(false);
+                toast.success("Skills updated.");
+              } catch (error) {
+                toast.error(
+                  error instanceof Error
+                    ? error.message
+                    : "Unable to update skills.",
+                );
+              }
+            }}
+          />
+        )}
+        {socialLinksModalOpen && profile && (
+          <SocialLinksModal
+            initialLinks={links}
+            onDismiss={() => setSocialLinksModalOpen(false)}
+            onSave={async (profileLinks) => {
+              try {
+                await updateProfile({ profileLinks });
+                await refreshProfile();
+                setSocialLinksModalOpen(false);
+                toast.success("Social links updated.");
+              } catch (error) {
+                toast.error(
+                  error instanceof Error
+                    ? error.message
+                    : "Unable to update social links.",
+                );
+              }
+            }}
+          />
+        )}
+        {storyModalOpen && profile && createPortal(
           <div
             className="experience-modal"
             onMouseDown={(event) =>
@@ -672,7 +869,8 @@ export default function PublicProfilePage() {
                 <button className="profile-submit">Save</button>
               </footer>
             </form>
-          </div>
+          </div>,
+          document.body,
         )}
       </section>
     </div>

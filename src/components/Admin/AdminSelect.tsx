@@ -6,6 +6,7 @@ export type AdminSelectOption = {
   value: string;
   label: string;
   meta?: string;
+  color?: string;
 };
 
 type AdminSelectProps = {
@@ -170,6 +171,13 @@ export function AdminSelect({
           }}
         >
           <span className="admin-picker-value" id={`${id}-value`}>
+            {selected.color ? (
+              <i
+                className="admin-picker-status-dot"
+                style={{ backgroundColor: selected.color }}
+                aria-hidden="true"
+              />
+            ) : null}
             {selected.label}
           </span>
           {selected.meta ? <em className="admin-picker-count">{selected.meta}</em> : null}
@@ -212,7 +220,16 @@ export function AdminSelect({
                 onClick={() => choose(index)}
               >
                 <Check />
-                <span>{option.label}</span>
+                <span>
+                  {option.color ? (
+                    <i
+                      className="admin-picker-status-dot"
+                      style={{ backgroundColor: option.color }}
+                      aria-hidden="true"
+                    />
+                  ) : null}
+                  {option.label}
+                </span>
                 {option.meta ? <em>{option.meta}</em> : null}
               </li>
             ))}

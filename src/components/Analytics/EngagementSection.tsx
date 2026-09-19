@@ -5,9 +5,11 @@ import {
   interviewLabels,
   planLabels,
 } from "./analyticsData";
+import { statusColor } from "../../lib/status";
 import { BarList } from "./charts/BarList";
 import { ChartCard, ChartEmpty } from "./charts/ChartCard";
 import { seriesColors } from "./charts/chartUtils";
+import { formatCompanyLocation } from "../../lib/location";
 
 export function EngagementSection({ data }: { data: PlatformEngagement }) {
   const totalInterviews = data.interviews.reduce((sum, entry) => sum + entry.count, 0);
@@ -46,7 +48,7 @@ export function EngagementSection({ data }: { data: PlatformEngagement }) {
                   <span>
                     <b>{company.companyName}</b>
                   </span>
-                  <span>{company.city}</span>
+                  <span>{formatCompanyLocation(company)}</span>
                   <span className="figure">{formatNumber(company.jobs)}</span>
                   <span className="figure">{formatNumber(company.applications)}</span>
                   <span className="figure">{formatNumber(company.hires)}</span>
@@ -154,6 +156,7 @@ export function EngagementSection({ data }: { data: PlatformEngagement }) {
                 label: interviewLabels[entry.status] ?? entry.status,
                 values: [entry.count],
                 note: `${Math.round((entry.count / totalInterviews) * 100)}% of bookings`,
+                color: statusColor(entry.status),
               }))}
             />
           ) : (

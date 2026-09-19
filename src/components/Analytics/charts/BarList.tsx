@@ -1,5 +1,10 @@
 type BarListProps = {
-  items: Array<{ label: string; values: Array<number | null>; note?: string }>;
+  items: Array<{
+    label: string;
+    values: Array<number | null>;
+    note?: string;
+    color?: string;
+  }>;
   series: Array<{ name: string; color: string }>;
   format?: (value: number) => string;
   /** Pass the top of a fixed scale (a 5 point rating) so bars are not scaled to the winner. */
@@ -27,7 +32,12 @@ export function BarList({ items, series, format = String, scaleMax }: BarListPro
                 <span className="bar-track" key={entry.name} title={`${entry.name}: ${value === null ? "no data" : format(value)}`}>
                   <span className="bar-rail">
                     {value === null ? null : (
-                      <i style={{ width: `${(value / max) * 100}%`, background: entry.color }} />
+                      <i
+                        style={{
+                          width: `${(value / max) * 100}%`,
+                          background: item.color ?? entry.color,
+                        }}
+                      />
                     )}
                   </span>
                   <em>{value === null ? "—" : format(value)}</em>
