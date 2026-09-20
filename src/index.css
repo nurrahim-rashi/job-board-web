@@ -2699,9 +2699,12 @@ body.polaris-signed-out .job-hero > div:last-child {
     gap: 28px;
   }
   .paper-section,
-  .plain-section,
-  .testimonials {
+  .plain-section {
     padding: 78px 0;
+  }
+  .testimonials {
+    overflow: hidden;
+    padding: 78px 18px;
   }
   .role-grid,
   .post-grid,
