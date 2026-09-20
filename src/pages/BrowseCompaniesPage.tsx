@@ -12,6 +12,7 @@ import {
   getCountries,
   getWorldwideCities,
   getWorldwideStates,
+  reverseGeocodeLocation,
   type Region,
 } from "../services/region.service";
 
@@ -77,9 +78,9 @@ export default function BrowseCompaniesPage() {
       setLoading(true);
       getPublicCompanies({
         search: query || undefined,
-        country: country === "all" ? undefined : country,
-        provinceName: province === "all" ? undefined : province,
-        city: city === "all" ? undefined : city,
+        country: coords || country === "all" ? undefined : country,
+        provinceName: coords || province === "all" ? undefined : province,
+        city: coords || city === "all" ? undefined : city,
         sort: sort === "az" ? "asc" : sort === "za" ? "desc" : "nearest",
         latitude: coords?.lat,
         longitude: coords?.lng,
@@ -90,7 +91,7 @@ export default function BrowseCompaniesPage() {
     }, 250);
     return () => window.clearTimeout(timer);
   }, [city, coords, country, province, query, sort]);
-  const locate = () => {
+  const locate = async () => {
     if (coords) {
       const previous = locationSnapshot.current;
       setCoords(null);
@@ -109,27 +110,38 @@ export default function BrowseCompaniesPage() {
     }
     locationSnapshot.current = { country, province, city, sort };
     setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setCoords({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        });
-        setSort("nearest");
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) =>
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 12_000,
+          maximumAge: 60_000,
+        }),
+      );
+      const coordinates = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      };
+      setCoords(coordinates);
+      setSort("nearest");
+      try {
+        const resolved = await reverseGeocodeLocation(coordinates.lat, coordinates.lng);
+        setCountry(resolved.country);
+        setProvince(resolved.province);
+        setCity(resolved.city);
+      } catch {
         setCountry("all");
         setProvince("all");
         setCity("all");
-        setLocating(false);
-      },
-      () => {
-        locationSnapshot.current = null;
-        setLocating(false);
-        window.alert(
-          "We could not access your location. Allow location permission or choose a province and city manually.",
-        );
-      },
-      { timeout: 8000 },
-    );
+      }
+    } catch {
+      locationSnapshot.current = null;
+      window.alert(
+        "We could not access your location. Allow location permission or choose a province and city manually.",
+      );
+    } finally {
+      setLocating(false);
+    }
   };
   return (
     <div id="top" className="browse-companies-page">

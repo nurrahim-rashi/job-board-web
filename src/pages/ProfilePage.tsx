@@ -670,7 +670,11 @@ export default function ProfilePage() {
                     suggestions={institutionSuggestions}
                     onQuery={(query) => {
                       if (query.trim().length < 2) return setInstitutionSuggestions([]);
-                      void getEducationOptions("institutions", query)
+                      void getEducationOptions(
+                        "institutions",
+                        query,
+                        profileCountry || undefined,
+                      )
                         .then(setInstitutionSuggestions)
                         .catch(() => setInstitutionSuggestions([]));
                     }}
