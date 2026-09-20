@@ -94,3 +94,21 @@ export async function reverseGeocodeLocation(latitude: number, longitude: number
   if (!response.data?.data) throw new Error("Unable to determine your location");
   return response.data.data;
 }
+
+export type GeocodedCoordinates = {
+  latitude: string;
+  longitude: string;
+};
+
+export async function geocodeLocation(
+  city: string,
+  province: string,
+  country: string,
+) {
+  const response = await axiosInstance.get<{ data: GeocodedCoordinates }>(
+    "/regions/geocode",
+    { params: { city, province, country } },
+  );
+  if (!response.data?.data) throw new Error("Unable to find this location");
+  return response.data.data;
+}
