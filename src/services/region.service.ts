@@ -87,12 +87,45 @@ export type ReverseGeocodedLocation = {
 };
 
 export async function reverseGeocodeLocation(latitude: number, longitude: number) {
-  const response = await axiosInstance.get<{ data: ReverseGeocodedLocation }>(
-    "/regions/reverse",
-    { params: { latitude, longitude } },
+  try {
+    const response = await axiosInstance.get<{ data: ReverseGeocodedLocation }>(
+      "/regions/reverse",
+      { params: { latitude, longitude } },
+    );
+    if (response.data?.data) return response.data.data;
+  } catch {
+    // The no-key BigDataCloud endpoint is intentionally client-side only. It is
+    // a fallback for current device coordinates when server geocoders are down.
+  }
+
+  const params = new URLSearchParams({
+    latitude: String(latitude),
+    longitude: String(longitude),
+    localityLanguage: "en",
+  });
+  const response = await fetch(
+    `https://api.bigdatacloud.net/data/reverse-geocode-client?${params.toString()}`,
   );
-  if (!response.data?.data) throw new Error("Unable to determine your location");
-  return response.data.data;
+  if (!response.ok) throw new Error("Unable to determine your location");
+  const result = (await response.json()) as {
+    city?: string;
+    locality?: string;
+    localAdminArea?: string;
+    principalSubdivision?: string;
+    countryName?: string;
+    countryCode?: string;
+  };
+  const city = result.city || result.locality || result.localAdminArea || "";
+  const province = result.principalSubdivision || result.localAdminArea || city;
+  const country = result.countryName || "";
+  if (!city || !province || !country)
+    throw new Error("Unable to determine your location");
+  return {
+    city,
+    province,
+    country,
+    countryCode: result.countryCode?.toUpperCase() ?? "",
+  };
 }
 
 export type GeocodedCoordinates = {

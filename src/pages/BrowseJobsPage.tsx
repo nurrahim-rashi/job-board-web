@@ -98,7 +98,7 @@ export default function BrowseJobsPage() {
       getPublicJobs({
         title: query || undefined,
         category: category === "all" ? undefined : category,
-        country: coords || country === "all" ? undefined : country,
+        country: country === "all" ? undefined : country,
         provinceName: coords || province === "all" ? undefined : province,
         city: coords || location === "all" ? undefined : location,
         dateFrom:
@@ -156,7 +156,12 @@ export default function BrowseJobsPage() {
       setSort("nearest");
       try {
         const resolved = await reverseGeocodeLocation(coordinates.lat, coordinates.lng);
-        setCountry(resolved.country);
+        const detectedCountry =
+          countries.find(
+            (item) =>
+              item.code.toLocaleUpperCase("en") === resolved.countryCode,
+          )?.name ?? resolved.country;
+        setCountry(detectedCountry);
         setProvince(resolved.province);
         setLocation(resolved.city);
       } catch {
