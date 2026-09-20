@@ -2,7 +2,6 @@ import { Search } from "../../site/Icons";
 import { AdminSelect, type AdminSelectOption } from "../AdminSelect";
 import { applicationStatuses, educationOptions, statusLabels, type ApplicantQuery, type ApplicationStatus } from "../../../types/applicant";
 import { statusColor } from "../../../lib/status";
-import { CurrencySelect } from "../../site/CurrencySelect";
 
 export type FilterState = {
   name: string;
@@ -10,7 +9,6 @@ export type FilterState = {
   maxAge: string;
   minSalary: string;
   maxSalary: string;
-  salaryCurrency: string;
   education: string;
   status: string;
   sort: SortKey;
@@ -24,7 +22,6 @@ export const emptyFilters: FilterState = {
   maxAge: "",
   minSalary: "",
   maxSalary: "",
-  salaryCurrency: "IDR",
   education: "",
   status: "all",
   sort: "earliest",
@@ -83,7 +80,6 @@ export function toQuery(filters: FilterState): ApplicantQuery {
     ...(maxAge !== undefined && ageOk && { maxAge }),
     ...(minSalary !== undefined && { minSalary }),
     ...(maxSalary !== undefined && salaryOk && { maxSalary }),
-    ...((minSalary !== undefined || maxSalary !== undefined) && { salaryCurrency: filters.salaryCurrency }),
     ...(educationQuery(filters.education) && { education: educationQuery(filters.education) }),
     ...(filters.status !== "all" && { status: filters.status as ApplicationStatus }),
     ...sorting[filters.sort],
@@ -115,11 +111,12 @@ export function hasActiveFilters(filters: FilterState) {
 
 type ApplicantFiltersProps = {
   filters: FilterState;
+  salaryCurrency: string;
   onChange: (filters: FilterState) => void;
   onReset: () => void;
 };
 
-export function ApplicantFilters({ filters, onChange, onReset }: ApplicantFiltersProps) {
+export function ApplicantFilters({ filters, salaryCurrency, onChange, onReset }: ApplicantFiltersProps) {
   const set = <Key extends keyof FilterState>(key: Key, value: FilterState[Key]) =>
     onChange({ ...filters, [key]: value });
 
@@ -177,13 +174,12 @@ export function ApplicantFilters({ filters, onChange, onReset }: ApplicantFilter
         </div>
 
         <div className="applicant-field">
-          <span>Expected salary</span>
-          <CurrencySelect value={filters.salaryCurrency} onChange={(currency) => set("salaryCurrency", currency)} />
+          <span>Expected salary ({salaryCurrency})</span>
           <div className="applicant-range">
             <input
               type="number"
               min={0}
-              step={500000}
+              step={salaryCurrency === "IDR" ? 500000 : 1}
               value={filters.minSalary}
               onChange={(event) => set("minSalary", event.target.value)}
               placeholder="Min"
@@ -193,7 +189,7 @@ export function ApplicantFilters({ filters, onChange, onReset }: ApplicantFilter
             <input
               type="number"
               min={0}
-              step={500000}
+              step={salaryCurrency === "IDR" ? 500000 : 1}
               value={filters.maxSalary}
               onChange={(event) => set("maxSalary", event.target.value)}
               placeholder="Max"

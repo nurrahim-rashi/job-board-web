@@ -62,6 +62,7 @@ export default function AdminApplicantsPage() {
             <ApplicantSection
               key={slug}
               slug={slug}
+              salaryCurrency={selected.salaryCurrency}
               hasPreSelectionTest={selected.hasPreSelectionTest}
               testDurationMinutes={selected.testDurationMinutes}
             />

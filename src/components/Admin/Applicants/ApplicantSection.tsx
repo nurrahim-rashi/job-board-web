@@ -12,9 +12,9 @@ import { ApplicantList } from "./ApplicantList";
 const PAGE_SIZE = 10;
 const ROSTER_LIMIT = 50;
 
-type ApplicantSectionProps = { slug: string; hasPreSelectionTest: boolean; testDurationMinutes: number | null };
+type ApplicantSectionProps = { slug: string; salaryCurrency: string; hasPreSelectionTest: boolean; testDurationMinutes: number | null };
 
-export function ApplicantSection({ slug, hasPreSelectionTest, testDurationMinutes }: ApplicantSectionProps) {
+export function ApplicantSection({ slug, salaryCurrency, hasPreSelectionTest, testDurationMinutes }: ApplicantSectionProps) {
   const [filters, setFilters] = useState<FilterState>(emptyFilters);
   const [debounced, setDebounced] = useState<FilterState>(emptyFilters);
   const [page, setPage] = useState(1);
@@ -58,7 +58,7 @@ export function ApplicantSection({ slug, hasPreSelectionTest, testDurationMinute
         ) : null}
       </div>
 
-      <ApplicantFilters filters={filters} onChange={setFilters} onReset={reset} />
+      <ApplicantFilters filters={filters} salaryCurrency={salaryCurrency} onChange={setFilters} onReset={reset} />
 
       {isPending ? (
         <div className="admin-empty">
