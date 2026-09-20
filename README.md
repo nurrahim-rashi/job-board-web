@@ -72,6 +72,8 @@ No redirect URI is required because Polaris uses the Google Identity Services Ja
 | `npm run build` | Type-check and create the production build in `dist/`. |
 | `npm run preview` | Preview the production build locally. |
 | `npm run lint` | Run ESLint. |
+| `npm test` | Run the Vitest unit suite once. |
+| `npm run test:watch` | Run Vitest in watch mode. |
 
 ## Main Routes
 
@@ -118,6 +120,7 @@ Protected routes remember the original URL and continue that flow after authenti
 - Email/password and Google authentication, verification, password reset, and role guards
 - Worldwide country/state/city search plus device-location sorting
 - Job search, pagination, sharing, saving, and application tracking
+- Salary conversion on job detail, with searchable currency picker and live rates
 - Application CV upload and immutable education snapshots
 - Public applicant and company profiles with quality scores and badges
 - Job posting, applicant, interview, and pre-selection-test administration
@@ -125,6 +128,20 @@ Protected routes remember the original URL and continue that flow after authenti
 - Polaris Plus/Pro subscription purchase flows
 - Company reviews and data-backed Stories content
 - Responsive skeleton, modal, toast, empty, and loading states
+
+## Testing
+
+Vitest covers the pure helpers in `src/lib`, where logic can be asserted without rendering. `src/lib/share.test.ts` pins the social-sharing contract: the four supported platforms, which of them can carry the custom message in the URL, and the encoding that keeps `&` and `#` from truncating a share.
+
+There is no component or end-to-end suite yet, so anything that only exists inside a React component is unverified.
+
+## Shared UI Conventions
+
+- **Dropdowns.** Every menu surface (`country-combobox-menu`, `education-combobox-menu`, `homepage-job-suggestions`, `homepage-location-suggestions`) draws from one set of `--menu-*` custom properties defined on `:root` in `index.css`. Change the tokens, not the individual menus.
+- **Password fields.** Use `PasswordField` rather than `<input type="password">`. It carries the show/hide control every password box is expected to have.
+- **Toggles.** A switch is a `<button role="switch">` and never shows a request spinner; `request-button-feedback.ts` skips that role, since swapping a knob for a "Loading…" label reads as a broken control.
+- **Grid items.** `.reveal` wrappers set `min-width: 0`. Grid and flex items default to `min-width: auto`, which refuses to shrink below their content and pushes pages wider than the viewport.
+- **Brand mark.** `public/favicon.svg` is a north-star compass rose: vertical rays longer than horizontal, drawn over a ring it breaks through. The wordmark in the header still uses the `✦` text glyph.
 
 ## Project Structure
 
@@ -146,7 +163,13 @@ src/
 
 The Axios client in `src/lib/axios.ts` attaches the persisted JWT as a Bearer token. API errors are normalized into user-facing errors, returned names are normalized for display, and mutation buttons receive a loading state. Authentication is stored under the `polaris-auth` local-storage key.
 
-The frontend does not call third-party location providers directly. It uses the API's `/regions` endpoints so provider CORS, caching, fallback, and rate limiting remain server-side.
+The frontend does not call third-party location or exchange-rate providers directly. It uses the API's `/regions` and `/exchange-rates` endpoints so provider CORS, caching, fallback, and rate limiting remain server-side.
+
+If a location or currency lookup returns nothing in local development, check the API before the component: `http://localhost:5173` is only on the API's CORS allow-list when the API is not running with `NODE_ENV=production`.
+
+### Salary converter
+
+`SalaryConverter` on the job-detail page fetches `/exchange-rates?base=<job currency>` once per job and converts locally, so switching currency is instant. It reuses `CurrencySelect` for type-to-search over every currency `Intl` reports, and remembers the last target under the `polaris-salary-currency` local-storage key. Converted amounts are rendered with the currency code rather than a narrow symbol, because SGD, USD and AUD all render as `$`. It renders only when the posting states a salary.
 
 ## Production Deployment
 

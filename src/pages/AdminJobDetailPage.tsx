@@ -75,6 +75,9 @@ export default function AdminJobDetailPage() {
             </div>
             <button
               type="button"
+              role="switch"
+              aria-checked={job.isPublished}
+              data-no-request-loading
               className={`admin-switch ${job.isPublished ? "on" : ""}`}
               disabled={togglePublish.isPending}
               onClick={() => togglePublish.mutate({ slug: job.slug, isPublished: !job.isPublished })}

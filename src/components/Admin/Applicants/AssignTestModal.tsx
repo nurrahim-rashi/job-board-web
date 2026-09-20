@@ -78,7 +78,7 @@ export function AssignTestModal({ slug, open, durationMinutes, onClose }: Assign
           <p className="eyebrow">Pre-selection test</p>
           <h2>Send the test to applicants</h2>
           <p className="admin-note">
-            Only applicants still on Pending can be sent the test — anyone you have already moved on is left out. They get{" "}
+            Only applicants still on Pending can be sent the test. Anyone you have already moved on is left out. They get{" "}
             {durationMinutes ?? 30} minutes once they open it, and the clock keeps running after that.
           </p>
         </header>

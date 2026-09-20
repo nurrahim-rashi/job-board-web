@@ -212,7 +212,7 @@ export function HiringConstellation() {
                   className={`constellation-point ${reached ? "reached" : ""} ${isCurrent ? "active" : ""}`}
                   style={{ left: `${step.x}%`, top: `${step.y}%` }}
                   onClick={() => goToStep(index)}
-                  aria-label={`${step.time} — ${step.title}`}
+                  aria-label={`${step.time} · ${step.title}`}
                 >
                   <i />
                   <span>{step.time}</span>

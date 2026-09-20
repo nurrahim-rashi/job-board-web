@@ -20,7 +20,7 @@ const perks = [
   {
     icon: FileText,
     title: "CV Generator",
-    body: "Turn your profile into a clean, recruiter-friendly CV in one click — tailored per role.",
+    body: "Turn your profile into a clean, recruiter-friendly CV in one click, tailored per role.",
   },
   {
     icon: Gauge,
