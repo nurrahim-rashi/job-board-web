@@ -13,6 +13,7 @@ import { isNewJob } from "../lib/job-age";
 import { categoryLabel } from "../types/job-posting";
 import { ShareJobModal } from "../components/JobDetail/ShareJobModal";
 import { ExpandableContent } from "../components/site/ExpandableContent";
+import { SalaryConverter } from "../components/JobDetail/SalaryConverter";
 import {
   Bookmark,
   Calendar,
@@ -199,7 +200,12 @@ export default function JobDetailPage() {
             </section>
             <aside>
               {user?.role === "JOB_SEEKER" && (
-                <button type="button" onClick={toggleSaved}>
+                <button
+                  type="button"
+                  className={saved ? "saved" : ""}
+                  aria-pressed={saved}
+                  onClick={toggleSaved}
+                >
                   <Bookmark />
                   {saved ? "Saved" : "Save job"}
                 </button>
@@ -244,6 +250,13 @@ export default function JobDetailPage() {
                     </span>
                   </div>
                 </section>
+                {(job.salaryMin !== null || job.salaryMax !== null) && (
+                  <SalaryConverter
+                    salaryMin={job.salaryMin}
+                    salaryMax={job.salaryMax}
+                    salaryCurrency={job.salaryCurrency}
+                  />
+                )}
               </article>
               <article className="job-role-card job-description-card">
                 <ExpandableContent maxHeight={430}>

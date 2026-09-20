@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
+import { PasswordField } from "../components/site/PasswordField";
 import toast from "react-hot-toast";
 import { Navbar } from "../components/Navbar";
 import { PageLoading } from "../components/site/PageLoading";
@@ -358,13 +359,16 @@ export default function ProfilePage() {
   async function updatePassword(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
-    const form = new FormData(event.currentTarget);
+    // React clears currentTarget once the event finishes dispatching, so the
+    // form has to be captured before the first await or reset() throws on null.
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
     try {
       await changePassword(
         String(form.get("currentPassword")),
         String(form.get("newPassword")),
       );
-      event.currentTarget.reset();
+      formElement.reset();
       toast.success("Password updated.");
     } catch (requestError) {
       setError(
@@ -501,7 +505,7 @@ export default function ProfilePage() {
               <strong>{avatarFileName || "Choose a profile photo"}</strong>
               <small>
                 {avatarFileName
-                  ? "Looking good — ready to upload!"
+                  ? "Looking good. Ready to upload!"
                   : "Drop it here or click to browse · JPG, PNG, WEBP, GIF, AVIF, or HEIC · max 3MB"}
               </small>
             </span>
@@ -1147,16 +1151,11 @@ export default function ProfilePage() {
             <div className="profile-fields">
               <label>
                 Current password
-                <input name="currentPassword" type="password" required />
+                <PasswordField name="currentPassword" required />
               </label>
               <label>
                 New password
-                <input
-                  name="newPassword"
-                  type="password"
-                  minLength={8}
-                  required
-                />
+                <PasswordField name="newPassword" minLength={6} required />
               </label>
             </div>
             <button className="profile-submit">Update password</button>

@@ -222,7 +222,7 @@ export default function AdminJobFormPage() {
     <AdminShell
       eyebrow={editing ? "Edit posting" : "New posting"}
       title={editing ? form.title : "Create a job posting"}
-      lead="Fields marked optional can be filled in later — drafts are only visible to your team."
+      lead="Fields marked optional can be filled in later. Drafts are only visible to your team."
       actions={
         <Link className="admin-btn ghost" to="/admin">
           <ArrowLeft /> Back
@@ -361,7 +361,7 @@ export default function AdminJobFormPage() {
 
         <footer className="admin-form-footer">
           <label className="admin-toggle">
-            <button type="button" className={`admin-switch ${form.published ? "on" : ""}`} onClick={() => set("published", !form.published)}>
+            <button type="button" role="switch" aria-checked={form.published} data-no-request-loading className={`admin-switch ${form.published ? "on" : ""}`} onClick={() => set("published", !form.published)}>
               <i />
             </button>
             <span>{form.published ? "Publish immediately" : "Save as draft"}</span>

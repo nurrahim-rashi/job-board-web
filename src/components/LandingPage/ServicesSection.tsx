@@ -33,7 +33,7 @@ const services = [
   {
     icon: Handshake,
     title: "Offer support",
-    body: "Comp expectations, notice periods, competing offers—fewer surprises before signing.",
+    body: "Comp expectations, notice periods, competing offers. Fewer surprises before signing.",
   },
   {
     icon: Sparkles,

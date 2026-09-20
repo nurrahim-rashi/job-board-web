@@ -5,6 +5,19 @@
   color: #202129;
   background: #f8f5ed;
   font-synthesis: none;
+
+  /* One dropdown surface for the whole app, matching the admin comboboxes. */
+  --menu-surface: #fffdf8;
+  --menu-border: #ded9cf;
+  --menu-radius: 14px;
+  --menu-shadow: 0 18px 40px rgb(32 33 41 / 0.14);
+  --menu-padding: 6px;
+  --menu-max-height: 260px;
+  --menu-item-radius: 9px;
+  --menu-item-padding: 10px 11px;
+  --menu-item-hover-bg: #eeeff9;
+  --menu-item-hover-fg: #3e54a3;
+  --menu-scroll-thumb: #a9afd0;
 }
 * {
   box-sizing: border-box;
@@ -276,23 +289,26 @@ p {
 .password-input {
   position: relative;
 }
-.password-input input {
+.password-input > input {
   padding-right: 46px;
 }
-.password-input button {
+.password-input > button {
   align-items: center;
   background: transparent;
   border: 0;
   color: #74717a;
   cursor: pointer;
   display: flex;
-  height: 36px;
+  height: 34px;
   justify-content: center;
   padding: 0;
   position: absolute;
-  right: 5px;
-  top: 5px;
-  width: 36px;
+  right: 6px;
+  /* Centred on the field rather than pinned to the top, so the same control
+     fits the auth dialog, the reset page and the profile form. */
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
 }
 .password-input button:hover {
   color: #485eb4;
@@ -468,7 +484,11 @@ p {
   cursor: pointer;
   display: inline-flex;
   font-size: 15px;
+  justify-content: center;
   min-height: 36px;
+  /* The in-flight label ("Signing in…") is wider than the idle one, and the
+     button keeps its idle width while loading, so reserve the space up front. */
+  min-width: 112px;
   padding: 9px 15px;
 }
 .nav-profile {
@@ -557,8 +577,17 @@ p {
   color: white;
   cursor: pointer;
   font-weight: 700;
+  min-width: 168px;
   padding: 12px 18px;
+  text-align: center;
   white-space: nowrap;
+}
+/* The reset card stacks a single action over a centred "Back to sign in"
+   link, so the button is centred with it instead of hugging the left edge. */
+.email-action .profile-submit {
+  display: block;
+  margin-inline: auto;
+  width: fit-content;
 }
 .profile-card h2 {
   font-size: 30px;
@@ -2222,75 +2251,89 @@ body.polaris-signed-out .job-hero > div:last-child {
   font-weight: 400;
   margin-top: 4px;
 }
-.marquees {
+.testimonial-grid {
   display: grid;
   gap: 18px;
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 55px;
 }
-.marquee {
-  animation: marquee 52s linear infinite;
-  display: flex;
-  gap: 18px;
-  width: max-content;
-}
-.marquee.reverse {
-  animation-direction: reverse;
-  animation-duration: 57s;
-}
-.marquee:hover {
-  animation-play-state: paused;
-}
-.marquee figure {
+.testimonial-card {
   background: #f4f1e9;
+  border: 1px solid #dfdbd0;
   border-radius: 24px;
+  display: flex;
+  flex-direction: column;
   margin: 0;
+  min-height: 268px;
   padding: 27px;
-  width: 340px;
 }
-.marquee i {
+.testimonial-card i {
   color: #485eb4;
   font-style: normal;
   letter-spacing: 2px;
 }
-.marquee blockquote {
+.testimonial-card blockquote {
+  display: -webkit-box;
   font-size: 17px;
   line-height: 1.55;
-  margin: 17px 0;
+  margin: 17px 0 0;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  line-clamp: 5;
+  -webkit-line-clamp: 5;
 }
-.marquee figcaption {
+.testimonial-card.expanded blockquote {
+  display: block;
+  overflow: visible;
+}
+.testimonial-card-toggle {
+  align-self: flex-start;
+  background: transparent;
+  border: 0;
+  color: #485eb4;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  margin-top: 10px;
+  padding: 4px 0;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 4px;
+}
+.testimonial-card-toggle:hover {
+  text-decoration-color: currentColor;
+}
+.testimonial-card figcaption {
   color: #77747a;
   font-size: 13px;
+  margin-top: auto;
+  padding-top: 20px;
 }
-.testimonial-skeleton-row {
-  animation: none;
-}
-.testimonial-skeleton-row figure {
-  display: grid;
-  gap: 14px;
-  min-height: 195px;
-}
-.testimonial-skeleton-row figure > i,
-.testimonial-skeleton-row figure > span,
-.testimonial-skeleton-row figure > small {
+.testimonial-card-skeleton > i,
+.testimonial-card-skeleton > span,
+.testimonial-card-skeleton > small {
   animation: polaris-skeleton-shine 1.35s ease-in-out infinite;
   background: linear-gradient(105deg, #dfdbd0 20%, #f8f5ed 38%, #dfdbd0 56%);
   background-size: 240% 100%;
   border-radius: 999px;
   display: block;
 }
-.testimonial-skeleton-row figure > i {
+.testimonial-card-skeleton > i {
   height: 14px;
   width: 96px;
 }
-.testimonial-skeleton-row figure > span {
+.testimonial-card-skeleton > span {
   height: 12px;
+  margin-top: 14px;
   width: 100%;
 }
-.testimonial-skeleton-row figure > span:nth-of-type(2) {
+.testimonial-card-skeleton > span:nth-of-type(3) {
   width: 72%;
 }
-.testimonial-skeleton-row figure > small {
+.testimonial-card-skeleton > small {
   height: 10px;
-  margin-top: 20px;
+  margin-top: auto;
   width: 56%;
 }
 .testimonial-state {
@@ -2615,6 +2658,10 @@ body.polaris-signed-out .job-hero > div:last-child {
   }
 }
 .reveal {
+  /* These wrappers sit directly inside grids, where the default min-width:auto
+     stops a track from shrinking below its content and pushes the page wider
+     than the viewport. */
+  min-width: 0;
   opacity: 0;
   transform: translateY(22px);
   transition:
@@ -2658,11 +2705,6 @@ body.polaris-signed-out .job-hero > div:last-child {
     transform: rotate(-1.2deg) scale(1);
   }
 }
-@keyframes marquee {
-  to {
-    transform: translateX(-33.333%);
-  }
-}
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -2675,6 +2717,11 @@ body.polaris-signed-out .job-hero > div:last-child {
   .reveal {
     opacity: 1;
     transform: none;
+  }
+}
+@media (max-width: 1040px) {
+  .testimonial-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 @media (max-width: 760px) {
@@ -2708,7 +2755,8 @@ body.polaris-signed-out .job-hero > div:last-child {
   }
   .role-grid,
   .post-grid,
-  .tech-grid {
+  .tech-grid,
+  .testimonial-grid {
     grid-template-columns: 1fr;
   }
   .service-grid {
@@ -3019,11 +3067,13 @@ body.polaris-signed-out .job-hero > div:last-child {
   background: transparent;
   border: 0;
   margin: 0;
+  min-width: 0;
   padding: 0;
   width: 100%;
 }
 .dashboard-page .dashboard-side {
   align-self: start;
+  min-width: 0;
 }
 .feed-main {
   min-width: 0;
@@ -4116,6 +4166,14 @@ body.polaris-signed-out .job-hero > div:last-child {
 .job-hero > div > aside button svg {
   height: 16px;
   width: 16px;
+}
+.job-hero > div > aside button.saved {
+  background: #485eb4;
+  border-color: #485eb4;
+  color: #fff;
+}
+.job-hero > div > aside button.saved svg {
+  fill: currentColor;
 }
 .job-hero > div > aside .button-light {
   border: 0;
@@ -6161,6 +6219,9 @@ body.polaris-signed-out .job-hero > div:last-child {
 .job-card-dashboard button.saved {
   color: #485eb4;
 }
+.job-card-dashboard button.saved svg {
+  fill: currentColor;
+}
 .job-card-dashboard h3 {
   font-family: "DM Sans", sans-serif;
   font-size: 17px;
@@ -6391,7 +6452,7 @@ body.polaris-signed-out .job-hero > div:last-child {
   .dashboard-search {
     grid-template-columns: 1fr 1fr;
   }
-  .dashboard-search button {
+  .dashboard-search > button {
     min-height: 48px;
   }
   .dashboard-feed {
@@ -6432,7 +6493,7 @@ body.polaris-signed-out .job-hero > div:last-child {
   .dash-content h1 {
     font-size: 37px;
   }
-  .dashboard-search button {
+  .dashboard-search > button {
     padding-block: 14px;
   }
   .dashboard-feed {
@@ -6999,18 +7060,18 @@ body.polaris-signed-out .job-hero > div:last-child {
   width: 14px;
 }
 .country-combobox-menu {
-  background: #fffdf8;
-  border: 1px solid #ded9cf;
-  border-radius: 14px;
-  box-shadow: 0 18px 40px rgb(32 33 41 / 0.14);
+  background: var(--menu-surface);
+  border: 1px solid var(--menu-border);
+  border-radius: var(--menu-radius);
+  box-shadow: var(--menu-shadow);
   display: grid;
   left: 0;
-  max-height: 250px;
+  max-height: var(--menu-max-height);
   overflow-y: auto;
-  padding: 6px;
+  padding: var(--menu-padding);
   position: absolute;
   right: 0;
-  scrollbar-color: #a9afd0 transparent;
+  scrollbar-color: var(--menu-scroll-thumb) transparent;
   scrollbar-width: thin;
   top: calc(100% + 7px);
   z-index: 80;
@@ -7018,23 +7079,23 @@ body.polaris-signed-out .job-hero > div:last-child {
 .country-combobox-menu button {
   background: transparent;
   border: 0;
-  border-radius: 9px;
+  border-radius: var(--menu-item-radius);
   color: #202129;
   cursor: pointer;
   font:
     500 13px "DM Sans",
     sans-serif;
-  padding: 10px;
+  padding: var(--menu-item-padding);
   text-align: left;
 }
 .country-combobox-menu button:hover {
-  background: #eeeff9;
-  color: #3e54a3;
+  background: var(--menu-item-hover-bg);
+  color: var(--menu-item-hover-fg);
 }
 .country-combobox-menu > span {
   color: #74717a;
   font-size: 12px;
-  padding: 10px;
+  padding: var(--menu-item-padding);
 }
 
 /* Searchable form comboboxes should look like Polaris inputs, never native selects. */
@@ -7250,6 +7311,9 @@ body.polaris-signed-out .job-hero > div:last-child {
 }
 .browse-card-top button.saved {
   color: #485eb4;
+}
+.browse-card-top button.saved svg {
+  fill: currentColor;
 }
 .browse-card-actions {
   align-items: center;
@@ -8010,33 +8074,58 @@ body.polaris-signed-out .job-hero > div:last-child {
   position: relative;
 }
 .homepage-job-suggestions {
-  background: #fffdf8;
-  border: 1px solid #ded9cf;
-  border-radius: 18px;
-  box-shadow: 0 18px 45px rgb(9 16 38 / 0.24);
+  background: var(--menu-surface);
+  border: 1px solid var(--menu-border);
+  border-radius: var(--menu-radius);
+  box-shadow: var(--menu-shadow);
+  display: grid;
+  gap: 2px;
   left: 8px;
-  overflow: hidden;
+  max-height: var(--menu-max-height);
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: var(--menu-padding);
   position: absolute;
   right: 8px;
+  scrollbar-color: var(--menu-scroll-thumb) transparent;
+  scrollbar-width: thin;
   top: calc(100% + 8px);
   z-index: 20;
 }
 .homepage-job-suggestions > a {
   align-items: center;
+  border-radius: var(--menu-item-radius);
   color: #242631;
   display: grid;
-  gap: 14px;
+  gap: 4px 12px;
   grid-template-columns: minmax(0, 1fr) auto 18px;
-  padding: 13px 16px;
-}
-.homepage-job-suggestions > a + a {
-  border-top: 1px solid #ebe6dc;
+  padding: var(--menu-item-padding);
 }
 .homepage-job-suggestions > a:hover {
-  background: #f0f3fb;
+  background: var(--menu-item-hover-bg);
+  color: var(--menu-item-hover-fg);
 }
 .homepage-job-suggestions > .homepage-search-fallback {
   grid-template-columns: minmax(0, 1fr) 18px;
+}
+.homepage-job-suggestions > a > span {
+  min-width: 0;
+}
+/* Side by side there is no room for a role and a full Indonesian address on a
+   phone: the title column collapsed to a few characters and its text ran under
+   the location. Stack them and let the arrow span both rows. */
+@media (max-width: 760px) {
+  .homepage-job-suggestions > a {
+    grid-template-columns: minmax(0, 1fr) 18px;
+  }
+  .homepage-job-suggestions > a > span,
+  .homepage-job-suggestions > a > em {
+    grid-column: 1;
+  }
+  .homepage-job-suggestions > a > svg {
+    grid-column: 2;
+    grid-row: 1 / -1;
+  }
 }
 .homepage-search-fallback b {
   color: #354b9f;
@@ -8048,6 +8137,7 @@ body.polaris-signed-out .job-hero > div:last-child {
 }
 .homepage-job-suggestions b {
   font-size: 14px;
+  overflow-wrap: anywhere;
 }
 .homepage-job-suggestions small,
 .homepage-job-suggestions em {
@@ -8142,6 +8232,9 @@ body.polaris-signed-out .job-hero > div:last-child {
 }
 .nearby-card-actions button.saved {
   color: #485eb4;
+}
+.nearby-card-actions button.saved svg {
+  fill: currentColor;
 }
 .nearby-card-actions svg {
   height: 18px;
@@ -10266,6 +10359,7 @@ body.polaris-signed-out .job-hero > div:last-child {
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 296px;
   padding: 23px;
   transition:
     box-shadow 0.35s,
@@ -10333,9 +10427,14 @@ body.polaris-signed-out .job-hero > div:last-child {
 }
 .company-about {
   color: #74717a;
+  display: -webkit-box;
   font-size: 14px;
   line-height: 1.55;
   margin: 20px 0 0;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  line-clamp: 4;
+  -webkit-line-clamp: 4;
 }
 .company-grid .top-tier-company-badge + .company-about {
   margin-top: 12px;
@@ -10354,12 +10453,14 @@ body.polaris-signed-out .job-hero > div:last-child {
 }
 .company-grid a {
   align-items: center;
+  align-self: flex-start;
   color: #485eb4;
   display: inline-flex;
   font-size: 14px;
   font-weight: 700;
   gap: 7px;
-  margin-top: 20px;
+  margin-top: auto;
+  padding-top: 20px;
 }
 .company-grid a svg {
   height: 16px;
@@ -10383,6 +10484,14 @@ body.polaris-signed-out .job-hero > div:last-child {
 }
 .company-empty p {
   margin: 12px 0 0 !important;
+}
+@media (min-width: 801px) and (max-width: 900px) {
+  .company-filters > div {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .company-filters label {
+    grid-column: 1 / -1;
+  }
 }
 @media (max-width: 800px) {
   .company-filters > div {
@@ -15067,6 +15176,10 @@ input[type="month"]:focus-visible {
   height: 13px;
   width: 13px;
 }
+/* Everything in this list is saved, so its bookmark reads as filled. */
+.saved-job-list article > button svg {
+  fill: currentColor;
+}
 .saved-job-list article > button {
   align-items: center;
   background: transparent;
@@ -16572,22 +16685,24 @@ input[type="month"]:focus-visible {
   position: relative;
 }
 .homepage-location-suggestions {
-  background: #fffdf8;
-  border: 1px solid #ded9cf;
-  border-radius: 14px;
-  box-shadow: 0 18px 45px rgb(9 16 38 / 0.24);
+  background: var(--menu-surface);
+  border: 1px solid var(--menu-border);
+  border-radius: var(--menu-radius);
+  box-shadow: var(--menu-shadow);
   display: grid;
+  gap: 2px;
   left: auto;
-  max-height: 330px;
+  max-height: var(--menu-max-height);
   max-width: min(420px, calc(100vw - 36px));
   min-width: min(360px, calc(100vw - 36px));
   overflow-x: hidden;
   overflow-y: auto;
+  padding: var(--menu-padding);
   position: absolute;
   right: 0;
   top: calc(100% + 9px);
   z-index: 30;
-  scrollbar-color: #9ca9d5 transparent;
+  scrollbar-color: var(--menu-scroll-thumb) transparent;
   scrollbar-width: thin;
 }
 .homepage-location-suggestions::-webkit-scrollbar {
@@ -16605,6 +16720,7 @@ input[type="month"]:focus-visible {
   align-items: center;
   background: transparent;
   border: 0;
+  border-radius: var(--menu-item-radius);
   color: #292a32;
   cursor: pointer;
   display: flex;
@@ -16612,7 +16728,7 @@ input[type="month"]:focus-visible {
     600 13px "DM Sans",
     sans-serif;
   gap: 9px;
-  padding: 11px 13px;
+  padding: var(--menu-item-padding);
   text-align: left;
 }
 .homepage-location-suggestions button > span {
@@ -16634,12 +16750,9 @@ input[type="month"]:focus-visible {
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
-.homepage-location-suggestions button + button {
-  border-top: 1px solid #ebe6dc;
-}
 .homepage-location-suggestions button:hover {
-  background: #edf0fa;
-  color: #354b9f;
+  background: var(--menu-item-hover-bg);
+  color: var(--menu-item-hover-fg);
 }
 .homepage-location-suggestions button svg {
   color: #677ac1;
@@ -16650,13 +16763,14 @@ input[type="month"]:focus-visible {
   color: #77747c;
   font-size: 12px;
   margin: 0;
-  padding: 15px;
+  padding: var(--menu-item-padding);
 }
 .homepage-location-attribution {
-  border-top: 1px solid #ebe6dc;
+  border-top: 1px solid var(--menu-border);
   color: #98949b;
   font-size: 9px;
-  padding: 8px 13px;
+  margin-top: 4px;
+  padding: 8px 11px 2px;
 }
 .homepage-location-loading {
   align-items: center;
@@ -17807,18 +17921,18 @@ body.polaris-signed-out .job-detail-page .job-hero {
 }
 
 .education-combobox-menu {
-  background: #fffdf8;
-  border: 1px solid #ded9cf;
-  border-radius: 14px;
-  box-shadow: 0 18px 40px rgb(32 33 41 / 0.14);
+  background: var(--menu-surface);
+  border: 1px solid var(--menu-border);
+  border-radius: var(--menu-radius);
+  box-shadow: var(--menu-shadow);
   display: grid;
   left: 0;
-  max-height: 260px;
+  max-height: var(--menu-max-height);
   overflow-y: auto;
-  padding: 7px;
+  padding: var(--menu-padding);
   position: absolute;
   right: 0;
-  scrollbar-color: #aeb8dc transparent;
+  scrollbar-color: var(--menu-scroll-thumb) transparent;
   scrollbar-width: thin;
   top: calc(100% + 6px);
   z-index: 80;
@@ -17827,21 +17941,21 @@ body.polaris-signed-out .job-detail-page .job-hero {
 .education-combobox-menu button {
   background: transparent;
   border: 0;
-  border-radius: 9px;
+  border-radius: var(--menu-item-radius);
   color: #292a32;
   cursor: pointer;
-  padding: 10px 11px;
+  padding: var(--menu-item-padding);
   text-align: left;
 }
 
 .education-combobox-menu button:hover {
-  background: #eef0f8;
-  color: #334994;
+  background: var(--menu-item-hover-bg);
+  color: var(--menu-item-hover-fg);
 }
 
 .education-combobox-menu span {
   color: #77747c;
-  padding: 10px 11px;
+  padding: var(--menu-item-padding);
 }
 
 @media (max-width: 700px) {
@@ -17873,6 +17987,9 @@ body.polaris-signed-out .job-detail-page .job-hero {
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 24px;
   margin-bottom: 12px;
+  /* Every row matches the tallest card in the grid, so rows stay uniform
+     even when one card carries a badge or a distance line. */
+  grid-auto-rows: 1fr;
 }
 
 .browse-pagination {
@@ -17990,13 +18107,6 @@ body.polaris-signed-out .job-detail-page .job-hero {
 
   .company-grid article {
     padding: 20px;
-  }
-}
-
-/* Leave room for the fixed compact navbar above the Stories heading. */
-@media (max-width: 1024px) {
-  .stories-page .social-garden-content {
-    padding-top: 180px !important;
   }
 }
 

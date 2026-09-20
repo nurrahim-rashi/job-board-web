@@ -5,6 +5,7 @@ import {
   verifyEmail,
 } from "../services/auth.service";
 import { useAuth } from "../stores/useAuth";
+import { PasswordField } from "../components/site/PasswordField";
 
 type EmailAction = "verify" | "forgot" | "reset";
 
@@ -92,11 +93,11 @@ export default function EmailActionPage({ action }: { action: EmailAction }) {
               <>
                 <label>
                   New password
-                  <input type="password" name="password" minLength={6} required />
+                  <PasswordField name="password" minLength={6} required />
                 </label>
                 <label>
                   Confirm new password
-                  <input type="password" name="confirmPassword" minLength={6} required />
+                  <PasswordField name="confirmPassword" minLength={6} required />
                 </label>
                 <p className="auth-note">
                   Use uppercase, lowercase, a number, and a special character.

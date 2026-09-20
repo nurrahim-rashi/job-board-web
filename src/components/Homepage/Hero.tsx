@@ -71,6 +71,7 @@ export function HeroSection({
       setSuggestions([]);
       return;
     }
+    let active = true;
     const timer = window.setTimeout(() => {
       setSuggestionsLoading(true);
       getPublicJobs({
@@ -78,11 +79,14 @@ export function HeroSection({
         ...locationFilters,
         limit: 6,
       })
-        .then(setSuggestions)
-        .catch(() => setSuggestions([]))
-        .finally(() => setSuggestionsLoading(false));
+        .then((jobs) => active && setSuggestions(jobs))
+        .catch(() => active && setSuggestions([]))
+        .finally(() => active && setSuggestionsLoading(false));
     }, 250);
-    return () => window.clearTimeout(timer);
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
   }, [location, query, selectedLocation]);
 
   useEffect(() => {
@@ -95,14 +99,20 @@ export function HeroSection({
       setLocationSuggestionsLoading(false);
       return;
     }
+    // Without this guard a slow earlier request can land after a newer one and
+    // replace the suggestions for the query the user is actually typing.
+    let active = true;
     const timer = window.setTimeout(() => {
       setLocationSuggestionsLoading(true);
       searchWorldwideLocations(location.trim())
-        .then(setLocationSuggestions)
-        .catch(() => setLocationSuggestions([]))
-        .finally(() => setLocationSuggestionsLoading(false));
+        .then((locations) => active && setLocationSuggestions(locations))
+        .catch(() => active && setLocationSuggestions([]))
+        .finally(() => active && setLocationSuggestionsLoading(false));
     }, 350);
-    return () => window.clearTimeout(timer);
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
   }, [location, locationFocused, selectedLocation]);
 
   function searchJobs(event: FormEvent) {

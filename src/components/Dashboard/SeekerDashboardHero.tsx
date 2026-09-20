@@ -56,17 +56,17 @@ export function SeekerDashboardHero({ stats }: { stats?: Stats }) {
         <dl className={`workspace-hero-stats ${loaded ? "" : "is-loading"}`}>
           <div>
             <dt>Applications</dt>
-            <dd>{loaded?.applications ?? "—"}</dd>
-            <small>{loaded?.active ?? "—"} in progress</small>
+            <dd>{loaded?.applications ?? "N/A"}</dd>
+            <small>{loaded?.active ?? "N/A"} in progress</small>
           </div>
           <div>
             <dt>Interviews</dt>
-            <dd>{loaded?.interviews ?? "—"}</dd>
+            <dd>{loaded?.interviews ?? "N/A"}</dd>
             <small>Scheduled interviews</small>
           </div>
           <div>
             <dt>Profile strength</dt>
-            <dd>{loaded ? `${loaded.profileCompletion}%` : "—"}</dd>
+            <dd>{loaded ? `${loaded.profileCompletion}%` : "N/A"}</dd>
             <small>Complete your profile</small>
           </div>
         </dl>
