@@ -11,6 +11,12 @@ type AuthModalProps = {
   initialMode?: "signIn" | "register";
 };
 
+// A Google OAuth web client ID is public configuration, not a secret. Keep a
+// production fallback so a missing Vercel build variable cannot remove the
+// Google Sign-In flow from the compiled application.
+const productionGoogleClientId =
+  "203506469596-22ceeuj3tquvqbqbbac1gbvotrf2dsot.apps.googleusercontent.com";
+
 export function AuthModal({ open, onClose, initialRole = "JOB_SEEKER", initialMode = "signIn" }: AuthModalProps) {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -27,7 +33,9 @@ export function AuthModal({ open, onClose, initialRole = "JOB_SEEKER", initialMo
   const [submitting, setSubmitting] = useState(false);
   const googleButton = useRef<HTMLDivElement>(null);
   const registering = mode === "register";
-  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const googleClientId =
+    import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim() ||
+    (import.meta.env.PROD ? productionGoogleClientId : undefined);
 
   useEffect(() => {
     if (!open) return;
@@ -73,6 +81,11 @@ export function AuthModal({ open, onClose, initialRole = "JOB_SEEKER", initialMo
     if (existingScript) {
       if (window.google) renderGoogleButton();
       else existingScript.addEventListener("load", renderGoogleButton, { once: true });
+      existingScript.addEventListener(
+        "error",
+        () => setError("Google Sign-In could not be loaded. Please try again."),
+        { once: true },
+      );
       return;
     }
 
@@ -81,6 +94,11 @@ export function AuthModal({ open, onClose, initialRole = "JOB_SEEKER", initialMo
     script.async = true;
     script.defer = true;
     script.addEventListener("load", renderGoogleButton, { once: true });
+    script.addEventListener(
+      "error",
+      () => setError("Google Sign-In could not be loaded. Please try again."),
+      { once: true },
+    );
     document.head.appendChild(script);
   }, [open, googleClientId, registering, role]);
 
