@@ -109,7 +109,6 @@ export interface ApplicantQuery {
   maxAge?: number;
   minSalary?: number;
   maxSalary?: number;
-  salaryCurrency?: string;
   education?: string;
   status?: ApplicationStatus;
   sortBy?: "createdAt" | "expectedSalary" | "name";

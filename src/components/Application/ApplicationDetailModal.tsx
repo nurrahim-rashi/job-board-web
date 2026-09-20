@@ -9,7 +9,6 @@ import { DataSkeleton } from "../site/DataSkeleton";
 import { formatJobLocation } from "../../lib/location";
 import { StatusBadge } from "../site/StatusBadge";
 import { formatCurrency } from "../../lib/currency";
-import { CurrencySelect } from "../site/CurrencySelect";
 
 const money = (value: number | null, currency: string) =>
   value == null ? "Not provided" : formatCurrency(value, currency);
@@ -115,8 +114,7 @@ export function ApplicationDetailModal({
     setSubmittingSalary(true);
     setSalaryError("");
     try {
-      const currency = String(new FormData(event.currentTarget).get("expectedSalaryCurrency") ?? "IDR");
-      const result = await submitExpectedSalary(application.id, expectedSalary, currency);
+      const result = await submitExpectedSalary(application.id, expectedSalary);
       setApplication({ ...application, expectedSalary: result.expectedSalary, expectedSalaryCurrency: result.expectedSalaryCurrency });
       setEditingSalary(false);
     } catch (requestError) {
@@ -220,7 +218,7 @@ export function ApplicationDetailModal({
               <div>
                 <dt>Expected salary</dt>
                 <dd>
-                  {money(application.expectedSalary, application.expectedSalaryCurrency)}{" "}
+                  {money(application.expectedSalary, application.job.salaryCurrency)}{" "}
                   <button
                     className="application-inline-edit"
                     type="button"
@@ -253,7 +251,7 @@ export function ApplicationDetailModal({
                 onSubmit={saveExpectedSalary}
               >
                 <span className="application-alert-icon" aria-hidden="true">
-                  {application.expectedSalaryRequestedAt ? "!" : application.expectedSalaryCurrency}
+                  {application.expectedSalaryRequestedAt ? "!" : application.job.salaryCurrency}
                 </span>
                 <div>
                   <h3>
@@ -266,14 +264,8 @@ export function ApplicationDetailModal({
                     Enter your expected monthly salary for this application.
                   </p>
                   <label htmlFor="requested-expected-salary">
-                    Expected monthly salary
+                    Expected monthly salary ({application.job.salaryCurrency})
                   </label>
-                  <CurrencySelect
-                    name="expectedSalaryCurrency"
-                    value={application.expectedSalaryCurrency}
-                    onChange={(currency) => setApplication({ ...application, expectedSalaryCurrency: currency })}
-                    disabled={submittingSalary}
-                  />
                   <input
                     id="requested-expected-salary"
                     name="expectedSalary"

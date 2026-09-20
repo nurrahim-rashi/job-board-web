@@ -338,6 +338,7 @@ export default function JobDetailPage() {
         open={applyOpen}
         title={job.title}
         slug={job.slug}
+        salaryCurrency={job.salaryCurrency}
         onClose={() => setApplyOpen(false)}
         onSubmitted={() => {
           void getMyJobApplication(slug).then(setApplication);

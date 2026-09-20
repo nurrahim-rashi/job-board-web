@@ -8,16 +8,14 @@ import { educationOptions } from "../../constants/education";
 import { getCountries, getWorldwideCities, getWorldwideStates, type Region } from "../../services/region.service";
 import { fetchSkillNames } from "../../lib/assessment-api";
 import { formatLocation } from "../../lib/location";
-import { CurrencySelect } from "../site/CurrencySelect";
 
-type Props = { open: boolean; title: string; slug: string; onClose: () => void; onSubmitted: () => void };
+type Props = { open: boolean; title: string; slug: string; salaryCurrency: string; onClose: () => void; onSubmitted: () => void };
 
-export function ApplicationModal({ open, title, slug, onClose, onSubmitted }: Props) {
+export function ApplicationModal({ open, title, slug, salaryCurrency, onClose, onSubmitted }: Props) {
   const user = useAuth((state) => state.user);
   const [step, setStep] = useState<"application" | "profile">("application");
   const [file, setFile] = useState<File | null>(null);
   const [salary, setSalary] = useState("");
-  const [salaryCurrency, setSalaryCurrency] = useState("IDR");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [choosingCv, setChoosingCv] = useState(false);
@@ -39,7 +37,7 @@ export function ApplicationModal({ open, title, slug, onClose, onSubmitted }: Pr
 
   useEffect(() => {
     if (!open) return;
-    setStep("application"); setFile(null); setSalary(""); setSalaryCurrency("IDR"); setError("");
+    setStep("application"); setFile(null); setSalary(""); setError("");
     setCheckingSubscription(true);
     getSubscriptionStatus().then(({ active }) => setChoosingCv(active)).catch(() => setChoosingCv(false)).finally(() => setCheckingSubscription(false));
     getCountries().then(setCountries).catch(() => setCountries([]));
@@ -98,7 +96,7 @@ export function ApplicationModal({ open, title, slug, onClose, onSubmitted }: Pr
     if (!file || step !== "profile") return;
     setSubmitting(true); setError("");
     try {
-      await submitApplication(slug, file, Number(salary) || undefined, salaryCurrency);
+      await submitApplication(slug, file, Number(salary) || undefined);
       onSubmitted();
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "Unable to submit application");
@@ -120,9 +118,7 @@ export function ApplicationModal({ open, title, slug, onClose, onSubmitted }: Pr
           <Upload /><span><b>{file?.name ?? "Choose your CV"}</b><small>{file ? `${(file.size / 1024).toFixed(0)} KB · Ready to upload` : "Click to browse or drag and drop your PDF"}</small></span>
         </label>{file && <button className="file-remove" type="button" aria-label="Remove selected CV" onClick={() => { setFile(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}><Close /></button>}</div>
         <input ref={fileInputRef} id="application-cv" className="apply-file-native" type="file" accept="application/pdf,.pdf" hidden tabIndex={-1} onChange={(event) => chooseFile(event.target.files?.[0])} />
-        <label htmlFor="application-salary-currency">Expected salary currency</label>
-        <CurrencySelect id="application-salary-currency" value={salaryCurrency} onChange={setSalaryCurrency} />
-        <label htmlFor="salary">Expected monthly salary <small>optional</small></label>
+        <label htmlFor="salary">Expected monthly salary ({salaryCurrency}) <small>optional</small></label>
         <input id="salary" inputMode="numeric" value={salary} onChange={(event) => setSalary(event.target.value.replace(/\D/g, ""))} placeholder="25000000" />
         {error && <p className="auth-error">{error}</p>}
         <button className="apply-continue" type="button" onClick={() => file ? (setError(""), setStep("profile")) : setError("Choose a CV before continuing.")}>Continue to your profile</button>
