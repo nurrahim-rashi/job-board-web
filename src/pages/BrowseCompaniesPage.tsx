@@ -78,7 +78,7 @@ export default function BrowseCompaniesPage() {
       setLoading(true);
       getPublicCompanies({
         search: query || undefined,
-        country: coords || country === "all" ? undefined : country,
+        country: country === "all" ? undefined : country,
         provinceName: coords || province === "all" ? undefined : province,
         city: coords || city === "all" ? undefined : city,
         sort: sort === "az" ? "asc" : sort === "za" ? "desc" : "nearest",
@@ -126,7 +126,12 @@ export default function BrowseCompaniesPage() {
       setSort("nearest");
       try {
         const resolved = await reverseGeocodeLocation(coordinates.lat, coordinates.lng);
-        setCountry(resolved.country);
+        const detectedCountry =
+          countries.find(
+            (item) =>
+              item.code.toLocaleUpperCase("en") === resolved.countryCode,
+          )?.name ?? resolved.country;
+        setCountry(detectedCountry);
         setProvince(resolved.province);
         setCity(resolved.city);
       } catch {
