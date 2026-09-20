@@ -99,8 +99,8 @@ export default function BrowseJobsPage() {
         title: query || undefined,
         category: category === "all" ? undefined : category,
         country: country === "all" ? undefined : country,
-        provinceName: coords || province === "all" ? undefined : province,
-        city: coords || location === "all" ? undefined : location,
+        provinceName: province === "all" ? undefined : province,
+        city: location === "all" ? undefined : location,
         dateFrom:
           dateFilter === "range"
             ? from || undefined

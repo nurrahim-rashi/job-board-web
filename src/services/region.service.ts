@@ -86,6 +86,54 @@ export type ReverseGeocodedLocation = {
   countryCode: string;
 };
 
+const indonesianProvinceByIsoCode: Record<string, string> = {
+  "ID-AC": "Aceh",
+  "ID-SU": "Sumatera Utara",
+  "ID-SB": "Sumatera Barat",
+  "ID-RI": "Riau",
+  "ID-JA": "Jambi",
+  "ID-SS": "Sumatera Selatan",
+  "ID-BE": "Bengkulu",
+  "ID-LA": "Lampung",
+  "ID-BB": "Kepulauan Bangka Belitung",
+  "ID-KR": "Kepulauan Riau",
+  "ID-JK": "DKI Jakarta",
+  "ID-JB": "Jawa Barat",
+  "ID-JT": "Jawa Tengah",
+  "ID-YO": "Daerah Istimewa Yogyakarta",
+  "ID-JI": "Jawa Timur",
+  "ID-BT": "Banten",
+  "ID-BA": "Bali",
+  "ID-NB": "Nusa Tenggara Barat",
+  "ID-NT": "Nusa Tenggara Timur",
+  "ID-KB": "Kalimantan Barat",
+  "ID-KT": "Kalimantan Tengah",
+  "ID-KS": "Kalimantan Selatan",
+  "ID-KI": "Kalimantan Timur",
+  "ID-KU": "Kalimantan Utara",
+  "ID-SA": "Sulawesi Utara",
+  "ID-ST": "Sulawesi Tengah",
+  "ID-SN": "Sulawesi Selatan",
+  "ID-SG": "Sulawesi Tenggara",
+  "ID-GO": "Gorontalo",
+  "ID-SR": "Sulawesi Barat",
+  "ID-MA": "Maluku",
+  "ID-MU": "Maluku Utara",
+  "ID-PB": "Papua Barat",
+  "ID-PA": "Papua",
+  "ID-PD": "Papua Barat Daya",
+  "ID-PE": "Papua Pegunungan",
+  "ID-PS": "Papua Selatan",
+  "ID-PT": "Papua Tengah",
+};
+
+type AdministrativeArea = {
+  name?: string;
+  description?: string;
+  adminLevel?: number;
+  isoCode?: string;
+};
+
 export async function reverseGeocodeLocation(latitude: number, longitude: number) {
   try {
     const response = await axiosInstance.get<{ data: ReverseGeocodedLocation }>(
@@ -101,7 +149,7 @@ export async function reverseGeocodeLocation(latitude: number, longitude: number
   const params = new URLSearchParams({
     latitude: String(latitude),
     longitude: String(longitude),
-    localityLanguage: "en",
+    localityLanguage: "id",
   });
   const response = await fetch(
     `https://api.bigdatacloud.net/data/reverse-geocode-client?${params.toString()}`,
@@ -112,12 +160,28 @@ export async function reverseGeocodeLocation(latitude: number, longitude: number
     locality?: string;
     localAdminArea?: string;
     principalSubdivision?: string;
+    principalSubdivisionCode?: string;
     countryName?: string;
     countryCode?: string;
+    localityInfo?: { administrative?: AdministrativeArea[] };
   };
-  const city = result.city || result.locality || result.localAdminArea || "";
-  const province = result.principalSubdivision || result.localAdminArea || city;
   const country = result.countryName || "";
+  const isIndonesia = result.countryCode?.toUpperCase() === "ID";
+  const administrative = result.localityInfo?.administrative ?? [];
+  const administrativeCity = administrative.find(
+    (area) =>
+      area.adminLevel === 5 ||
+      /kabupaten|regency|\bkota\b|\bcity\b/i.test(
+        `${area.name ?? ""} ${area.description ?? ""}`,
+      ),
+  )?.name;
+  const city = isIndonesia
+    ? administrativeCity || result.city || result.localAdminArea || result.locality || ""
+    : result.city || result.locality || result.localAdminArea || "";
+  const subdivisionCode = result.principalSubdivisionCode?.toUpperCase() ?? "";
+  const province = isIndonesia
+    ? indonesianProvinceByIsoCode[subdivisionCode] || result.principalSubdivision || ""
+    : result.principalSubdivision || result.localAdminArea || city;
   if (!city || !province || !country)
     throw new Error("Unable to determine your location");
   return {
