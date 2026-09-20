@@ -63,7 +63,7 @@ export default function AdminInterviewsPage() {
       ) : (
         <div className="admin-empty">
           <h2>No postings yet.</h2>
-          <p className="admin-note">Create a job posting first — interviews are scheduled per posting.</p>
+          <p className="admin-note">Create a job posting first. Interviews are scheduled per posting.</p>
           <Link className="admin-btn primary" to="/admin/jobs/new">
             New job posting
           </Link>

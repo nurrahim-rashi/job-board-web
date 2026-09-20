@@ -22,7 +22,7 @@ export function EngagementSection({ data }: { data: PlatformEngagement }) {
           <h2>The rest of the picture</h2>
         </div>
         <p>
-          Screening, assessments, subscriptions and reviews — the numbers a company needs before
+          Screening, assessments, subscriptions and reviews. The numbers a company needs before
           deciding how to run its next hiring round.
         </p>
       </header>

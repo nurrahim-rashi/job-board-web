@@ -145,3 +145,20 @@ export async function geocodeLocation(
   if (!response.data?.data) throw new Error("Unable to find this location");
   return response.data.data;
 }
+
+export type ExchangeRateTable = {
+  base: string;
+  rates: Record<string, number>;
+  fetchedAt: string;
+};
+
+export async function getExchangeRates(base: string) {
+  const response = await axiosInstance.get<{ data: ExchangeRateTable }>(
+    "/exchange-rates",
+    { params: { base } },
+  );
+  const table = response.data?.data;
+  if (!table || typeof table.rates !== "object")
+    throw new Error("Unable to load exchange rates");
+  return table;
+}

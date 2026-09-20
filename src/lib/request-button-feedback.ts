@@ -37,7 +37,10 @@ function install() {
   const rememberCandidate = (button: HTMLButtonElement) => {
     if (
       button.disabled ||
-      button.dataset.noRequestLoading !== undefined
+      button.dataset.noRequestLoading !== undefined ||
+      // A switch flips in place. Swapping its knob for a "Loading…" label
+      // makes the control look broken, so toggles never get this treatment.
+      button.getAttribute("role") === "switch"
     )
       return;
 

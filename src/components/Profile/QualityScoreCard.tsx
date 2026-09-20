@@ -49,7 +49,7 @@ export function QualityScoreCard({
           <div className="quality-tooltip" role="tooltip">
             <strong>Score breakdown</strong>
             <p>
-              Metrics without enough data are shown as — and are not included in
+              Metrics without enough data are shown as N/A and are not included in
               the score.
             </p>
             <ul>

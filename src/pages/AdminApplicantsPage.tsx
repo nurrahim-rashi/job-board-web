@@ -71,7 +71,7 @@ export default function AdminApplicantsPage() {
       ) : (
         <div className="admin-empty">
           <h2>No postings yet.</h2>
-          <p className="admin-note">Create a job posting first — applicants show up here once people apply.</p>
+          <p className="admin-note">Create a job posting first. Applicants show up here once people apply.</p>
           <Link className="admin-btn primary" to="/admin/jobs/new">
             New job posting
           </Link>

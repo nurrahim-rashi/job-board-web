@@ -54,7 +54,7 @@ export function OverviewSection({ data }: { data: AnalyticsOverview }) {
               <span>{card.label}</span>
               <b>{formatNumber(metric.value)}</b>
               <em className={deltaClass(metric.delta)}>
-                {metric.delta === null ? "—" : `${metric.delta > 0 ? "↑" : metric.delta < 0 ? "↓" : "→"} ${Math.abs(metric.delta)}%`}
+                {metric.delta === null ? "N/A" : `${metric.delta > 0 ? "↑" : metric.delta < 0 ? "↓" : "→"} ${Math.abs(metric.delta)}%`}
               </em>
               <small>{card.hint} · {formatDelta(metric.delta)}</small>
             </article>

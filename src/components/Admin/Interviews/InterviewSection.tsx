@@ -131,7 +131,7 @@ export function InterviewSection({ slug }: InterviewSectionProps) {
           ) : (
             <>
               <p className="admin-note">
-                Shortlist a few applicants and book them in — each one gets their own time slot and an email invitation.
+                Shortlist a few applicants and book them in. Each one gets their own time slot and an email invitation.
               </p>
               <button type="button" className="admin-btn primary" onClick={() => setScheduling(true)}>
                 <Calendar /> Schedule interviews

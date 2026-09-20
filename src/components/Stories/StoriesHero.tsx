@@ -36,11 +36,11 @@ export function StoriesHero({
   const milestones = metrics
     ? storyMilestones(metrics)
     : [
-        ["—", "matches made on Polaris"],
-        ["—", "median application to offer"],
-        ["—", "listings with a salary range"],
-        ["—", "average verified review rating"],
-        ["—", "rejected applications with a reason"],
+        ["N/A", "matches made on Polaris"],
+        ["N/A", "median application to offer"],
+        ["N/A", "listings with a salary range"],
+        ["N/A", "average verified review rating"],
+        ["N/A", "rejected applications with a reason"],
       ];
 
   return (
@@ -124,7 +124,7 @@ function StatCard({
       <i>{icon}</i>
       <p>
         <b className={loading ? "story-stat-value-skeleton" : ""}>
-          {loading ? null : value ?? "—"}
+          {loading ? null : value ?? "N/A"}
         </b>
         <span>{label}</span>
       </p>

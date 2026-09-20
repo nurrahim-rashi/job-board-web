@@ -30,7 +30,7 @@ export function StatusDecision({ slug, applicationId, status, onInviteToIntervie
   if (!allowed.length) {
     return (
       <p className="admin-note">
-        This applicant is already <StatusBadge status={status} /> — the decision is final.
+        This applicant is already <StatusBadge status={status} />. The decision is final.
       </p>
     );
   }

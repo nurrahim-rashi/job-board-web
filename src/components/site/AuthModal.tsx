@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent, type MouseEvent } from "react";
 import { createPortal } from "react-dom";
-import { Close, Eye } from "./Icons";
+import { Close } from "./Icons";
+import { PasswordField } from "./PasswordField";
 import { login, loginWithGoogle, register } from "../../services/auth.service";
 import { useAuth } from "../../stores/useAuth";
 
@@ -22,7 +23,6 @@ export function AuthModal({ open, onClose, initialRole = "JOB_SEEKER", initialMo
   const [name, setName] = useState("");
   const [lastName, setLastName] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState<"JOB_SEEKER" | "COMPANY_ADMIN">(
     "JOB_SEEKER",
   );
@@ -238,23 +238,13 @@ export function AuthModal({ open, onClose, initialRole = "JOB_SEEKER", initialMo
           placeholder="you@example.com"
         />
         <label htmlFor="sign-in-password">Password</label>
-        <div className="password-input">
-          <input
-            id="sign-in-password"
-            type={showPassword ? "text" : "password"}
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            required
-            placeholder="••••••••"
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword((visible) => !visible)}
-            aria-label={showPassword ? "Hide password" : "Show password"}
-          >
-            <Eye />
-          </button>
-        </div>
+        <PasswordField
+          id="sign-in-password"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          required
+          placeholder="••••••••"
+        />
         {!registering && (
           <a className="auth-forgot" href="/reset-password">
             Forgot password?
