@@ -18049,3 +18049,44 @@ body.polaris-signed-out .job-detail-page .job-hero {
     align-items: flex-start;
   }
 }
+
+/* Profile and company heroes: the shared hero rule forces 36px of bottom
+   padding, but the content section below is pulled up by -96px, so the last
+   60px of the hero was sitting underneath the cards. Reserve the overlap, and
+   centre the hero as a column so an action row centres as a block rather than
+   relying on inline text alignment. */
+.company-profile-intro,
+.seeker-profile-intro {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 136px !important;
+}
+.company-profile-intro > *,
+.seeker-profile-intro > * {
+  max-width: 100%;
+}
+.company-profile-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 26px;
+}
+/* The two actions were different sizes and sat a single collapsed space
+   apart. Match them so they read as one control group. */
+.company-profile-actions > .company-profile-website,
+.company-profile-actions > .company-profile-edit {
+  font-size: 14px;
+  margin-top: 0;
+  padding: 12px 20px;
+}
+@media (max-width: 700px) {
+  .company-profile-intro,
+  .seeker-profile-intro {
+    padding-bottom: 124px !important;
+  }
+  .company-profile-actions {
+    width: 100%;
+  }
+}

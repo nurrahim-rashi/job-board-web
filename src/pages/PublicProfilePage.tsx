@@ -215,7 +215,6 @@ export default function PublicProfilePage() {
               alt={`${profile.name}'s profile`}
             />
           )}
-          {isCompanyAdmin && <p>HIRING</p>}
           <h1>
             {profile.name}
             {profile.emailVerifiedAt && (
