@@ -18160,113 +18160,43 @@ body.polaris-signed-out .job-detail-page .job-hero {
   }
 }
 
-/* The navbar is fixed and owns the top 68px of the viewport (12px offset plus
-   a 56px pill). Whenever a hero's content fills its section rather than
-   centring inside it (every hero on mobile, and Stories and About at any
-   width), the shared 60px hero padding put the eyebrow underneath the navbar.
-   Reserve the clearance at every width so this cannot come back page by page.
-   The selector list repeats the shared rule's, so this wins on source order
-   rather than by piling on another !important. */
-:is(
-  .dashboard-wrap,
-  .workspace-hero-inner,
-  .jobs-board-content,
-  .cityscape-content,
-  .company-profile-intro,
-  .seeker-profile-intro,
-  .edit-profile-hero-inner,
-  .social-garden-content,
-  .about-hero-copy,
-  .about-sunrise-copy,
-  .certificate-verification-hero > .content,
-  .hero-night > .hero-wrap,
-  .browse-hero > div,
-  .companies-hero > div,
-  .job-hero > div:last-child
-) {
-  padding-top: 92px !important;
-}
-
-/* The shared hero rhythm above pins height AND max-height, so a hero whose
-   content outgrows it gets silently cut instead of scrolling. The Stories
-   hero loses its milestone row and its eyebrow on tablets and desktop. Keep
-   the rhythm as a floor via the min-height those rules already set, but let a
-   hero grow rather than crop itself. */
-body:is(.polaris-signed-in, .polaris-signed-out)
-  :is(
-    .dashboard-hero,
-    .workspace-hero,
-    .jobs-board-hero,
-    .cityscape-hero,
-    .companies-hero,
-    .browse-hero,
-    .company-profile-hero,
-    .seeker-profile-hero,
-    .job-hero,
-    .edit-profile-hero,
-    .social-garden,
-    .about-hero,
-    .about-sunrise,
-    .hero-night,
-    .stories-hero,
-    .certificate-verification-hero,
-    .generic-loading-hero
-  ) {
-  height: auto !important;
-  max-height: none !important;
-}
-
-/* Salary converter on the job detail page. The currency picker reuses the
-   shared combobox, so only the surrounding block needs styling here. */
-.salary-converter {
-  background: #fcfaf4;
-  border: 1px solid #ded9cf;
-  border-radius: 16px;
-  display: grid;
-  gap: 8px;
-  margin-bottom: 27px;
-  padding: 16px;
-}
-.salary-converter-head {
+/* Profile and company heroes: the shared hero rule forces 36px of bottom
+   padding, but the content section below is pulled up by -96px, so the last
+   60px of the hero was sitting underneath the cards. Reserve the overlap, and
+   centre the hero as a column so an action row centres as a block rather than
+   relying on inline text alignment. */
+.company-profile-intro,
+.seeker-profile-intro {
   align-items: center;
   display: flex;
+  flex-direction: column;
+  padding-bottom: 136px !important;
+}
+.company-profile-intro > *,
+.seeker-profile-intro > * {
+  max-width: 100%;
+}
+.company-profile-actions {
+  display: flex;
   flex-wrap: wrap;
-  gap: 10px 16px;
-  justify-content: space-between;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 26px;
 }
-.salary-converter-head .eyebrow {
-  margin: 0;
-}
-.salary-converter-head .currency-combobox {
-  flex: 1 1 220px;
-  max-width: 280px;
-  min-width: 0;
-}
-.salary-converter-amount {
-  font-family: Fraunces, Georgia, serif;
-  font-size: 27px;
-  font-weight: 500;
-  letter-spacing: -0.03em;
-  line-height: 1.15;
-}
-.salary-converter-note {
-  color: #77747a;
-  font-size: 12px;
-  line-height: 1.5;
-}
-.salary-converter-state {
-  color: #77747a;
-  font-size: 13px;
-  margin: 0;
-}
-.salary-converter-state.is-error {
-  color: #a4442f;
+/* The two actions were different sizes and sat a single collapsed space
+   apart. Match them so they read as one control group. */
+.company-profile-actions > .company-profile-website,
+.company-profile-actions > .company-profile-edit {
+  font-size: 14px;
+  margin-top: 0;
+  padding: 12px 20px;
 }
 @media (max-width: 700px) {
-  .salary-converter-head .currency-combobox {
-    max-width: none;
+  .company-profile-intro,
+  .seeker-profile-intro {
+    padding-bottom: 124px !important;
   }
-  .salary-converter-amount {
-    font-size: 23px;
+  .company-profile-actions {
+    width: 100%;
   }
 }

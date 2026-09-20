@@ -129,21 +129,23 @@ export default function CompanyDetailPage() {
             </span>
           )}
           <p className="company-profile-tagline">{tagline}</p>
-          {company.website && (
-            <a
-              className="company-profile-website"
-              href={company.website}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Visit website ↗
-            </a>
-          )}
-          {canEdit && (
-            <a className="company-profile-edit" href="/company/profile/edit">
-              Edit company
-            </a>
-          )}
+          <div className="company-profile-actions">
+            {company.website && (
+              <a
+                className="company-profile-website"
+                href={company.website}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Visit website ↗
+              </a>
+            )}
+            {canEdit && (
+              <a className="company-profile-edit" href="/company/profile/edit">
+                Edit company
+              </a>
+            )}
+          </div>
         </div>
       </section>
 
