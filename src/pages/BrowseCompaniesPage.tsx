@@ -79,8 +79,8 @@ export default function BrowseCompaniesPage() {
       getPublicCompanies({
         search: query || undefined,
         country: country === "all" ? undefined : country,
-        provinceName: coords || province === "all" ? undefined : province,
-        city: coords || city === "all" ? undefined : city,
+        provinceName: province === "all" ? undefined : province,
+        city: city === "all" ? undefined : city,
         sort: sort === "az" ? "asc" : sort === "za" ? "desc" : "nearest",
         latitude: coords?.lat,
         longitude: coords?.lng,
