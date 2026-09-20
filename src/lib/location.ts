@@ -1,15 +1,19 @@
 type LocationPart = string | null | undefined;
 
+/**
+ * City and country only. Indonesian city names are long enough that adding the
+ * province pushed these lines onto three rows in cards and lists. The province
+ * is still used when there is no city to show.
+ */
 export function formatLocation(
   city: LocationPart,
   provinceOrState: LocationPart,
   country: LocationPart = "Indonesia",
 ) {
-  const hasLocality = Boolean(city?.trim() || provinceOrState?.trim());
+  const locality = city?.trim() || provinceOrState?.trim();
   const parts = [
-    city?.trim(),
-    provinceOrState?.trim(),
-    country?.trim() || (hasLocality ? "Indonesia" : ""),
+    locality,
+    country?.trim() || (locality ? "Indonesia" : ""),
   ].filter(Boolean) as string[];
 
   return parts

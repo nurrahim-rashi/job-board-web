@@ -18211,3 +18211,97 @@ body.polaris-signed-out .job-detail-page .job-hero {
     width: 100%;
   }
 }
+
+/* Salary converter on the job detail page. Listed amount on the left, the
+   converted one on the right, so the two are read as a comparison. */
+.salary-converter {
+  background: #fcfaf4;
+  border: 1px solid #ded9cf;
+  border-radius: 16px;
+  display: grid;
+  gap: 10px;
+  margin-bottom: 27px;
+  padding: 16px;
+}
+.salary-converter > .eyebrow {
+  margin: 0;
+}
+.salary-converter-panes {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr 1fr;
+}
+.salary-converter-pane {
+  align-content: start;
+  background: #fffdf7;
+  border: 1px solid #e5e0d6;
+  border-radius: 13px;
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 13px 14px;
+}
+.salary-converter-pane.is-target {
+  background: #f2f4fc;
+  border-color: #d3d9f0;
+}
+.salary-converter-pane-head {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+.salary-converter-pane-head .currency-combobox {
+  flex: 1 1 130px;
+  min-width: 0;
+}
+.salary-converter-pane-label {
+  color: #77747a;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.salary-converter-amount {
+  font-family: Fraunces, Georgia, serif;
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+.salary-converter-period {
+  color: #77747a;
+  font-size: 12px;
+}
+.salary-converter-note {
+  color: #77747a;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.salary-converter-state {
+  color: #77747a;
+  font-size: 13px;
+  margin: 0;
+}
+.salary-converter-state.is-error {
+  color: #a4442f;
+}
+@media (max-width: 860px) {
+  .salary-converter-panes {
+    grid-template-columns: 1fr;
+  }
+  .salary-converter-amount {
+    font-size: 21px;
+  }
+}
+
+/* The navbar is fixed and owns the top 68px. The landing hero centres the
+   latest-drop card in its row, so on a short laptop screen a full card of five
+   roles rode up to 11px from the navbar. Reserve the clearance. The selector
+   matches the shared hero rule's specificity and wins on source order rather
+   than stacking another !important level. */
+body .hero-night > .hero-wrap {
+  padding-top: 104px !important;
+}
