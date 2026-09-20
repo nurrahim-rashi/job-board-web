@@ -17990,9 +17990,59 @@ body.polaris-signed-out .job-detail-page .job-hero {
   }
 }
 
-/* Leave room for the fixed mobile navbar at the top of the Stories hero. */
-@media (max-width: 700px) {
+/* Leave room for the fixed compact navbar above the Stories heading. */
+@media (max-width: 1024px) {
   .stories-page .social-garden-content {
-    padding-top: 132px !important;
+    padding-top: 180px !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .stories-companies .company-trust-track {
+    gap: 14px;
+    padding-inline: 18px;
+  }
+
+  .stories-companies .company-trust-card {
+    flex-basis: calc(100vw - 36px);
+    max-width: calc(100vw - 36px);
+    min-width: 0;
+    padding: 22px 20px;
+  }
+
+  .stories-companies .company-trust-card > header {
+    align-items: flex-start;
+    gap: 11px;
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+
+  .stories-companies .company-trust-logo {
+    height: 44px;
+    width: 44px;
+  }
+
+  .stories-companies .company-trust-card > header > strong {
+    font-size: 29px;
+    grid-column: 2;
+  }
+
+  .stories-companies .company-trust-card > header a,
+  .stories-companies .company-trust-card > header p,
+  .stories-companies .company-trust-summary > span,
+  .stories-companies .company-latest-reviews b,
+  .stories-companies .company-latest-reviews p {
+    overflow-wrap: anywhere;
+  }
+
+  .stories-companies .company-trust-card > header a {
+    font-size: 16px;
+  }
+
+  .stories-companies .company-trust-summary > span {
+    max-width: 100%;
+  }
+
+  .stories-companies .company-latest-reviews > a > span {
+    align-items: flex-start;
   }
 }
