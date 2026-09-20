@@ -31,6 +31,18 @@ const loadingLabel = (button: HTMLButtonElement) => {
   return "Loading…";
 };
 
+/**
+ * The loading state works by replacing a button's own label with a word. A
+ * button that carries no word to replace, such as the circular clear "x" or a
+ * bookmark icon, has nothing to swap: the overlay just spills a "Loading…"
+ * out of a 26px circle. Symbols count as icons here, so "x" is iconic while
+ * "Save" is not.
+ */
+const isIconOnly = (button: HTMLButtonElement) => {
+  const label = (button.textContent ?? "").trim();
+  return !/[\p{L}\p{N}]/u.test(label);
+};
+
 function install() {
   if (installed || typeof document === "undefined") return;
   installed = true;
@@ -40,7 +52,8 @@ function install() {
       button.dataset.noRequestLoading !== undefined ||
       // A switch flips in place. Swapping its knob for a "Loading…" label
       // makes the control look broken, so toggles never get this treatment.
-      button.getAttribute("role") === "switch"
+      button.getAttribute("role") === "switch" ||
+      isIconOnly(button)
     )
       return;
 

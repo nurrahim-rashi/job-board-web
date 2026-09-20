@@ -12020,12 +12020,23 @@ input[type="file"]::file-selector-button:hover {
   width: 15px;
 }
 .company-media-field {
-  align-items: flex-end;
+  display: block;
+}
+/* The label used to wrap the input, so the remove button could only align to
+   the bottom of the whole block and sat 9px below the input's centre. The
+   label now sits above its own row, and the button centres on the input
+   whatever height the browser gives a file control. */
+.company-media-row {
+  align-items: center;
   display: flex;
   gap: 10px;
+  /* The gap under the label moves here. Left on the input it becomes part of
+     the flex item's margin box, which centres the button 3px too high. */
+  margin-top: 7px;
 }
-.company-media-field > label {
+.profile-fields .company-media-row > input {
   flex: 1;
+  margin-top: 0;
   min-width: 0;
 }
 input[type="file"]:focus-visible,
