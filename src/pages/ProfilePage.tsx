@@ -104,6 +104,21 @@ const educationParts = (value: string | null) => {
   };
 };
 
+const MINIMUM_APPLICANT_AGE = 17;
+
+/**
+ * Bounds for the date picker, so a too-young date cannot be chosen at all.
+ * The API enforces the same rule; this only spares the round trip.
+ */
+const birthDateBounds = (() => {
+  const shift = (years: number) => {
+    const date = new Date();
+    date.setFullYear(date.getFullYear() - years);
+    return date.toISOString().slice(0, 10);
+  };
+  return { min: shift(100), max: shift(MINIMUM_APPLICANT_AGE) };
+})();
+
 export default function ProfilePage() {
   const user = useAuth((state) => state.user);
   const [profileLoading, setProfileLoading] = useState(true);
@@ -264,6 +279,7 @@ export default function ProfilePage() {
         throw new Error("Education level, major, and school or university are required.");
       }
       if (!isCompany && (!form.get("birthDate") || !form.get("gender") || !String(form.get("address") ?? "").trim() || !profileCity || !profileProvince || !profileCountry)) throw new Error("Birth date, gender, education, and complete address are required.");
+      if (!isCompany && String(form.get("birthDate") ?? "") > birthDateBounds.max) throw new Error(`You must be at least ${MINIMUM_APPLICANT_AGE} years old to use Polaris.`);
       if (!isCompany && availability && !isAvailability(availability)) {
         throw new Error("Please select a valid availability status.");
       }
@@ -627,6 +643,8 @@ export default function ProfilePage() {
                       name="birthDate"
                       type="date"
                       required
+                      min={birthDateBounds.min}
+                      max={birthDateBounds.max}
                       defaultValue={user.birthDate?.slice(0, 10) ?? ""}
                     />
                   </span>
