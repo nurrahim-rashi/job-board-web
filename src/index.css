@@ -17993,9 +17993,9 @@ body.polaris-signed-out .job-detail-page .job-hero {
   }
 }
 
-/* Leave room for the fixed mobile navbar at the top of the Stories hero. */
-@media (max-width: 700px) {
+/* Leave room for the fixed compact navbar above the Stories heading. */
+@media (max-width: 1024px) {
   .stories-page .social-garden-content {
-    padding-top: 132px !important;
+    padding-top: 180px !important;
   }
 }
