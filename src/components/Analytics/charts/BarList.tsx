@@ -40,7 +40,7 @@ export function BarList({ items, series, format = String, scaleMax }: BarListPro
                       />
                     )}
                   </span>
-                  <em>{value === null ? "—" : format(value)}</em>
+                  <em>{value === null ? "N/A" : format(value)}</em>
                 </span>
               );
             })}

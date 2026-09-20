@@ -40,7 +40,7 @@ export function ApplicantList({ applicants, onOpen, onPreviewCv }: ApplicantList
             <b>{item.applicant.name}</b>
             {item.priorityReview && <em className="admin-chip good">Priority</em>}
           </span>
-          <span>{item.applicant.age ?? "—"}</span>
+          <span>{item.applicant.age ?? "N/A"}</span>
           <span>{educationLabel(item.applicant.lastEducation)}</span>
           <span>{formatSalary(item.expectedSalary, item.expectedSalaryCurrency)}</span>
           <span>{formatDate(item.appliedAt)}</span>

@@ -28,7 +28,7 @@ export function CompanyStoriesSection({ companies, loading, error }: {
             Companies held to a higher standard of reliability, quality, and
             integrity.
           </h2>
-          <p>Quality scores combine real hiring behavior, job transparency, and verified employee experience—so every partnership earns trust.</p>
+          <p>Quality scores combine real hiring behavior, job transparency, and verified employee experience, so every partnership earns trust.</p>
         </Reveal>
         <div className="company-trust-rail">
           <div className="story-rail-actions">

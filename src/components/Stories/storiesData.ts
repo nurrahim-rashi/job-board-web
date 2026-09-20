@@ -66,25 +66,25 @@ export const storyMilestones = (metrics: ReviewStoriesData["metrics"]) => [
   [metrics.matchesMade.toLocaleString("en-US"), "matches made on Polaris"],
   [
     metrics.medianDaysToOffer === null
-      ? "—"
+      ? "N/A"
       : `${metrics.medianDaysToOffer.toLocaleString("en-US")} days`,
     "median application to offer",
   ],
   [
     metrics.salaryTransparencyRate === null
-      ? "—"
+      ? "N/A"
       : `${metrics.salaryTransparencyRate}%`,
     "listings with a salary range",
   ],
   [
     metrics.averageReviewRating === null
-      ? "—"
+      ? "N/A"
       : `${metrics.averageReviewRating.toFixed(1)} / 5`,
     `average across ${metrics.totalReviews.toLocaleString("en-US")} verified reviews`,
   ],
   [
     metrics.rejectedWithReasonRate === null
-      ? "—"
+      ? "N/A"
       : `${metrics.rejectedWithReasonRate}%`,
     "rejected applications with a reason",
   ],

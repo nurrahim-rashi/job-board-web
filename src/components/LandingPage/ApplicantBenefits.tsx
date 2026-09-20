@@ -13,7 +13,7 @@ const benefits = [
   {
     icon: MapPin,
     title: "Location-based jobs",
-    body: "Allow location once and your feed reorders by city radius — no more scrolling past roles three islands away.",
+    body: "Allow location once and your feed reorders by city radius. No more scrolling past roles three islands away.",
   },
   {
     icon: Wallet,
@@ -23,7 +23,7 @@ const benefits = [
   {
     icon: Timer,
     title: "No black-hole applications",
-    body: "Track every application through screening, test, interview and offer — with a reason attached when it's a no.",
+    body: "Track every application through screening, test, interview and offer, with a reason attached when it's a no.",
   },
   {
     icon: FileText,

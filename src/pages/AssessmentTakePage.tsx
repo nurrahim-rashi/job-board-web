@@ -125,7 +125,7 @@ export default function AssessmentTakePage() {
         });
       } catch {
         // 404 means the attempt is still unfinished.
-        // That's fine — keep showing the assessment.
+        // That's fine, keep showing the assessment.
       } finally {
         setCheckingResult(false);
       }

@@ -17,7 +17,7 @@ export function TestResult({ title, company, result }: TestResultProps) {
       <p className="pretest-count">{detail}</p>
       <h2>{title}</h2>
       <p>
-        {company} sees this score next to your CV. Your application moves to the review stage now — the dashboard shows
+        {company} sees this score next to your CV. Your application moves to the review stage now. The dashboard shows
         what happens next.
       </p>
       {result.submittedAt ? <small>Submitted {formatMoment(result.submittedAt)}</small> : null}

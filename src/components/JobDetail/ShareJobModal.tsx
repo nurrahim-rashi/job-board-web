@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Close, Share } from "../site/Icons";
+import {
+  buildShareTargets,
+  defaultShareMessage,
+  shareText,
+} from "../../lib/share";
 
 type ShareJobModalProps = {
   open: boolean;
@@ -17,14 +22,12 @@ export function ShareJobModal({
   url,
   onClose,
 }: ShareJobModalProps) {
-  const [message, setMessage] = useState(
-    `Check out ${title} at ${company} on Polaris.`,
-  );
+  const [message, setMessage] = useState(defaultShareMessage(title, company));
   const [copiedPlatform, setCopiedPlatform] = useState("");
 
   useEffect(() => {
     if (open) {
-      setMessage(`Check out ${title} at ${company} on Polaris.`);
+      setMessage(defaultShareMessage(title, company));
       setCopiedPlatform("");
     }
   }, [company, open, title]);
@@ -39,37 +42,12 @@ export function ShareJobModal({
 
   if (!open) return null;
 
-  const encodedUrl = encodeURIComponent(url);
-  const encodedMessage = encodeURIComponent(message.trim());
-  const combined = encodeURIComponent(`${message.trim()} ${url}`.trim());
-  const platforms = [
-    {
-      name: "LinkedIn",
-      hint: "Message copied—paste it into your post",
-      href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
-    },
-    {
-      name: "Facebook",
-      hint: "Message copied—paste it into your post",
-      href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
-    },
-    {
-      name: "X (Twitter)",
-      hint: "Share it in a post",
-      href: `https://x.com/intent/tweet?text=${encodedMessage}&url=${encodedUrl}`,
-    },
-    {
-      name: "WhatsApp",
-      hint: "Send it to a chat or group",
-      href: `https://wa.me/?text=${combined}`,
-    },
-  ];
+  const platforms = buildShareTargets({ url, message });
 
   function openShare(platform: { name: string; href: string }) {
-    const shareText = `${message.trim()} ${url}`.trim();
     if (navigator.clipboard?.writeText) {
       void navigator.clipboard
-        .writeText(shareText)
+        .writeText(shareText(message, url))
         .then(() => setCopiedPlatform(platform.name))
         .catch(() => setCopiedPlatform(""));
     }

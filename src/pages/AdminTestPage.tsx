@@ -92,7 +92,7 @@ export default function AdminTestPage() {
     const duplicate = questions.findIndex((item) => isComplete(item) && hasDuplicateOptions(item));
     if (duplicate !== -1) {
       setActive(duplicate);
-      setNotice(`Question ${duplicate + 1} repeats an answer option — each of the four must be different.`);
+      setNotice(`Question ${duplicate + 1} repeats an answer option. Each of the four must be different.`);
       return;
     }
     const payload: TestQuestionInput[] = complete.map((item) => ({
@@ -144,11 +144,14 @@ export default function AdminTestPage() {
             <p className="admin-note">
               {saved.totalQuestions === saved.requiredQuestions
                 ? `All ${saved.requiredQuestions} questions are saved.`
-                : `${saved.totalQuestions} of ${saved.requiredQuestions} questions saved — all ${saved.requiredQuestions} are needed before the test can be switched on.`}
+                : `${saved.totalQuestions} of ${saved.requiredQuestions} questions saved. All ${saved.requiredQuestions} are needed before the test can be switched on.`}
             </p>
           </div>
           <button
             type="button"
+            role="switch"
+            aria-checked={testOn}
+            data-no-request-loading
             className={`admin-switch ${testOn ? "on" : ""}`}
             disabled={busy}
             onClick={toggleActivation}

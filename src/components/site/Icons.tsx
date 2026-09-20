@@ -81,6 +81,9 @@ export const Trash = icon(
 export const Eye = icon(
   "M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Zm10 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z",
 );
+export const EyeOff = icon(
+  "M3 3l18 18M10.6 10.6a3 3 0 0 0 4.2 4.2M9.9 5.2A9.6 9.6 0 0 1 12 5c6.5 0 10 7 10 7a17.1 17.1 0 0 1-3.6 4.4M6.5 6.6A16.7 16.7 0 0 0 2 12s3.5 7 10 7c1.2 0 2.3-.2 3.3-.6",
+);
 export const Info = icon("M12 11v6M12 7h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z");
 export const Target = icon(
   "M12 2v4m0 12v4M2 12h4m12 0h4M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm0-6a10 10 0 1 1 0 20 10 10 0 0 1 0-20Z",

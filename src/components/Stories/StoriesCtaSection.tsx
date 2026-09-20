@@ -9,7 +9,7 @@ export function StoriesCtaSection() {
           <h2>Your story might be the next interesting one.</h2>
           <p>
             Start with one search, one honest salary range, one application you
-            actually hear back from. Then tell us how it went — we publish the
+            actually hear back from. Then tell us how it went. We publish the
             good ones here.
           </p>
           <aside>
