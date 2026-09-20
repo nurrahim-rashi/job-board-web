@@ -3,32 +3,30 @@ import type { FormEvent } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { DeveloperShell } from "../components/Developer/DeveloperShell";
-
 import {
-  fetchAssessmentQuestions,
   createAssessmentQuestion,
   deleteAssessmentQuestion,
+  fetchAssessmentQuestions,
   updateAssessmentQuestion,
 } from "../lib/assessment-api";
+import type {
+  AnswerOption,
+  DeveloperAssessmentQuestion,
+} from "../types/assessment";
 
-import type { DeveloperAssessmentQuestion } from "../types/assessment";
+const QUESTION_COUNT = 25;
 
 export default function AssessmentQuestionsManagementPage() {
   const { assessmentId } = useParams();
 
-  const [creating, setCreating] = useState(false);
-  const [createError, setCreateError] = useState("");
-
   const [questions, setQuestions] = useState<DeveloperAssessmentQuestion[]>([]);
+  const [selectedOrder, setSelectedOrder] = useState(1);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [formError, setFormError] = useState("");
 
-  const [editingQuestionId, setEditingQuestionId] = useState<number | null>(
-    null,
-  );
-  const [editing, setEditing] = useState(false);
-  const [editError, setEditError] = useState("");
+  const [saving, setSaving] = useState(false);
   const [deletingQuestionId, setDeletingQuestionId] = useState<number | null>(
     null,
   );
@@ -46,8 +44,27 @@ export default function AssessmentQuestionsManagementPage() {
         setError("");
 
         const response = await fetchAssessmentQuestions(Number(assessmentId));
+        const sortedQuestions = [...response.data].sort(
+          (a, b) => a.questionOrder - b.questionOrder,
+        );
 
-        setQuestions(response.data);
+        setQuestions(sortedQuestions);
+
+        const firstEmptyOrder = Array.from(
+          { length: QUESTION_COUNT },
+          (_, index) => index + 1,
+        ).find(
+          (order) =>
+            !sortedQuestions.some(
+              (question) => question.questionOrder === order,
+            ),
+        );
+
+        setSelectedOrder(
+          sortedQuestions.length > 0
+            ? sortedQuestions[0].questionOrder
+            : (firstEmptyOrder ?? 1),
+        );
       } catch (error) {
         setError(
           error instanceof Error
@@ -62,99 +79,87 @@ export default function AssessmentQuestionsManagementPage() {
     loadQuestions();
   }, [assessmentId]);
 
-  async function handleCreateQuestion(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  const selectedQuestion =
+    questions.find((question) => question.questionOrder === selectedOrder) ??
+    null;
 
-    if (!assessmentId) return;
+  const progress = Math.min((questions.length / QUESTION_COUNT) * 100, 100);
 
-    const formElement = event.currentTarget;
-    const form = new FormData(formElement);
-
-    setCreating(true);
-    setCreateError("");
-
-    try {
-      const response = await createAssessmentQuestion(Number(assessmentId), {
-        question: String(form.get("question") ?? "").trim(),
-        options: {
-          A: String(form.get("optionA") ?? "").trim(),
-          B: String(form.get("optionB") ?? "").trim(),
-          C: String(form.get("optionC") ?? "").trim(),
-          D: String(form.get("optionD") ?? "").trim(),
-        },
-        correctAnswer: String(form.get("correctAnswer") ?? "") as
-          | "A"
-          | "B"
-          | "C"
-          | "D",
-        questionOrder: Number(form.get("questionOrder")),
-      });
-
-      setQuestions((current) =>
-        [...current, response.data].sort(
-          (a, b) => a.questionOrder - b.questionOrder,
-        ),
-      );
-
-      formElement.reset();
-    } catch (error) {
-      setCreateError(
-        error instanceof Error ? error.message : "Failed to create question",
-      );
-    } finally {
-      setCreating(false);
-    }
+  function selectQuestion(order: number) {
+    setSelectedOrder(order);
+    setFormError("");
   }
 
-  async function handleUpdateQuestion(
-    event: FormEvent<HTMLFormElement>,
-    questionId: number,
-  ) {
+  async function handleSubmitQuestion(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!assessmentId) return;
 
     const form = new FormData(event.currentTarget);
 
-    setEditing(true);
-    setEditError("");
+    const payload = {
+      question: String(form.get("question") ?? "").trim(),
+      options: {
+        A: String(form.get("optionA") ?? "").trim(),
+        B: String(form.get("optionB") ?? "").trim(),
+        C: String(form.get("optionC") ?? "").trim(),
+        D: String(form.get("optionD") ?? "").trim(),
+      },
+      correctAnswer: String(form.get("correctAnswer") ?? "A") as AnswerOption,
+      questionOrder: selectedOrder,
+    };
+
+    setSaving(true);
+    setFormError("");
 
     try {
-      const response = await updateAssessmentQuestion(
-        Number(assessmentId),
-        questionId,
-        {
-          question: String(form.get("question") ?? "").trim(),
-          options: {
-            A: String(form.get("optionA") ?? "").trim(),
-            B: String(form.get("optionB") ?? "").trim(),
-            C: String(form.get("optionC") ?? "").trim(),
-            D: String(form.get("optionD") ?? "").trim(),
-          },
-          correctAnswer: String(form.get("correctAnswer") ?? "") as
-            | "A"
-            | "B"
-            | "C"
-            | "D",
-          questionOrder: Number(form.get("questionOrder")),
-        },
-      );
+      if (selectedQuestion) {
+        const response = await updateAssessmentQuestion(
+          Number(assessmentId),
+          selectedQuestion.id,
+          payload,
+        );
 
-      setQuestions((current) =>
-        current
-          .map((question) =>
-            question.id === questionId ? response.data : question,
-          )
-          .sort((a, b) => a.questionOrder - b.questionOrder),
-      );
+        setQuestions((current) =>
+          current
+            .map((question) =>
+              question.id === selectedQuestion.id ? response.data : question,
+            )
+            .sort((a, b) => a.questionOrder - b.questionOrder),
+        );
+      } else {
+        const response = await createAssessmentQuestion(
+          Number(assessmentId),
+          payload,
+        );
 
-      setEditingQuestionId(null);
+        setQuestions((current) =>
+          [...current, response.data].sort(
+            (a, b) => a.questionOrder - b.questionOrder,
+          ),
+        );
+
+        const nextEmptyOrder = Array.from(
+          { length: QUESTION_COUNT },
+          (_, index) => index + 1,
+        ).find(
+          (order) =>
+            order > selectedOrder &&
+            ![...questions, response.data].some(
+              (question) => question.questionOrder === order,
+            ),
+        );
+
+        if (nextEmptyOrder) {
+          setSelectedOrder(nextEmptyOrder);
+        }
+      }
     } catch (error) {
-      setEditError(
-        error instanceof Error ? error.message : "Failed to update question",
+      setFormError(
+        error instanceof Error ? error.message : "Failed to save question",
       );
     } finally {
-      setEditing(false);
+      setSaving(false);
     }
   }
 
@@ -162,11 +167,11 @@ export default function AssessmentQuestionsManagementPage() {
     if (!assessmentId) return;
 
     const confirmed = window.confirm("Delete this assessment question?");
-
     if (!confirmed) return;
 
     try {
       setDeletingQuestionId(questionId);
+      setFormError("");
 
       await deleteAssessmentQuestion(Number(assessmentId), questionId);
 
@@ -174,7 +179,7 @@ export default function AssessmentQuestionsManagementPage() {
         current.filter((question) => question.id !== questionId),
       );
     } catch (error) {
-      setError(
+      setFormError(
         error instanceof Error ? error.message : "Failed to delete question",
       );
     } finally {
@@ -182,256 +187,180 @@ export default function AssessmentQuestionsManagementPage() {
     }
   }
 
-  const nextAvailableQuestionOrder =
-    Array.from({ length: 25 }, (_, index) => index + 1).find(
-      (order) =>
-        !questions.some((question) => question.questionOrder === order),
-    ) ?? 25;
-
   return (
     <DeveloperShell
       eyebrow="Developer tools"
       title="Manage questions"
-      lead={`Questions: ${questions.length}/25`}
+      lead={`${questions.length} of ${QUESTION_COUNT} questions ready`}
     >
-      <section className="role-panel">
-        <Link to="/dashboard/developer/assessments">← Back to assessments</Link>
+      <section className="role-panel assessment-builder-page">
+        <div className="assessment-builder-toolbar">
+          <Link to="/dashboard/developer/assessments">
+            ← Back to assessments
+          </Link>
+
+          <span>
+            {questions.length}/{QUESTION_COUNT} questions
+          </span>
+        </div>
 
         {loading && <p>Loading questions...</p>}
+        {error && <p className="profile-error">{error}</p>}
 
-        {error && <p>{error}</p>}
+        {!loading && !error && (
+          <div className="assessment-builder-layout">
+            <aside className="assessment-progress-card">
+              <p className="eyebrow">Progress</p>
 
-        {!loading && !error && questions.length < 25 && (
-          <form className="profile-card" onSubmit={handleCreateQuestion}>
-            <p className="eyebrow">New question</p>
-            <h2>Add assessment question</h2>
+              <strong className="assessment-progress-count">
+                {questions.length}/{QUESTION_COUNT}
+              </strong>
 
-            <div className="profile-fields">
-              <label className="profile-wide">
-                Question
-                <textarea
-                  name="question"
-                  placeholder="Enter the question..."
-                  required
-                />
-              </label>
+              <div
+                className="assessment-progress-track"
+                role="progressbar"
+                aria-valuemin={0}
+                aria-valuemax={QUESTION_COUNT}
+                aria-valuenow={questions.length}
+              >
+                <span style={{ width: `${progress}%` }} />
+              </div>
 
-              <label>
-                Option A
-                <input name="optionA" required />
-              </label>
+              <div className="assessment-question-grid">
+                {Array.from(
+                  { length: QUESTION_COUNT },
+                  (_, index) => index + 1,
+                ).map((order) => {
+                  const completed = questions.some(
+                    (question) => question.questionOrder === order,
+                  );
 
-              <label>
-                Option B
-                <input name="optionB" required />
-              </label>
+                  return (
+                    <button
+                      key={order}
+                      type="button"
+                      className={[
+                        "assessment-question-slot",
+                        selectedOrder === order ? "is-selected" : "",
+                        completed ? "is-complete" : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
+                      onClick={() => selectQuestion(order)}
+                      aria-label={`Question ${order}${
+                        completed ? ", completed" : ", empty"
+                      }`}
+                    >
+                      {order}
+                    </button>
+                  );
+                })}
+              </div>
 
-              <label>
-                Option C
-                <input name="optionC" required />
-              </label>
+              <p className="assessment-progress-note">
+                Filled slots are saved questions. Select any slot to edit or
+                create it.
+              </p>
+            </aside>
 
-              <label>
-                Option D
-                <input name="optionD" required />
-              </label>
-
-              <label>
-                Correct answer
-                <select name="correctAnswer" defaultValue="A" required>
-                  <option value="A">A</option>
-                  <option value="B">B</option>
-                  <option value="C">C</option>
-                  <option value="D">D</option>
-                </select>
-              </label>
-
-              <label>
-                Question order
-                <input
-                  name="questionOrder"
-                  type="number"
-                  min={1}
-                  max={25}
-                  defaultValue={nextAvailableQuestionOrder}
-                  required
-                />
-              </label>
-            </div>
-
-            {createError && <p className="profile-error">{createError}</p>}
-
-            <button
-              type="submit"
-              className="profile-submit"
-              disabled={creating}
-            >
-              {creating ? "Adding..." : "Add question"}
-            </button>
-          </form>
-        )}
-
-        {!loading && !error && questions.length === 0 && (
-          <article className="panel-card">
-            <h2>No questions yet</h2>
-            <p>Add the first question to this assessment.</p>
-          </article>
-        )}
-
-        {!loading && !error && questions.length > 0 && (
-          <div>
-            {questions.map((question) => (
-              <article className="panel-card" key={question.id}>
-                <p className="eyebrow">Question {question.questionOrder}</p>
-
-                <h2>{question.question}</h2>
-
-                <p>A. {question.options.A}</p>
-                <p>B. {question.options.B}</p>
-                <p>C. {question.options.C}</p>
-                <p>D. {question.options.D}</p>
-
-                <p>
-                  Correct answer: <strong>{question.correctAnswer}</strong>
-                </p>
-
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "12px",
-                    marginTop: "20px",
-                  }}
-                >
-                  <button
-                    type="button"
-                    className="button button-primary"
-                    onClick={() => setEditingQuestionId(question.id)}
-                  >
-                    Edit
-                  </button>
-
-                  <button
-                    type="button"
-                    className="button"
-                    onClick={() => handleDeleteQuestion(question.id)}
-                    disabled={deletingQuestionId === question.id}
-                  >
-                    {deletingQuestionId === question.id
-                      ? "Deleting..."
-                      : "Delete"}
-                  </button>
+            <div className="assessment-question-editor">
+              <div className="assessment-editor-heading">
+                <div>
+                  <p className="eyebrow">Question {selectedOrder}</p>
+                  <h2>{selectedQuestion ? "Edit question" : "Add question"}</h2>
                 </div>
 
-                {editingQuestionId === question.id && (
-                  <form
-                    onSubmit={(event) =>
-                      handleUpdateQuestion(event, question.id)
-                    }
-                  >
-                    <div className="profile-fields">
-                      <label className="profile-wide">
-                        Question
-                        <textarea
-                          name="question"
-                          defaultValue={question.question}
-                          required
-                        />
-                      </label>
+                <span
+                  className={`assessment-question-state ${
+                    selectedQuestion ? "is-saved" : ""
+                  }`}
+                >
+                  {selectedQuestion ? "Saved" : "Empty"}
+                </span>
+              </div>
 
-                      <label>
-                        Option A
-                        <input
-                          name="optionA"
-                          defaultValue={question.options.A}
-                          required
-                        />
-                      </label>
+              <form
+                key={selectedQuestion?.id ?? `new-${selectedOrder}`}
+                onSubmit={handleSubmitQuestion}
+              >
+                <div className="assessment-editor-fields">
+                  <label className="assessment-editor-wide">
+                    Question
+                    <textarea
+                      name="question"
+                      defaultValue={selectedQuestion?.question ?? ""}
+                      placeholder="Enter the question..."
+                      required
+                    />
+                  </label>
 
-                      <label>
-                        Option B
-                        <input
-                          name="optionB"
-                          defaultValue={question.options.B}
-                          required
-                        />
-                      </label>
+                  {(["A", "B", "C", "D"] as const).map((option) => (
+                    <label key={option}>
+                      Option {option}
+                      <input
+                        name={`option${option}`}
+                        defaultValue={selectedQuestion?.options[option] ?? ""}
+                        required
+                      />
+                    </label>
+                  ))}
 
-                      <label>
-                        Option C
-                        <input
-                          name="optionC"
-                          defaultValue={question.options.C}
-                          required
-                        />
-                      </label>
-
-                      <label>
-                        Option D
-                        <input
-                          name="optionD"
-                          defaultValue={question.options.D}
-                          required
-                        />
-                      </label>
-
-                      <label>
-                        Correct answer
-                        <select
-                          name="correctAnswer"
-                          defaultValue={question.correctAnswer}
-                        >
-                          <option value="A">A</option>
-                          <option value="B">B</option>
-                          <option value="C">C</option>
-                          <option value="D">D</option>
-                        </select>
-                      </label>
-
-                      <label>
-                        Question order
-                        <input
-                          name="questionOrder"
-                          type="number"
-                          min={1}
-                          max={25}
-                          defaultValue={question.questionOrder}
-                          required
-                        />
-                      </label>
-                    </div>
-
-                    {editError && <p className="profile-error">{editError}</p>}
-
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "12px",
-                        marginTop: "16px",
-                      }}
+                  <label>
+                    Correct answer
+                    <select
+                      name="correctAnswer"
+                      defaultValue={selectedQuestion?.correctAnswer ?? "A"}
+                      required
                     >
-                      <button
-                        type="submit"
-                        className="button button-primary"
-                        disabled={editing}
-                      >
-                        {editing ? "Saving..." : "Save changes"}
-                      </button>
+                      <option value="A">A</option>
+                      <option value="B">B</option>
+                      <option value="C">C</option>
+                      <option value="D">D</option>
+                    </select>
+                  </label>
 
-                      <button
-                        type="button"
-                        className="button"
-                        onClick={() => {
-                          setEditingQuestionId(null);
-                          setEditError("");
-                        }}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </form>
+                  <div className="assessment-order-display">
+                    <span>Question order</span>
+                    <strong>
+                      {selectedOrder} of {QUESTION_COUNT}
+                    </strong>
+                  </div>
+                </div>
+
+                {formError && (
+                  <p className="profile-error assessment-form-error">
+                    {formError}
+                  </p>
                 )}
-              </article>
-            ))}
+
+                <div className="assessment-editor-actions">
+                  <button
+                    type="submit"
+                    className="button button-primary"
+                    disabled={saving}
+                  >
+                    {saving
+                      ? "Saving..."
+                      : selectedQuestion
+                        ? "Save changes"
+                        : "Add question"}
+                  </button>
+
+                  {selectedQuestion && (
+                    <button
+                      type="button"
+                      className="button"
+                      onClick={() => handleDeleteQuestion(selectedQuestion.id)}
+                      disabled={deletingQuestionId === selectedQuestion.id}
+                    >
+                      {deletingQuestionId === selectedQuestion.id
+                        ? "Deleting..."
+                        : "Delete question"}
+                    </button>
+                  )}
+                </div>
+              </form>
+            </div>
           </div>
         )}
       </section>
