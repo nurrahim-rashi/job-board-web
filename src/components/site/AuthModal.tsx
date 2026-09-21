@@ -46,8 +46,18 @@ export function AuthModal({ open, onClose, initialRole = "JOB_SEEKER", initialMo
   useEffect(() => {
     if (!open || !googleClientId || (registering && role === "COMPANY_ADMIN")) return;
 
+    const cleanups: Array<() => void> = [];
+
+    let renderedWidth = 0;
+
     const renderGoogleButton = () => {
       if (!window.google || !googleButton.current) return;
+      // Google draws this button at a fixed pixel width, so a hardcoded value
+      // overflows the dialog on a phone and leaves a gap on a wide one. Take
+      // the width from the slot itself, inside the range Google accepts.
+      const available = googleButton.current.clientWidth;
+      const width = Math.round(Math.min(400, Math.max(200, available)));
+      renderedWidth = width;
       googleButton.current.replaceChildren();
       window.google.accounts.id.initialize({
         client_id: googleClientId,
@@ -71,9 +81,22 @@ export function AuthModal({ open, onClose, initialRole = "JOB_SEEKER", initialMo
         size: "large",
         shape: "pill",
         text: "continue_with",
-        width: 358,
+        width,
       });
     };
+
+    // Redraw when the dialog changes width, for a rotation or a resized window.
+    const slot = googleButton.current;
+    const observer = slot
+      ? new ResizeObserver(() => {
+          const next = Math.round(
+            Math.min(400, Math.max(200, slot.clientWidth)),
+          );
+          if (next !== renderedWidth) renderGoogleButton();
+        })
+      : null;
+    if (slot) observer?.observe(slot);
+    cleanups.push(() => observer?.disconnect());
 
     const existingScript = document.querySelector<HTMLScriptElement>(
       'script[src="https://accounts.google.com/gsi/client"]',
@@ -86,7 +109,7 @@ export function AuthModal({ open, onClose, initialRole = "JOB_SEEKER", initialMo
         () => setError("Google Sign-In could not be loaded. Please try again."),
         { once: true },
       );
-      return;
+      return () => cleanups.forEach((fn) => fn());
     }
 
     const script = document.createElement("script");
@@ -100,6 +123,8 @@ export function AuthModal({ open, onClose, initialRole = "JOB_SEEKER", initialMo
       { once: true },
     );
     document.head.appendChild(script);
+
+    return () => cleanups.forEach((fn) => fn());
   }, [open, googleClientId, registering, role]);
 
   if (!open) return null;
