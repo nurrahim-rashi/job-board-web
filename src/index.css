@@ -18181,7 +18181,6 @@ body.polaris-signed-out .job-detail-page .job-hero {
   align-items: center;
   display: flex;
   flex-direction: column;
-  padding-bottom: 136px !important;
 }
 .company-profile-intro > *,
 .seeker-profile-intro > * {
@@ -18392,4 +18391,56 @@ body .hero-night > .hero-wrap {
   animation: none;
   justify-content: center;
   width: 100%;
+}
+
+/* The profile and company heroes sit above a card section that is pulled up by
+   -96px. Two things have to hold for the last button not to end up underneath
+   those cards, and neither did:
+   1. The bottom padding has to exceed that 96px. The shared hero rule sets
+      36px with !important at a higher specificity, so the clearance has to be
+      declared at a matching specificity, later in the file.
+   2. The hero has to be allowed to grow. With a pinned height the content is
+      centred, and once it is taller than the hero (a company with a logo, on a
+      short laptop window) the padding is simply centred out of view. */
+:is(
+  .dashboard-wrap,
+  .workspace-hero-inner,
+  .jobs-board-content,
+  .cityscape-content,
+  .company-profile-intro,
+  .seeker-profile-intro,
+  .edit-profile-hero-inner,
+  .social-garden-content,
+  .about-hero-copy,
+  .about-sunrise-copy,
+  .certificate-verification-hero > .content,
+  .hero-night > .hero-wrap,
+  .browse-hero > div,
+  .companies-hero > div,
+  .job-hero > div:last-child
+) {
+  padding-bottom: 136px !important;
+}
+body:is(.polaris-signed-in, .polaris-signed-out)
+  :is(
+    .dashboard-hero,
+    .workspace-hero,
+    .jobs-board-hero,
+    .cityscape-hero,
+    .companies-hero,
+    .browse-hero,
+    .company-profile-hero,
+    .seeker-profile-hero,
+    .job-hero,
+    .edit-profile-hero,
+    .social-garden,
+    .about-hero,
+    .about-sunrise,
+    .hero-night,
+    .stories-hero,
+    .certificate-verification-hero,
+    .generic-loading-hero
+  ) {
+  height: auto !important;
+  max-height: none !important;
 }
