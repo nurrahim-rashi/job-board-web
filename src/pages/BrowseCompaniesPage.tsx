@@ -15,13 +15,12 @@ import {
   reverseGeocodeLocation,
   type Region,
 } from "../services/region.service";
+import { toast } from "react-hot-toast";
 
 export default function BrowseCompaniesPage() {
   const initialSearch = new URLSearchParams(window.location.search);
   const [query, setQuery] = useState(initialSearch.get("q") ?? "");
-  const [country, setCountry] = useState(
-    initialSearch.get("country") ?? "all",
-  );
+  const [country, setCountry] = useState(initialSearch.get("country") ?? "all");
   const [province, setProvince] = useState(
     initialSearch.get("provinceName") ?? "all",
   );
@@ -103,7 +102,7 @@ export default function BrowseCompaniesPage() {
       return;
     }
     if (!navigator.geolocation) {
-      window.alert(
+      toast.error(
         "Location is not supported by this browser. Choose a location manually.",
       );
       return;
@@ -111,12 +110,13 @@ export default function BrowseCompaniesPage() {
     locationSnapshot.current = { country, province, city, sort };
     setLocating(true);
     try {
-      const position = await new Promise<GeolocationPosition>((resolve, reject) =>
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: true,
-          timeout: 12_000,
-          maximumAge: 60_000,
-        }),
+      const position = await new Promise<GeolocationPosition>(
+        (resolve, reject) =>
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: true,
+            timeout: 12_000,
+            maximumAge: 60_000,
+          }),
       );
       const coordinates = {
         lat: position.coords.latitude,
@@ -125,7 +125,10 @@ export default function BrowseCompaniesPage() {
       setCoords(coordinates);
       setSort("nearest");
       try {
-        const resolved = await reverseGeocodeLocation(coordinates.lat, coordinates.lng);
+        const resolved = await reverseGeocodeLocation(
+          coordinates.lat,
+          coordinates.lng,
+        );
         const detectedCountry =
           countries.find(
             (item) =>
@@ -141,7 +144,7 @@ export default function BrowseCompaniesPage() {
       }
     } catch {
       locationSnapshot.current = null;
-      window.alert(
+      toast.error(
         "We could not access your location. Allow location permission or choose a province and city manually.",
       );
     } finally {
