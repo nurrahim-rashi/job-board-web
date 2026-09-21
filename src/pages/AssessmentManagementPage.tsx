@@ -5,6 +5,7 @@ import { DeveloperShell } from "../components/Developer/DeveloperShell";
 import {
   createAssessment,
   fetchDeveloperAssessments,
+  publishAssessment,
 } from "../lib/assessment-api";
 import type { DeveloperAssessment } from "../types/assessment";
 
@@ -16,6 +17,10 @@ export default function AssessmentManagementPage() {
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [publishingAssessmentId, setPublishingAssessmentId] = useState<
+    number | null
+  >(null);
+  const [publishError, setPublishError] = useState("");
 
   useEffect(() => {
     const loadAssessments = async () => {
@@ -56,6 +61,8 @@ export default function AssessmentManagementPage() {
       setAssessments((current) => [
         {
           ...response.data,
+          isPublished: false,
+          publishedAt: null,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           _count: {
@@ -76,6 +83,47 @@ export default function AssessmentManagementPage() {
     }
   }
 
+  async function handlePublishAssessment(assessment: DeveloperAssessment) {
+    const completedQuestions = assessment._count.questions;
+    const requiredQuestions = assessment.questionCount || 25;
+
+    if (assessment.isPublished || completedQuestions !== requiredQuestions) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Publish "${assessment.title}"? Once published, its questions can no longer be edited.`,
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setPublishingAssessmentId(assessment.id);
+      setPublishError("");
+
+      const response = await publishAssessment(assessment.id);
+
+      setAssessments((current) =>
+        current.map((item) =>
+          item.id === assessment.id
+            ? {
+                ...item,
+                isPublished: response.data.isPublished,
+                publishedAt: response.data.publishedAt,
+                updatedAt: response.data.updatedAt,
+              }
+            : item,
+        ),
+      );
+    } catch (error) {
+      setPublishError(
+        error instanceof Error ? error.message : "Failed to publish assessment",
+      );
+    } finally {
+      setPublishingAssessmentId(null);
+    }
+  }
+
   return (
     <DeveloperShell
       eyebrow="Developer tools"
@@ -87,9 +135,7 @@ export default function AssessmentManagementPage() {
           <div>
             <p className="eyebrow">Skill assessments</p>
             <h2>Assessment library</h2>
-            <p>
-              Create assessments and prepare their 25-question banks.
-            </p>
+            <p>Create assessments and prepare their 25-question banks.</p>
           </div>
 
           <button
@@ -119,11 +165,7 @@ export default function AssessmentManagementPage() {
             <div className="assessment-create-fields">
               <label>
                 Skill name
-                <input
-                  name="skillName"
-                  placeholder="e.g. React"
-                  required
-                />
+                <input name="skillName" placeholder="e.g. React" required />
               </label>
 
               <label>
@@ -144,9 +186,7 @@ export default function AssessmentManagementPage() {
               </label>
             </div>
 
-            {createError && (
-              <p className="profile-error">{createError}</p>
-            )}
+            {createError && <p className="profile-error">{createError}</p>}
 
             <div className="assessment-create-actions">
               <button
@@ -178,8 +218,12 @@ export default function AssessmentManagementPage() {
         )}
 
         {error && (
+          <p className="profile-error assessment-management-message">{error}</p>
+        )}
+
+        {publishError && (
           <p className="profile-error assessment-management-message">
-            {error}
+            {publishError}
           </p>
         )}
 
@@ -200,7 +244,8 @@ export default function AssessmentManagementPage() {
                 (completedQuestions / requiredQuestions) * 100,
                 100,
               );
-              const complete = completedQuestions >= requiredQuestions;
+              const complete = completedQuestions === requiredQuestions;
+              const readyToPublish = complete && !assessment.isPublished;
 
               return (
                 <article
@@ -211,11 +256,22 @@ export default function AssessmentManagementPage() {
                     <p className="eyebrow">{assessment.skillName}</p>
 
                     <span
-                      className={`assessment-library-status ${
-                        complete ? "is-complete" : ""
-                      }`}
+                      className={[
+                        "assessment-library-status",
+                        assessment.isPublished
+                          ? "is-published"
+                          : readyToPublish
+                            ? "is-complete"
+                            : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
                     >
-                      {complete ? "25/25 ready" : "In progress"}
+                      {assessment.isPublished
+                        ? "Published"
+                        : readyToPublish
+                          ? "Ready to publish"
+                          : "Draft"}
                     </span>
                   </div>
 
@@ -232,9 +288,7 @@ export default function AssessmentManagementPage() {
                       {completedQuestions} of {requiredQuestions} questions
                     </span>
 
-                    <strong>
-                      {Math.round(progress)}%
-                    </strong>
+                    <strong>{Math.round(progress)}%</strong>
                   </div>
 
                   <div
@@ -259,13 +313,30 @@ export default function AssessmentManagementPage() {
                     </span>
                   </div>
 
-                  <Link
-                    className="assessment-library-link"
-                    to={`/dashboard/developer/assessments/${assessment.id}`}
-                  >
-                    Open assessment builder
-                    <span aria-hidden="true">→</span>
-                  </Link>
+                  <div className="assessment-library-actions">
+                    <Link
+                      className="assessment-library-link"
+                      to={`/dashboard/developer/assessments/${assessment.id}`}
+                    >
+                      {assessment.isPublished
+                        ? "View questions"
+                        : "Open assessment builder"}
+                      <span aria-hidden="true">→</span>
+                    </Link>
+
+                    {readyToPublish && (
+                      <button
+                        type="button"
+                        className="button button-primary"
+                        onClick={() => handlePublishAssessment(assessment)}
+                        disabled={publishingAssessmentId === assessment.id}
+                      >
+                        {publishingAssessmentId === assessment.id
+                          ? "Publishing..."
+                          : "Publish assessment"}
+                      </button>
+                    )}
+                  </div>
                 </article>
               );
             })}

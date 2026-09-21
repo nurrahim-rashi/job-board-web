@@ -15,6 +15,7 @@ import type {
   CreateAssessmentQuestionInput,
   CertificateVerificationResponse,
   AssessmentCertificateResponse,
+  PublishAssessmentResponse,
 } from "../types/assessment";
 
 export const fetchSkillNames = async () => {
@@ -196,6 +197,16 @@ export const deleteAssessmentQuestion = async (
 ) => {
   const response = await axiosInstance.delete(
     `/assessment/${assessmentId}/questions/${questionId}`,
+  );
+
+  return response.data;
+};
+
+export const publishAssessment = async (
+  assessmentId: number,
+): Promise<PublishAssessmentResponse> => {
+  const response = await axiosInstance.patch<PublishAssessmentResponse>(
+    `/assessment/${assessmentId}/publish`,
   );
 
   return response.data;

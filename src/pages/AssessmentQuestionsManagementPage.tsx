@@ -8,10 +8,13 @@ import {
   deleteAssessmentQuestion,
   fetchAssessmentQuestions,
   updateAssessmentQuestion,
+  publishAssessment,
+  fetchDeveloperAssessments,
 } from "../lib/assessment-api";
 import type {
   AnswerOption,
   DeveloperAssessmentQuestion,
+  DeveloperAssessment,
 } from "../types/assessment";
 
 const QUESTION_COUNT = 25;
@@ -25,6 +28,12 @@ export default function AssessmentQuestionsManagementPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [formError, setFormError] = useState("");
+
+  const [assessment, setAssessment] = useState<DeveloperAssessment | null>(
+    null,
+  );
+  const [publishing, setPublishing] = useState(false);
+  const [publishError, setPublishError] = useState("");
 
   const [saving, setSaving] = useState(false);
   const [deletingQuestionId, setDeletingQuestionId] = useState<number | null>(
@@ -43,7 +52,25 @@ export default function AssessmentQuestionsManagementPage() {
         setLoading(true);
         setError("");
 
-        const response = await fetchAssessmentQuestions(Number(assessmentId));
+        const numericAssessmentId = Number(assessmentId);
+
+        const [questionsResponse, assessmentsResponse] = await Promise.all([
+          fetchAssessmentQuestions(numericAssessmentId),
+          fetchDeveloperAssessments(),
+        ]);
+
+        const currentAssessment =
+          assessmentsResponse.data.find(
+            (item) => item.id === numericAssessmentId,
+          ) ?? null;
+
+        if (!currentAssessment) {
+          throw new Error("Assessment not found");
+        }
+
+        setAssessment(currentAssessment);
+
+        const response = questionsResponse;
         const sortedQuestions = [...response.data].sort(
           (a, b) => a.questionOrder - b.questionOrder,
         );
@@ -93,7 +120,7 @@ export default function AssessmentQuestionsManagementPage() {
   async function handleSubmitQuestion(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!assessmentId) return;
+    if (!assessmentId || assessment?.isPublished) return;
 
     const form = new FormData(event.currentTarget);
 
@@ -163,8 +190,46 @@ export default function AssessmentQuestionsManagementPage() {
     }
   }
 
+  async function handlePublishAssessment() {
+    if (!assessmentId || !assessment) return;
+
+    if (assessment.isPublished || questions.length !== QUESTION_COUNT) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Publish "${assessment.title}"? Once published, its questions can no longer be edited.`,
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setPublishing(true);
+      setPublishError("");
+
+      const response = await publishAssessment(Number(assessmentId));
+
+      setAssessment((current) =>
+        current
+          ? {
+              ...current,
+              isPublished: response.data.isPublished,
+              publishedAt: response.data.publishedAt,
+              updatedAt: response.data.updatedAt,
+            }
+          : current,
+      );
+    } catch (error) {
+      setPublishError(
+        error instanceof Error ? error.message : "Failed to publish assessment",
+      );
+    } finally {
+      setPublishing(false);
+    }
+  }
+
   async function handleDeleteQuestion(questionId: number) {
-    if (!assessmentId) return;
+    if (!assessmentId || assessment?.isPublished) return;
 
     const confirmed = window.confirm("Delete this assessment question?");
     if (!confirmed) return;
@@ -226,6 +291,43 @@ export default function AssessmentQuestionsManagementPage() {
                 <span style={{ width: `${progress}%` }} />
               </div>
 
+              <div className="assessment-publish-panel">
+                <span
+                  className={[
+                    "assessment-library-status",
+                    assessment?.isPublished
+                      ? "is-published"
+                      : questions.length === QUESTION_COUNT
+                        ? "is-complete"
+                        : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
+                  {assessment?.isPublished
+                    ? "Published"
+                    : questions.length === QUESTION_COUNT
+                      ? "Ready to publish"
+                      : "Draft"}
+                </span>
+
+                {!assessment?.isPublished &&
+                  questions.length === QUESTION_COUNT && (
+                    <button
+                      type="button"
+                      className="button button-primary"
+                      onClick={handlePublishAssessment}
+                      disabled={publishing}
+                    >
+                      {publishing ? "Publishing..." : "Publish assessment"}
+                    </button>
+                  )}
+
+                {publishError && (
+                  <p className="profile-error">{publishError}</p>
+                )}
+              </div>
+
               <div className="assessment-question-grid">
                 {Array.from(
                   { length: QUESTION_COUNT },
@@ -258,8 +360,9 @@ export default function AssessmentQuestionsManagementPage() {
               </div>
 
               <p className="assessment-progress-note">
-                Filled slots are saved questions. Select any slot to edit or
-                create it.
+                {assessment?.isPublished
+                  ? "This assessment is published. Questions are now read only."
+                  : "Filled slots are saved questions. Select any slot to edit or create it."}
               </p>
             </aside>
 
@@ -291,6 +394,7 @@ export default function AssessmentQuestionsManagementPage() {
                       defaultValue={selectedQuestion?.question ?? ""}
                       placeholder="Enter the question..."
                       required
+                      disabled={assessment?.isPublished}
                     />
                   </label>
 
@@ -301,6 +405,7 @@ export default function AssessmentQuestionsManagementPage() {
                         name={`option${option}`}
                         defaultValue={selectedQuestion?.options[option] ?? ""}
                         required
+                        disabled={assessment?.isPublished}
                       />
                     </label>
                   ))}
@@ -311,6 +416,7 @@ export default function AssessmentQuestionsManagementPage() {
                       name="correctAnswer"
                       defaultValue={selectedQuestion?.correctAnswer ?? "A"}
                       required
+                      disabled={assessment?.isPublished}
                     >
                       <option value="A">A</option>
                       <option value="B">B</option>
@@ -337,13 +443,15 @@ export default function AssessmentQuestionsManagementPage() {
                   <button
                     type="submit"
                     className="button button-primary"
-                    disabled={saving}
+                    disabled={saving || assessment?.isPublished}
                   >
-                    {saving
-                      ? "Saving..."
-                      : selectedQuestion
-                        ? "Save changes"
-                        : "Add question"}
+                    {assessment?.isPublished
+                      ? "Published — read only"
+                      : saving
+                        ? "Saving..."
+                        : selectedQuestion
+                          ? "Save changes"
+                          : "Add question"}
                   </button>
 
                   {selectedQuestion && (
@@ -351,7 +459,10 @@ export default function AssessmentQuestionsManagementPage() {
                       type="button"
                       className="button"
                       onClick={() => handleDeleteQuestion(selectedQuestion.id)}
-                      disabled={deletingQuestionId === selectedQuestion.id}
+                      disabled={
+                        assessment?.isPublished ||
+                        deletingQuestionId === selectedQuestion.id
+                      }
                     >
                       {deletingQuestionId === selectedQuestion.id
                         ? "Deleting..."
