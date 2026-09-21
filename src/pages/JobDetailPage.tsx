@@ -25,6 +25,7 @@ import { applicationStatusLabel } from "../lib/application-status";
 import { formatJobLocation } from "../lib/location";
 import { StatusBadge } from "../components/site/StatusBadge";
 import { formatCurrencyRange } from "../lib/currency";
+import { toast } from "react-hot-toast";
 
 const salary = (job: PublicJobDetail) =>
   job.salaryMin || job.salaryMax
@@ -101,7 +102,7 @@ export default function JobDetailPage() {
       return;
     }
     if (!user.emailVerifiedAt) {
-      window.alert("Verify your email before applying.");
+      toast.error("Verify your email before applying.");
       window.location.assign("/profile");
       return;
     }
