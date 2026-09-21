@@ -14,6 +14,7 @@ import { InterestsSection } from "./InterestsSection";
 import { OverviewSection } from "./OverviewSection";
 import { SalarySection } from "./SalarySection";
 import { currencyOptions } from "../../lib/currency";
+import { useAuth } from "../../stores/useAuth";
 
 const rangeOptions: AdminSelectOption[] = analyticsRanges.map((range) => ({
   value: String(range.value),
@@ -35,13 +36,23 @@ export function AnalyticsDashboard() {
     [months, category, currency],
   );
 
+  // The company ranking is developer only, so it is skipped rather than requested and refused,
+  // which would otherwise replace the whole dashboard with the 403.
+  const isDeveloper = useAuth((state) => state.user?.role) === "DEVELOPER";
+
   const overview = useAnalyticsOverview(query);
   const demographics = useUserDemographics(query);
   const salary = useSalaryTrends(query);
   const interests = useApplicantInterests(query);
-  const engagement = usePlatformEngagement(query);
+  const engagement = usePlatformEngagement(query, isDeveloper);
 
-  const sections = [overview, demographics, salary, interests, engagement];
+  const sections = [
+    overview,
+    demographics,
+    salary,
+    interests,
+    ...(isDeveloper ? [engagement] : []),
+  ];
   const failed = sections.find((section) => section.error);
   const loading = sections.some((section) => section.isPending);
   const refreshing = sections.some((section) => section.isFetching);

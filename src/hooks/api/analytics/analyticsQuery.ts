@@ -4,9 +4,14 @@ import { axiosInstance } from "../../../lib/axios";
 import type { ApiResponse } from "../../../types/api";
 import type { AnalyticsQuery } from "../../../types/analytics";
 
-export const useAnalyticsQuery = <T>(section: string, query: AnalyticsQuery) =>
+export const useAnalyticsQuery = <T>(
+  section: string,
+  query: AnalyticsQuery,
+  enabled = true,
+) =>
   useQuery({
     queryKey: ["analytics", section, query],
+    enabled,
     staleTime: 60_000,
     placeholderData: (previous) => previous,
     queryFn: async () => {
