@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Reveal } from "../../hooks/useReveal";
 import { SectionHead } from "./SectionHead";
 import {
@@ -75,15 +75,38 @@ export function TestimonialsSection() {
     };
   }, []);
 
-  // Two rows moving in opposite directions. Each row is tripled because the
-  // track animates by exactly one third of its width, which is what makes the
-  // loop seamless; the extra passes are clones, hidden from assistive tech.
+  // Two rows moving in opposite directions, but only once there is enough to
+  // scroll. A marquee loops by repeating its track, and repeating two reviews
+  // just shows the same card three times side by side, so a row that already
+  // fits stays still and shows each review once.
   const rows = reviews.length
     ? [
         reviews.filter((_, index) => index % 2 === 0),
         reviews.filter((_, index) => index % 2 === 1),
       ].filter((row) => row.length > 0)
     : [];
+
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [scrolls, setScrolls] = useState(false);
+
+  useEffect(() => {
+    const track = trackRef.current;
+    const container = track?.parentElement;
+    if (!track || !container) return;
+
+    const measure = () => {
+      // The track holds `passes` copies, so one pass is that fraction of it.
+      const passes = scrolls ? 3 : 1;
+      const onePass = track.scrollWidth / passes;
+      setScrolls(onePass > container.clientWidth + 1);
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [reviews, scrolls]);
+
+  const passes = scrolls ? [0, 1, 2] : [0];
 
   return (
     <section id="stories" className="testimonials">
@@ -125,10 +148,13 @@ export function TestimonialsSection() {
         ) : (
           rows.map((row, rowIndex) => (
             <div
-              className={`marquee ${rowIndex ? "reverse" : ""}`}
+              className={`marquee ${scrolls ? "is-scrolling" : "is-static"} ${
+                rowIndex ? "reverse" : ""
+              }`}
               key={rowIndex}
+              ref={rowIndex === 0 ? trackRef : undefined}
             >
-              {[0, 1, 2].map((pass) =>
+              {passes.map((pass) =>
                 row.map((review) => (
                   <TestimonialCard
                     key={`${pass}-${review.id}`}
