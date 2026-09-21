@@ -4,6 +4,7 @@ import {
   type Region,
 } from "../../services/region.service";
 import { Close, Search } from "./Icons";
+import { suppressBrowserAutofill } from "../../lib/form";
 
 type Props = {
   value: string;
@@ -86,6 +87,7 @@ export function CountryCombobox({ value, countries, onChange }: Props) {
     <div className="country-combobox">
       <Search />
       <input
+        {...suppressBrowserAutofill}
         aria-label="Search country"
         aria-autocomplete="list"
         aria-expanded={open}

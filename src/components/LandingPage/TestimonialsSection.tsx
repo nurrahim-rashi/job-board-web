@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Reveal } from "../../hooks/useReveal";
 import { SectionHead } from "./SectionHead";
 import {
@@ -6,46 +6,24 @@ import {
   type ReviewStory,
 } from "../../services/review.service";
 
-const VISIBLE_REVIEWS = 6;
+const VISIBLE_REVIEWS = 10;
 
-function TestimonialCard({ review }: { review: ReviewStory }) {
-  const quoteRef = useRef<HTMLQuoteElement>(null);
-  const [expanded, setExpanded] = useState(false);
-  const [clamped, setClamped] = useState(false);
-
-  useLayoutEffect(() => {
-    const quote = quoteRef.current;
-    if (!quote) return;
-
-    const measure = () => {
-      if (expanded) return;
-      setClamped(quote.scrollHeight > quote.clientHeight + 1);
-    };
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(quote);
-    return () => observer.disconnect();
-  }, [review.reviewText, expanded]);
-
+function TestimonialCard({
+  review,
+  cloned,
+}: {
+  review: ReviewStory;
+  cloned?: boolean;
+}) {
   const rounded = Math.round(review.overallRating);
 
   return (
-    <figure className={`testimonial-card ${expanded ? "expanded" : ""}`}>
-      <i aria-label={`${rounded} out of 5`}>
+    <figure className="testimonial-card" aria-hidden={cloned || undefined}>
+      <i aria-label={cloned ? undefined : `${rounded} out of 5`}>
         {"★".repeat(rounded)}
         {"☆".repeat(5 - rounded)}
       </i>
-      <blockquote ref={quoteRef}>{review.reviewText}</blockquote>
-      {(clamped || expanded) && (
-        <button
-          className="testimonial-card-toggle"
-          type="button"
-          aria-expanded={expanded}
-          onClick={() => setExpanded((value) => !value)}
-        >
-          {expanded ? "Show less" : "Read more"}
-        </button>
-      )}
+      <blockquote>{review.reviewText}</blockquote>
       <figcaption>
         Anonymous {review.jobTitleHeld} · {review.company.companyName}
       </figcaption>
@@ -97,6 +75,16 @@ export function TestimonialsSection() {
     };
   }, []);
 
+  // Two rows moving in opposite directions. Each row is tripled because the
+  // track animates by exactly one third of its width, which is what makes the
+  // loop seamless; the extra passes are clones, hidden from assistive tech.
+  const rows = reviews.length
+    ? [
+        reviews.filter((_, index) => index % 2 === 0),
+        reviews.filter((_, index) => index % 2 === 1),
+      ].filter((row) => row.length > 0)
+    : [];
+
   return (
     <section id="stories" className="testimonials">
       <SectionHead
@@ -104,39 +92,55 @@ export function TestimonialsSection() {
         title="Verified company stories from people who worked there"
         body="Every review comes from a job seeker with an accepted Polaris application. Identities stay anonymous; the experience stays honest."
       />
-      {loading ? (
-        <div className="testimonial-grid">
-          {Array.from({ length: VISIBLE_REVIEWS }, (_, index) => (
-            <figure
-              className="testimonial-card testimonial-card-skeleton"
-              key={index}
-              aria-hidden="true"
+      <div className="marquees">
+        {loading ? (
+          Array.from({ length: 2 }, (_, rowIndex) => (
+            <div className="marquee testimonial-skeleton-row" key={rowIndex}>
+              {Array.from({ length: 4 }, (_, index) => (
+                <figure
+                  className="testimonial-card testimonial-card-skeleton"
+                  key={index}
+                  aria-hidden="true"
+                >
+                  <i />
+                  <span />
+                  <span />
+                  <small />
+                </figure>
+              ))}
+            </div>
+          ))
+        ) : error ? (
+          <div className="testimonial-state">
+            <strong>Company reviews could not be loaded.</strong>
+            <p>{error}</p>
+          </div>
+        ) : rows.length === 0 ? (
+          <div className="testimonial-state">
+            <strong>No verified reviews yet.</strong>
+            <p>
+              The first employee story will appear here after it is submitted.
+            </p>
+          </div>
+        ) : (
+          rows.map((row, rowIndex) => (
+            <div
+              className={`marquee ${rowIndex ? "reverse" : ""}`}
+              key={rowIndex}
             >
-              <i />
-              <span />
-              <span />
-              <span />
-              <small />
-            </figure>
-          ))}
-        </div>
-      ) : error ? (
-        <div className="testimonial-state">
-          <strong>Company reviews could not be loaded.</strong>
-          <p>{error}</p>
-        </div>
-      ) : reviews.length === 0 ? (
-        <div className="testimonial-state">
-          <strong>No verified reviews yet.</strong>
-          <p>The first employee story will appear here after it is submitted.</p>
-        </div>
-      ) : (
-        <div className="testimonial-grid">
-          {reviews.map((review) => (
-            <TestimonialCard key={review.id} review={review} />
-          ))}
-        </div>
-      )}
+              {[0, 1, 2].map((pass) =>
+                row.map((review) => (
+                  <TestimonialCard
+                    key={`${pass}-${review.id}`}
+                    review={review}
+                    cloned={pass > 0}
+                  />
+                )),
+              )}
+            </div>
+          ))
+        )}
+      </div>
       <Reveal className="benefits-cta" delay={120}>
         <a className="button button-primary" href="/stories">
           View more stories

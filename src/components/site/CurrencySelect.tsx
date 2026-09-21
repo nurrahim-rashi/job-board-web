@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { currencyOptions } from "../../lib/currency";
 import { Search } from "./Icons";
+import { suppressBrowserAutofill } from "../../lib/form";
 
 type Props = {
   name?: string;
@@ -69,7 +70,7 @@ export function CurrencySelect({
         aria-autocomplete="list"
         aria-expanded={open}
         placeholder="Type a currency code or name"
-        autoComplete="off"
+        {...suppressBrowserAutofill}
         onFocus={(event) => {
           if (blurTimer.current) window.clearTimeout(blurTimer.current);
           setOpen(true);

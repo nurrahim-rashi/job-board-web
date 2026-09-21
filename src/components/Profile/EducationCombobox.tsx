@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from "react";
+import { suppressBrowserAutofill } from "../../lib/form";
 
 type Props = {
   name: string;
@@ -36,7 +37,7 @@ export function EducationCombobox({
         name={name}
         value={value}
         placeholder={placeholder}
-        autoComplete="off"
+        {...suppressBrowserAutofill}
         aria-autocomplete="list"
         aria-expanded={open}
         required={required}
