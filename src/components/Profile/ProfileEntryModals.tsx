@@ -4,6 +4,7 @@ import type { PublicCompany } from "../../services/company.service";
 import type { AuthUser } from "../../types/auth";
 import type { AssessmentSkillOption } from "../../lib/assessment-api";
 import { Calendar, Close, Trash } from "../site/Icons";
+import { suppressBrowserAutofill } from "../../lib/form";
 
 type Experience = NonNullable<AuthUser["experiences"]>[number];
 type SelectedWork = NonNullable<AuthUser["selectedWork"]>[number];
@@ -499,7 +500,7 @@ export function SkillsModal({
               addSkill(exactAvailable ?? query);
             }}
             placeholder="e.g. TypeScript, Product Design"
-            autoComplete="off"
+            {...suppressBrowserAutofill}
           />
           <div className="skill-modal-results">
             {suggestions.map((skill) => (

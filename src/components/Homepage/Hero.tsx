@@ -8,6 +8,7 @@ import {
   type WorldwideLocation,
 } from "../../services/region.service";
 import { formatJobLocation } from "../../lib/location";
+import { suppressBrowserAutofill } from "../../lib/form";
 
 const locationTypeLabel = (type: WorldwideLocation["type"]) =>
   type === "country"
@@ -168,7 +169,7 @@ export function HeroSection({
                 onFocus={() => setLocationFocused(true)}
                 onBlur={() => setLocationFocused(false)}
                 placeholder="City, province, state, or country"
-                autoComplete="off"
+                {...suppressBrowserAutofill}
               />
               {location && (
                 <button

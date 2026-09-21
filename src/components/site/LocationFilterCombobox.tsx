@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Close, Search } from "./Icons";
+import { suppressBrowserAutofill } from "../../lib/form";
 
 export type LocationFilterOption = {
   value: string;
@@ -60,6 +61,7 @@ export function LocationFilterCombobox({
     <div className={`country-combobox${disabled ? " is-disabled" : ""}`}>
       <Search />
       <input
+        {...suppressBrowserAutofill}
         disabled={disabled}
         aria-label={placeholder}
         aria-autocomplete="list"

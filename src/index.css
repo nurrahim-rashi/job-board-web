@@ -2251,21 +2251,42 @@ body.polaris-signed-out .job-hero > div:last-child {
   font-weight: 400;
   margin-top: 4px;
 }
-.testimonial-grid {
+.marquees {
   display: grid;
   gap: 18px;
-  grid-template-columns: repeat(3, 1fr);
   margin-top: 55px;
+  /* The rows are wider than the page on purpose. */
+  overflow: hidden;
+}
+.marquee {
+  animation: marquee 52s linear infinite;
+  display: flex;
+  gap: 18px;
+  width: max-content;
+}
+.marquee.reverse {
+  animation-direction: reverse;
+  animation-duration: 57s;
+}
+/* Hovering anywhere on a row holds it still so a quote can be read. */
+.marquee:hover,
+.marquee:focus-within {
+  animation-play-state: paused;
+}
+.testimonial-skeleton-row {
+  animation: none;
 }
 .testimonial-card {
   background: #f4f1e9;
   border: 1px solid #dfdbd0;
   border-radius: 24px;
   display: flex;
+  flex: 0 0 340px;
   flex-direction: column;
   margin: 0;
   min-height: 268px;
   padding: 27px;
+  width: 340px;
 }
 .testimonial-card i {
   color: #485eb4;
@@ -2281,28 +2302,6 @@ body.polaris-signed-out .job-hero > div:last-child {
   -webkit-box-orient: vertical;
   line-clamp: 5;
   -webkit-line-clamp: 5;
-}
-.testimonial-card.expanded blockquote {
-  display: block;
-  overflow: visible;
-}
-.testimonial-card-toggle {
-  align-self: flex-start;
-  background: transparent;
-  border: 0;
-  color: #485eb4;
-  cursor: pointer;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 800;
-  margin-top: 10px;
-  padding: 4px 0;
-  text-decoration: underline;
-  text-decoration-color: transparent;
-  text-underline-offset: 4px;
-}
-.testimonial-card-toggle:hover {
-  text-decoration-color: currentColor;
 }
 .testimonial-card figcaption {
   color: #77747a;
@@ -2719,11 +2718,6 @@ body.polaris-signed-out .job-hero > div:last-child {
     transform: none;
   }
 }
-@media (max-width: 1040px) {
-  .testimonial-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
 @media (max-width: 760px) {
   .site-nav ul {
     display: none;
@@ -2755,8 +2749,7 @@ body.polaris-signed-out .job-hero > div:last-child {
   }
   .role-grid,
   .post-grid,
-  .tech-grid,
-  .testimonial-grid {
+  .tech-grid {
     grid-template-columns: 1fr;
   }
   .service-grid {
@@ -9928,6 +9921,10 @@ body.polaris-signed-out .job-hero > div:last-child {
   border: 1px solid #ded9cf;
   border-radius: 27px;
   flex: 0 0 var(--stories-card-width);
+  /* A flex item will not shrink below its content, and the single-line
+     "role · company · city" caption made that minimum 602px, so the card
+     ignored its own basis and ran off a phone screen. */
+  min-width: 0;
   padding: 26px;
   scroll-snap-align: start;
 }
@@ -18304,4 +18301,83 @@ body.polaris-signed-out .job-detail-page .job-hero {
    than stacking another !important level. */
 body .hero-night > .hero-wrap {
   padding-top: 104px !important;
+}
+
+/* Story cards clamp their quote so one long review cannot make a card taller
+   than a phone screen. The toggle only renders when text is actually hidden. */
+.story-rail article blockquote {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  line-clamp: 6;
+  -webkit-line-clamp: 6;
+}
+.story-rail article blockquote.is-expanded {
+  display: block;
+  overflow: visible;
+}
+.story-quote-toggle {
+  align-self: flex-start;
+  background: transparent;
+  border: 0;
+  color: #485eb4;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  margin-top: 8px;
+  padding: 4px 0;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 4px;
+}
+.story-quote-toggle:hover {
+  text-decoration-color: currentColor;
+}
+.story-rail.dark .story-quote-toggle {
+  color: #bcd0f5;
+}
+/* Cards sit at the top of the rail, so expanding one does not stretch the rest. */
+.story-rail-track {
+  align-items: flex-start;
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-33.333%);
+  }
+}
+
+@media (max-width: 620px) {
+  .testimonial-card {
+    flex-basis: 268px;
+    min-height: 240px;
+    padding: 22px;
+    width: 268px;
+  }
+}
+
+/* The navbar is fixed and owns the top 68px of the viewport. The shared hero
+   rule above reserves only 60px, so any hero whose content fills its section
+   rather than centring inside it puts its first line under the navbar. Repeat
+   that rule's selector list so this wins on source order rather than by
+   stacking another !important level. */
+:is(
+  .dashboard-wrap,
+  .workspace-hero-inner,
+  .jobs-board-content,
+  .cityscape-content,
+  .company-profile-intro,
+  .seeker-profile-intro,
+  .edit-profile-hero-inner,
+  .social-garden-content,
+  .about-hero-copy,
+  .about-sunrise-copy,
+  .certificate-verification-hero > .content,
+  .hero-night > .hero-wrap,
+  .browse-hero > div,
+  .companies-hero > div,
+  .job-hero > div:last-child
+) {
+  padding-top: 96px !important;
 }
