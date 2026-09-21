@@ -82,6 +82,8 @@ export function CountryCombobox({ value, countries, onChange }: Props) {
     setOpen(false);
   };
 
+  // Chrome keeps offering saved addresses here when autoComplete is "off", so the input carries a
+  // token Chrome recognises as something other than an address.
   return (
     <div className="country-combobox">
       <Search />
@@ -89,6 +91,7 @@ export function CountryCombobox({ value, countries, onChange }: Props) {
         aria-label="Search country"
         aria-autocomplete="list"
         aria-expanded={open}
+        autoComplete="new-password"
         value={query}
         placeholder="All countries"
         onFocus={() => {

@@ -56,6 +56,8 @@ export function LocationFilterCombobox({
     setOpen(false);
   };
 
+  // Chrome keeps offering saved addresses here when autoComplete is "off", so the input carries a
+  // token Chrome recognises as something other than an address.
   return (
     <div className={`country-combobox${disabled ? " is-disabled" : ""}`}>
       <Search />
@@ -64,6 +66,7 @@ export function LocationFilterCombobox({
         aria-label={placeholder}
         aria-autocomplete="list"
         aria-expanded={open}
+        autoComplete="new-password"
         value={query}
         placeholder={placeholder}
         onFocus={() => {

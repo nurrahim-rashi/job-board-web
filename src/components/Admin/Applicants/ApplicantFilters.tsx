@@ -1,3 +1,5 @@
+import { useMemo, useRef, useState } from "react";
+
 import { Search } from "../../site/Icons";
 import { AdminSelect, type AdminSelectOption } from "../AdminSelect";
 import { applicationStatuses, educationOptions, statusLabels, type ApplicantQuery, type ApplicationStatus } from "../../../types/applicant";
@@ -117,10 +119,20 @@ type ApplicantFiltersProps = {
 };
 
 export function ApplicantFilters({ filters, salaryCurrency, onChange, onReset }: ApplicantFiltersProps) {
+  const [educationOpen, setEducationOpen] = useState(false);
+  const educationBlurTimer = useRef<number | null>(null);
+
   const set = <Key extends keyof FilterState>(key: Key, value: FilterState[Key]) =>
     onChange({ ...filters, [key]: value });
 
   const warnings = rangeWarnings(filters);
+
+  const educationMatches = useMemo(() => {
+    const query = filters.education.trim().toLocaleLowerCase("en");
+    return educationOptions.filter(
+      (option) => !query || option.label.toLocaleLowerCase("en").includes(query),
+    );
+  }, [filters.education]);
 
   return (
     <section className="applicant-filters">
@@ -200,18 +212,45 @@ export function ApplicantFilters({ filters, salaryCurrency, onChange, onReset }:
 
         <div className="applicant-field">
           <span>Education</span>
-          <input
-            list="applicant-education"
-            value={filters.education}
-            onChange={(event) => set("education", event.target.value)}
-            placeholder="e.g. S1"
-            aria-label="Last education"
-          />
-          <datalist id="applicant-education">
-            {educationOptions.map((option) => (
-              <option key={option.label} value={option.label} />
-            ))}
-          </datalist>
+          <div className="education-combobox">
+            <input
+              value={filters.education}
+              placeholder="e.g. S1"
+              aria-label="Last education"
+              autoComplete="off"
+              aria-autocomplete="list"
+              aria-expanded={educationOpen}
+              onFocus={() => {
+                if (educationBlurTimer.current) window.clearTimeout(educationBlurTimer.current);
+                setEducationOpen(true);
+              }}
+              onBlur={() => {
+                educationBlurTimer.current = window.setTimeout(() => setEducationOpen(false), 150);
+              }}
+              onChange={(event) => {
+                set("education", event.target.value);
+                setEducationOpen(true);
+              }}
+            />
+            {educationOpen && educationMatches.length > 0 && (
+              <div className="education-combobox-menu" role="listbox">
+                {educationMatches.map((option) => (
+                  <button
+                    key={option.label}
+                    type="button"
+                    role="option"
+                    onMouseDown={(event) => {
+                      event.preventDefault();
+                      set("education", option.label);
+                      setEducationOpen(false);
+                    }}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="applicant-field end">
