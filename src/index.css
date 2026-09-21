@@ -9979,6 +9979,9 @@ body.polaris-signed-out .job-hero > div:last-child {
   background: #ede9df;
   border-radius: 50%;
   display: flex;
+  /* A flex item shrinks by default, so on a narrow card this circle was
+     squeezed into an oval while its height stayed put. */
+  flex: 0 0 44px;
   font-size: 13px;
   font-style: normal;
   font-weight: 700;
@@ -18380,4 +18383,13 @@ body .hero-night > .hero-wrap {
   .job-hero > div:last-child
 ) {
   padding-top: 96px !important;
+}
+
+/* A row only animates when it has more than a screenful. With one or two
+   reviews the track stays put and centres, so a single review is shown once
+   instead of being repeated to fill the loop. */
+.marquee.is-static {
+  animation: none;
+  justify-content: center;
+  width: 100%;
 }
