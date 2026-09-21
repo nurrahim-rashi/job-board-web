@@ -132,6 +132,8 @@ export interface AssessmentBadgesResponse {
 }
 
 export interface DeveloperAssessment extends Assessment {
+  isPublished: boolean;
+  publishedAt: string | null;
   createdAt: string;
   updatedAt: string;
   _count: {
@@ -153,6 +155,11 @@ export interface CreateAssessmentInput {
 export interface CreateAssessmentResponse {
   message: string;
   data: Assessment;
+}
+
+export interface PublishAssessmentResponse {
+  message: string;
+  data: DeveloperAssessment;
 }
 
 export interface DeveloperAssessmentQuestion {
