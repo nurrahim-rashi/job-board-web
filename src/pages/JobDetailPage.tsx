@@ -13,6 +13,7 @@ import { isNewJob } from "../lib/job-age";
 import { categoryLabel } from "../types/job-posting";
 import { ShareJobModal } from "../components/JobDetail/ShareJobModal";
 import { ExpandableContent } from "../components/site/ExpandableContent";
+import { RichText } from "../components/site/RichText";
 import { SalaryConverter } from "../components/JobDetail/SalaryConverter";
 import {
   Bookmark,
@@ -302,7 +303,7 @@ export default function JobDetailPage() {
               )}
               <section className="job-company-card">
                 <p className="eyebrow">About {job.company.companyName}</p>
-                <p>{job.company.profileContent}</p>
+                <RichText html={job.company.profileContent} />
                 <dl className="company-post-meta">
                   <div>
                     <dt>Posted by</dt>
