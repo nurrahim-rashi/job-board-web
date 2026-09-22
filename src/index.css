@@ -18862,6 +18862,7 @@ body:is(.polaris-signed-in, .polaris-signed-out)
   min-height: 42px;
   overflow: hidden;
   -webkit-box-orient: vertical;
+  line-clamp: 2;
   -webkit-line-clamp: 2;
 }
 
