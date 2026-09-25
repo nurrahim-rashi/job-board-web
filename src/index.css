@@ -19003,6 +19003,7 @@ body:is(.polaris-signed-in, .polaris-signed-out)
   min-height: 42px;
   overflow: hidden;
   -webkit-box-orient: vertical;
+  line-clamp: 2;
   -webkit-line-clamp: 2;
 }
 
@@ -19175,4 +19176,138 @@ body:is(.polaris-signed-in, .polaris-signed-out)
   .assessment-library-actions .button {
     width: 100%;
   }
+}
+
+/* Rich text: company profile content, edited by RichTextEditor and rendered
+   by RichText wherever a company bio is shown in full. */
+.rich-text > :first-child {
+  margin-top: 0;
+}
+.rich-text > :last-child {
+  margin-bottom: 0;
+}
+.rich-text h2,
+.rich-text h3 {
+  font-family: Fraunces, Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  margin: 24px 0 8px;
+}
+.rich-text h2 {
+  font-size: 22px;
+}
+.rich-text h3 {
+  font-size: 18px;
+}
+.rich-text p {
+  margin: 12px 0;
+}
+.rich-text ul,
+.rich-text ol {
+  margin: 12px 0;
+  padding-left: 22px;
+}
+.rich-text li {
+  margin: 4px 0;
+}
+.rich-text blockquote {
+  border-left: 3px solid #ded9cf;
+  color: #74717a;
+  font-style: italic;
+  margin: 16px 0;
+  padding-left: 16px;
+}
+.rich-text a {
+  color: #485eb4;
+  text-decoration: underline;
+  text-decoration-color: rgb(72 94 180 / 0.35);
+  text-underline-offset: 3px;
+}
+.rich-text a:hover {
+  text-decoration-color: currentColor;
+}
+.job-company-card .rich-text {
+  color: #74717a;
+  font-size: 14px;
+  line-height: 1.65;
+  margin-top: 14px;
+}
+
+/* Rich text editor: RichTextEditor, the company profile content field. */
+.rich-text-editor {
+  background: #fcfaf4;
+  border: 1px solid #ded9cf;
+  border-radius: 12px;
+  margin-top: 7px;
+  overflow: hidden;
+}
+.rich-text-editor-toolbar {
+  border-bottom: 1px solid #ded9cf;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 6px;
+}
+.rich-text-editor-toolbar button {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: #67656c;
+  cursor: pointer;
+  font:
+    700 13px "DM Sans",
+    sans-serif;
+  min-width: 30px;
+  padding: 5px 8px;
+}
+.rich-text-editor-toolbar button:hover {
+  background: #f0ede5;
+}
+.rich-text-editor-toolbar button.is-active {
+  background: #eeeff9;
+  border-color: #ded9cf;
+  color: #3e54a3;
+}
+.rich-text-editor-content {
+  color: #202129;
+  font:
+    14px "DM Sans",
+    sans-serif;
+  min-height: 160px;
+  outline: none;
+  padding: 12px 14px;
+}
+.rich-text-editor-content p.is-editor-empty:first-child::before {
+  color: #97949c;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+.rich-text-editor-content h2,
+.rich-text-editor-content h3 {
+  font-family: Fraunces, Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin: 18px 0 6px;
+}
+.rich-text-editor-content h2 {
+  font-size: 20px;
+}
+.rich-text-editor-content h3 {
+  font-size: 17px;
+}
+.rich-text-editor-content ul,
+.rich-text-editor-content ol {
+  padding-left: 20px;
+}
+.rich-text-editor-content blockquote {
+  border-left: 3px solid #ded9cf;
+  color: #74717a;
+  margin: 10px 0;
+  padding-left: 14px;
+}
+.rich-text-editor-content a {
+  color: #485eb4;
 }
