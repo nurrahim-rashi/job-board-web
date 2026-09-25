@@ -207,9 +207,15 @@ export default function AdminTestPage() {
             <button type="button" className="admin-btn ghost" disabled={active === 0} onClick={() => setActive(active - 1)}>
               Previous
             </button>
-            <button type="button" className="admin-btn ghost" disabled={active === questionCount - 1} onClick={() => setActive(active + 1)}>
-              Next question
-            </button>
+            {active === questionCount - 1 ? (
+              <button type="button" className="admin-btn primary" onClick={submit} disabled={busy || locked}>
+                {saveQuestions.isPending ? "Saving…" : "Save test"}
+              </button>
+            ) : (
+              <button type="button" className="admin-btn ghost" onClick={() => setActive(active + 1)}>
+                Next question
+              </button>
+            )}
           </footer>
         </section>
       </div>

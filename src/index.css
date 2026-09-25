@@ -6,7 +6,6 @@
   background: #f8f5ed;
   font-synthesis: none;
 
-  /* One dropdown surface for the whole app, matching the admin comboboxes. */
   --menu-surface: #fffdf8;
   --menu-border: #ded9cf;
   --menu-radius: 14px;
@@ -138,7 +137,6 @@ p {
   z-index: 50;
 }
 
-/* Keep every modal above page-level stacking contexts such as heroes/navbars. */
 .auth-modal,
 .experience-modal,
 .share-job-backdrop,
@@ -304,8 +302,6 @@ p {
   padding: 0;
   position: absolute;
   right: 6px;
-  /* Centred on the field rather than pinned to the top, so the same control
-     fits the auth dialog, the reset page and the profile form. */
   top: 50%;
   transform: translateY(-50%);
   width: 34px;
@@ -486,8 +482,6 @@ p {
   font-size: 15px;
   justify-content: center;
   min-height: 36px;
-  /* The in-flight label ("Signing in…") is wider than the idle one, and the
-     button keeps its idle width while loading, so reserve the space up front. */
   min-width: 112px;
   padding: 9px 15px;
 }
@@ -582,8 +576,6 @@ p {
   text-align: center;
   white-space: nowrap;
 }
-/* The reset card stacks a single action over a centred "Back to sign in"
-   link, so the button is centred with it instead of hugging the left edge. */
 .email-action .profile-submit {
   display: block;
   margin-inline: auto;
@@ -1377,7 +1369,6 @@ p {
   }
 }
 
-/* Profile entry actions */
 .experience-modal-delete {
   align-items: center;
   background: #fff3f1;
@@ -1412,7 +1403,6 @@ p {
   width: 13px;
 }
 
-/* Applicant dashboard status filters */
 .seeker-card-heading-with-filter {
   align-items: end;
   display: flex;
@@ -1444,7 +1434,6 @@ p {
   padding: 0 36px 0 13px;
 }
 
-/* Company trust cards on Stories */
 .stories-section-head > p:last-child {
   color: rgb(255 255 255 / 0.62);
   line-height: 1.65;
@@ -1760,7 +1749,6 @@ p {
   width: 58px;
 }
 
-/* One hero rhythm, selected automatically from authentication state. */
 :root {
   --polaris-signed-in-hero-height: 410px;
   --polaris-signed-out-hero-height: 510px;
@@ -2255,7 +2243,6 @@ body.polaris-signed-out .job-hero > div:last-child {
   display: grid;
   gap: 18px;
   margin-top: 55px;
-  /* The rows are wider than the page on purpose. */
   overflow: hidden;
 }
 .marquee {
@@ -2268,7 +2255,6 @@ body.polaris-signed-out .job-hero > div:last-child {
   animation-direction: reverse;
   animation-duration: 57s;
 }
-/* Hovering anywhere on a row holds it still so a quote can be read. */
 .marquee:hover,
 .marquee:focus-within {
   animation-play-state: paused;
@@ -2657,9 +2643,6 @@ body.polaris-signed-out .job-hero > div:last-child {
   }
 }
 .reveal {
-  /* These wrappers sit directly inside grids, where the default min-width:auto
-     stops a track from shrinking below its content and pushes the page wider
-     than the viewport. */
   min-width: 0;
   opacity: 0;
   transform: translateY(22px);
@@ -3556,7 +3539,6 @@ body.polaris-signed-out .job-hero > div:last-child {
   }
 }
 
-/* Keep every page hero on the application's primary typeface. */
 :where([class*="hero"]) :is(h1, h2, h3) {
   font-family: Fraunces, Georgia, serif !important;
 }
@@ -3902,7 +3884,6 @@ body.polaris-signed-out .job-hero > div:last-child {
   }
 }
 
-/* Shared application and interview status language. Colors come from lib/status.ts. */
 .status-badge {
   align-items: center;
   background: var(--status-background) !important;
@@ -7091,7 +7072,6 @@ body.polaris-signed-out .job-hero > div:last-child {
   padding: var(--menu-item-padding);
 }
 
-/* Searchable form comboboxes should look like Polaris inputs, never native selects. */
 .admin-fields label > .country-combobox,
 .currency-combobox {
   background: #fcfaf4;
@@ -7420,7 +7400,6 @@ body.polaris-signed-out .job-hero > div:last-child {
   }
 }
 
-/* Company profile mirrors the supplied reference layout. */
 .company-profile-page {
   background: #f8f5ed;
   color: #202129;
@@ -8104,9 +8083,6 @@ body.polaris-signed-out .job-hero > div:last-child {
 .homepage-job-suggestions > a > span {
   min-width: 0;
 }
-/* Side by side there is no room for a role and a full Indonesian address on a
-   phone: the title column collapsed to a few characters and its text ran under
-   the location. Stack them and let the arrow span both rows. */
 @media (max-width: 760px) {
   .homepage-job-suggestions > a {
     grid-template-columns: minmax(0, 1fr) 18px;
@@ -9601,7 +9577,6 @@ body.polaris-signed-out .job-hero > div:last-child {
   }
 }
 
-/* Final constellation layout: vertical wheel drives the horizontal journey. */
 .hiring-constellation {
   height: 100vh;
 }
@@ -9921,9 +9896,6 @@ body.polaris-signed-out .job-hero > div:last-child {
   border: 1px solid #ded9cf;
   border-radius: 27px;
   flex: 0 0 var(--stories-card-width);
-  /* A flex item will not shrink below its content, and the single-line
-     "role · company · city" caption made that minimum 602px, so the card
-     ignored its own basis and ran off a phone screen. */
   min-width: 0;
   padding: 26px;
   scroll-snap-align: start;
@@ -9979,8 +9951,6 @@ body.polaris-signed-out .job-hero > div:last-child {
   background: #ede9df;
   border-radius: 50%;
   display: flex;
-  /* A flex item shrinks by default, so on a narrow card this circle was
-     squeezed into an oval while its height stayed put. */
   flex: 0 0 44px;
   font-size: 13px;
   font-style: normal;
@@ -11599,7 +11569,6 @@ body.polaris-signed-out .job-hero > div:last-child {
   }
 }
 
-/* Friendly native date and upload controls */
 input[type="date"],
 input[type="month"] {
   color: #35333d;
@@ -11609,7 +11578,6 @@ input[type="month"] {
   min-height: 46px;
 }
 
-/* Job seeker's application details */
 .application-row-button {
   align-items: center;
   background: transparent;
@@ -12022,16 +11990,10 @@ input[type="file"]::file-selector-button:hover {
 .company-media-field {
   display: block;
 }
-/* The label used to wrap the input, so the remove button could only align to
-   the bottom of the whole block and sat 9px below the input's centre. The
-   label now sits above its own row, and the button centres on the input
-   whatever height the browser gives a file control. */
 .company-media-row {
   align-items: center;
   display: flex;
   gap: 10px;
-  /* The gap under the label moves here. Left on the input it becomes part of
-     the flex item's margin box, which centres the button 3px too high. */
   margin-top: 7px;
 }
 .profile-fields .company-media-row > input {
@@ -12145,7 +12107,6 @@ input[type="month"]:focus-visible {
   width: 100%;
 }
 
-/* Keep signed-in job seeker heroes aligned with the Jobs page hero. */
 :root {
   --job-seeker-hero-height: 410px;
 }
@@ -12516,7 +12477,6 @@ input[type="month"]:focus-visible {
   border-color: #ded9cf;
 }
 
-/* Carries `required` for the browser: unstyled but still focusable, so the validation bubble has somewhere to point. */
 .admin-picker-native {
   border: 0;
   bottom: 0;
@@ -12626,7 +12586,6 @@ input[type="month"]:focus-visible {
   top: auto;
 }
 
-/* Label above a full-width trigger. */
 .admin-picker.stacked,
 .admin-picker.field {
   align-items: stretch;
@@ -12647,7 +12606,6 @@ input[type="month"]:focus-visible {
   min-width: 172px;
 }
 
-/* Matches the inputs sitting beside it inside `.admin-fields`. */
 .admin-picker.field {
   gap: 7px;
   min-width: 0;
@@ -12670,6 +12628,43 @@ input[type="month"]:focus-visible {
   }
   .admin-picker-value {
     margin-right: auto;
+  }
+  .admin-filters .admin-picker,
+  .applicant-filters-top .admin-picker {
+    flex-wrap: nowrap;
+  }
+  .admin-filters .admin-picker-label,
+  .applicant-filters-top .admin-picker-label {
+    flex-shrink: 0;
+    padding-left: 4px;
+  }
+  .admin-filters .admin-picker-label + .admin-picker-anchor,
+  .applicant-filters-top .admin-picker-label + .admin-picker-anchor {
+    flex: 1;
+    min-width: 0;
+  }
+  .admin-picker-label + .admin-picker-anchor .admin-picker-menu {
+    left: auto;
+    right: 0;
+  }
+  .admin-filters > .admin-picker:only-child {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .admin-detail-head {
+    flex-direction: column;
+  }
+  .admin-detail-head:has(> .admin-switch) {
+    flex-direction: row;
+  }
+  .admin-detail-head > .admin-switch {
+    margin-top: 2px;
+  }
+  .admin-detail-head + .admin-fields {
+    border-top: 1px solid #ece7dd;
+    margin-top: 4px;
+    padding-top: 18px;
   }
 }
 .admin-table {
@@ -13163,12 +13158,67 @@ input[type="month"]:focus-visible {
     padding-top: 28px;
   }
   .admin-side {
+    align-items: center;
+    column-gap: 12px;
+    display: grid;
+    grid-template-areas:
+      "brand signout"
+      "nav nav"
+      "note note";
+    grid-template-columns: minmax(0, 1fr) auto;
     position: static;
   }
+  .admin-side-brand {
+    grid-area: brand;
+    margin: 0;
+  }
+  .admin-side > .eyebrow {
+    display: none;
+  }
   .admin-side nav {
+    grid-area: nav;
     grid-auto-flow: column;
     justify-content: start;
+    margin: 14px -12px 0;
     overflow-x: auto;
+    padding: 4px 12px;
+    scrollbar-width: none;
+  }
+  .admin-side nav::-webkit-scrollbar {
+    display: none;
+  }
+  .admin-side nav a {
+    white-space: nowrap;
+  }
+  .admin-side nav a:first-child:not(.active) {
+    margin-left: -12px;
+  }
+  .admin-side-note {
+    align-items: baseline;
+    display: flex;
+    gap: 6px;
+    grid-area: note;
+    margin-top: 10px;
+    min-width: 0;
+    padding-top: 12px;
+  }
+  .admin-side-note b {
+    flex-shrink: 0;
+  }
+  .admin-side-note small {
+    margin-top: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .admin-side-note small::before {
+    content: "· ";
+  }
+  .admin-side-signout {
+    grid-area: signout;
+    margin-top: 0;
+    padding: 7px 14px;
+    width: auto;
   }
   .admin-detail-grid,
   .admin-test,
@@ -13200,8 +13250,65 @@ input[type="month"]:focus-visible {
     grid-template-columns: repeat(8, 1fr);
   }
 }
+@media (max-width: 760px) {
+  .admin-table.jobs .admin-row {
+    column-gap: 0;
+    grid-template-areas:
+      "role role role publish"
+      "category applied applied applied"
+      "deadline deadline actions actions";
+    grid-template-columns: auto minmax(0, 1fr) auto 40px;
+    padding: 18px 16px 14px;
+    row-gap: 12px;
+  }
+  .admin-table.jobs .admin-role {
+    grid-area: role;
+    padding-right: 12px;
+  }
+  .admin-table.jobs .admin-role b {
+    display: block;
+    font-size: 16px;
+    line-height: 1.3;
+  }
+  .admin-job-category {
+    grid-area: category;
+  }
+  .admin-job-applied {
+    align-self: center;
+    color: #74717a;
+    grid-area: applied;
+    padding-left: 10px;
+  }
+  .admin-job-applied b {
+    color: #202129;
+  }
+  .admin-job-publish {
+    align-self: start;
+    grid-area: publish;
+    justify-self: end;
+  }
+  .admin-job-deadline,
+  .admin-table.jobs .admin-row-actions {
+    border-top: 1px solid #ece7dd;
+    padding-top: 12px;
+  }
+  .admin-job-deadline {
+    grid-area: deadline;
+  }
+  .admin-job-deadline small {
+    display: inline;
+  }
+  .admin-job-deadline small::before {
+    content: " · ";
+  }
+  .admin-table.jobs .admin-row-actions {
+    align-self: stretch;
+    gap: 18px;
+    grid-area: actions;
+    justify-content: flex-end;
+  }
+}
 
-/* Applicant management */
 .admin-chip.info {
   background: #e7e9f6;
   color: #33438a;
@@ -13525,6 +13632,42 @@ input[type="month"]:focus-visible {
 @media (max-width: 720px) {
   .applicant-filters-grid {
     grid-template-columns: minmax(0, 1fr);
+  }
+  .admin-table.applicants {
+    overflow: visible;
+  }
+  .admin-table.applicants .admin-row {
+    align-items: start;
+    gap: 14px 12px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    min-width: 0;
+    padding: 16px;
+  }
+  .admin-table.applicants .admin-row-head {
+    display: none;
+  }
+  .admin-table.applicants .applicant-identity,
+  .admin-table.applicants .admin-row-actions {
+    grid-column: 1 / -1;
+  }
+  .admin-table.applicants [data-label]::before,
+  .admin-table.interviews [data-label]::before {
+    color: #74717a;
+    content: attr(data-label);
+    display: block;
+    font:
+      500 10px "DM Mono",
+      monospace;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+  }
+  .admin-table.applicants .admin-row-actions,
+  .admin-table.interviews .admin-row-actions {
+    border-top: 1px solid #ece7dd;
+    gap: 18px;
+    justify-content: flex-end;
+    padding-top: 12px;
   }
   .applicant-facts {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -13871,7 +14014,73 @@ input[type="month"]:focus-visible {
 }
 @media (max-width: 720px) {
   .interview-stats {
+    gap: 8px;
     grid-template-columns: minmax(0, 1fr);
+  }
+  .interview-stats article {
+    align-items: center;
+    column-gap: 12px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: 12px 16px;
+  }
+  .interview-stats article span {
+    color: #202129;
+    font-weight: 600;
+  }
+  .interview-stats article b {
+    font-size: 28px;
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    margin: 0;
+  }
+  .interview-stats article small {
+    font-size: 12px;
+    margin-top: 2px;
+  }
+  .admin-table.interviews {
+    overflow: visible;
+  }
+  .admin-table.interviews .admin-row {
+    align-items: start;
+    gap: 14px 12px;
+    grid-template-areas:
+      "identity identity"
+      "when status"
+      "where where"
+      "actions actions";
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    min-width: 0;
+    padding: 16px;
+  }
+  .admin-table.interviews .admin-row-head {
+    display: none;
+  }
+  .admin-table.interviews .applicant-identity {
+    grid-area: identity;
+  }
+  .interview-when {
+    grid-area: when;
+  }
+  .interview-when b {
+    white-space: normal;
+  }
+  .interview-status {
+    grid-area: status;
+  }
+  .interview-where {
+    flex-wrap: wrap;
+    grid-area: where;
+  }
+  .interview-where::before {
+    flex-basis: 100%;
+  }
+  .interview-where span {
+    flex: 1;
+    min-width: 0;
+  }
+  .admin-table.interviews .admin-row-actions {
+    grid-area: actions;
   }
   .interview-bulk {
     flex-direction: column;
@@ -14439,7 +14648,6 @@ input[type="month"]:focus-visible {
   }
 }
 
-/* Job seeker dashboard layout */
 .workspace-hero {
   background: linear-gradient(135deg, #10162e, #273c70);
   color: white;
@@ -14449,7 +14657,6 @@ input[type="month"]:focus-visible {
   position: relative;
 }
 
-/* Shared edit-profile hero */
 .edit-profile-hero {
   box-sizing: border-box;
   color: #fff;
@@ -15187,7 +15394,6 @@ input[type="month"]:focus-visible {
   height: 13px;
   width: 13px;
 }
-/* Everything in this list is saved, so its bookmark reads as filled. */
 .saved-job-list article > button svg {
   fill: currentColor;
 }
@@ -16048,7 +16254,6 @@ input[type="month"]:focus-visible {
   font-size: 20px;
 }
 
-/* Assessment certificate sharing */
 
 .certificate-actions {
   display: flex;
@@ -16164,7 +16369,6 @@ input[type="month"]:focus-visible {
   }
 }
 
-/* Shared loading language: preserve the final data layout while requests resolve. */
 @keyframes polaris-skeleton-shine {
   0% {
     background-position: 120% 0;
@@ -16333,7 +16537,6 @@ input[type="month"]:focus-visible {
   text-decoration-color: currentColor;
 }
 
-/* Independent profile columns: right-hand cards keep their natural vertical flow. */
 .profile-left-column,
 .profile-right-column {
   align-content: start;
@@ -16462,7 +16665,6 @@ input[type="month"]:focus-visible {
   }
 }
 
-/* Keep the two company columns independent while enforcing real vertical space. */
 .company-profile-columns > .profile-left-column,
 .company-profile-columns > .profile-right-column {
   align-items: stretch;
@@ -16598,7 +16800,6 @@ input[type="month"]:focus-visible {
   font-size: 11px;
 }
 
-/* Shared navigation and footer typography across every route wrapper. */
 .site-nav .nav-mark,
 .workspace-brand,
 .app-brand,
@@ -16820,7 +17021,6 @@ input[type="month"]:focus-visible {
   }
 }
 
-/* Developer subscription management */
 
 .subscription-management-page .panel-grid {
   align-items: stretch;
@@ -16962,7 +17162,6 @@ input[type="month"]:focus-visible {
   }
 }
 
-/* Final specificity for shared hero rhythm and Stories rails. */
 .stories-page .social-garden dl {
   grid-template-columns: repeat(5, minmax(0, 1fr));
 }
@@ -16985,7 +17184,6 @@ body.polaris-signed-out .hero-night .hero-wrap {
   }
 }
 
-/* Keep every hero on the same vertical rhythm for the current auth state. */
 :root {
   --polaris-signed-out-hero-height: clamp(560px, 78vh, 860px);
 }
@@ -17106,7 +17304,6 @@ body.polaris-signed-out .hero-night .hero-wrap {
   min-height: 0 !important;
 }
 
-/* Profile unavailable is a complete page; the navbar is no longer a flex item. */
 .seeker-profile-not-found-page .seeker-profile-not-found {
   align-items: center;
   display: flex;
@@ -17262,9 +17459,6 @@ button.is-request-loading::after {
   }
 }
 
-/* Definitive hero sizing: Companies is the signed-in reference and About is
-   the public reference. Keep this block last so page-level hero CSS cannot
-   reintroduce different heights or off-centre content. */
 :root {
   --polaris-signed-in-hero-height: 410px;
   --polaris-signed-out-hero-height: clamp(640px, 84vh, 920px);
@@ -17321,8 +17515,6 @@ button.is-request-loading::after {
     min-height: var(--polaris-signed-out-hero-height) !important;
   }
 
-  /* Public profiles need the same generous hero height whether the viewer is
-     authenticated or not. */
   body.polaris-signed-in :is(.company-profile-hero, .seeker-profile-hero) {
     height: var(--polaris-signed-out-hero-height) !important;
     max-height: var(--polaris-signed-out-hero-height) !important;
@@ -17413,7 +17605,6 @@ button:disabled {
   cursor: not-allowed;
 }
 
-/* One consistent action weight across native buttons and link-style buttons. */
 button,
 .button,
 [role="button"] {
@@ -17512,9 +17703,6 @@ button,
   }
 }
 
-/* Touch devices use explicit carousel controls instead of relying on a mouse
-   wheel to advance the hiring constellation. Kept last to override the legacy
-   constellation iterations above. */
 .constellation-mobile-controls {
   display: none;
 }
@@ -17720,8 +17908,6 @@ button,
   }
 }
 
-/* Complete mobile navigation: every desktop destination remains reachable
-   through one compact dropdown. */
 .mobile-nav-toggle,
 .mobile-nav-menu {
   display: none;
@@ -17853,16 +18039,12 @@ button,
   }
 }
 
-/* Job details are public, but their compact summary hero should keep the same
-   height before and after authentication. Other signed-out heroes stay tall. */
 body.polaris-signed-out .job-detail-page .job-hero {
   height: var(--polaris-signed-in-hero-height) !important;
   max-height: var(--polaris-signed-in-hero-height) !important;
   min-height: var(--polaris-signed-in-hero-height) !important;
 }
 
-/* Location comboboxes inside profile forms use the same field shell as every
-   other input; the search icon stays inside instead of beside the field. */
 .profile-fields label > .country-combobox {
   background: #fcfaf4;
   border: 1px solid #ded9cf;
@@ -17998,8 +18180,6 @@ body.polaris-signed-out .job-detail-page .job-hero {
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 24px;
   margin-bottom: 12px;
-  /* Every row matches the tallest card in the grid, so rows stay uniform
-     even when one card carries a badge or a distance line. */
   grid-auto-rows: 1fr;
 }
 
@@ -18011,9 +18191,6 @@ body.polaris-signed-out .job-detail-page .job-hero {
   gap: 16px;
 }
 
-/* Keep the Companies page inside the mobile viewport. The pagination rules
-   above are declared after the original responsive grid, so its 300px column
-   minimum needs an explicit mobile override here. */
 .browse-companies-page,
 .browse-companies-page main,
 .company-results,
@@ -18171,11 +18348,6 @@ body.polaris-signed-out .job-detail-page .job-hero {
   }
 }
 
-/* Profile and company heroes: the shared hero rule forces 36px of bottom
-   padding, but the content section below is pulled up by -96px, so the last
-   60px of the hero was sitting underneath the cards. Reserve the overlap, and
-   centre the hero as a column so an action row centres as a block rather than
-   relying on inline text alignment. */
 .company-profile-intro,
 .seeker-profile-intro {
   align-items: center;
@@ -18193,8 +18365,6 @@ body.polaris-signed-out .job-detail-page .job-hero {
   justify-content: center;
   margin-top: 26px;
 }
-/* The two actions were different sizes and sat a single collapsed space
-   apart. Match them so they read as one control group. */
 .company-profile-actions > .company-profile-website,
 .company-profile-actions > .company-profile-edit {
   font-size: 14px;
@@ -18211,8 +18381,6 @@ body.polaris-signed-out .job-detail-page .job-hero {
   }
 }
 
-/* Salary converter on the job detail page. Listed amount on the left, the
-   converted one on the right, so the two are read as a comparison. */
 .salary-converter {
   background: #fcfaf4;
   border: 1px solid #ded9cf;
@@ -18296,17 +18464,10 @@ body.polaris-signed-out .job-detail-page .job-hero {
   }
 }
 
-/* The navbar is fixed and owns the top 68px. The landing hero centres the
-   latest-drop card in its row, so on a short laptop screen a full card of five
-   roles rode up to 11px from the navbar. Reserve the clearance. The selector
-   matches the shared hero rule's specificity and wins on source order rather
-   than stacking another !important level. */
 body .hero-night > .hero-wrap {
   padding-top: 104px !important;
 }
 
-/* Story cards clamp their quote so one long review cannot make a card taller
-   than a phone screen. The toggle only renders when text is actually hidden. */
 .story-rail article blockquote {
   display: -webkit-box;
   overflow: hidden;
@@ -18339,7 +18500,6 @@ body .hero-night > .hero-wrap {
 .story-rail.dark .story-quote-toggle {
   color: #bcd0f5;
 }
-/* Cards sit at the top of the rail, so expanding one does not stretch the rest. */
 .story-rail-track {
   align-items: flex-start;
 }
@@ -18359,11 +18519,6 @@ body .hero-night > .hero-wrap {
   }
 }
 
-/* The navbar is fixed and owns the top 68px of the viewport. The shared hero
-   rule above reserves only 60px, so any hero whose content fills its section
-   rather than centring inside it puts its first line under the navbar. Repeat
-   that rule's selector list so this wins on source order rather than by
-   stacking another !important level. */
 :is(
   .dashboard-wrap,
   .workspace-hero-inner,
@@ -18384,24 +18539,12 @@ body .hero-night > .hero-wrap {
   padding-top: 96px !important;
 }
 
-/* A row only animates when it has more than a screenful. With one or two
-   reviews the track stays put and centres, so a single review is shown once
-   instead of being repeated to fill the loop. */
 .marquee.is-static {
   animation: none;
   justify-content: center;
   width: 100%;
 }
 
-/* The profile and company heroes sit above a card section that is pulled up by
-   -96px. Two things have to hold for the last button not to end up underneath
-   those cards, and neither did:
-   1. The bottom padding has to exceed that 96px. The shared hero rule sets
-      36px with !important at a higher specificity, so the clearance has to be
-      declared at a matching specificity, later in the file.
-   2. The hero has to be allowed to grow. With a pinned height the content is
-      centred, and once it is taller than the hero (a company with a logo, on a
-      short laptop window) the padding is simply centred out of view. */
 :is(
   .dashboard-wrap,
   .workspace-hero-inner,
@@ -18444,7 +18587,6 @@ body:is(.polaris-signed-in, .polaris-signed-out)
   height: auto !important;
   max-height: none !important;
   }
-/* Compact developer assessment builder */
 .assessment-builder-page {
   max-width: 1180px;
   margin: 0 auto;
@@ -18711,7 +18853,6 @@ body:is(.polaris-signed-in, .polaris-signed-out)
   }
 }
 
-/* Compact developer assessment library */
 .assessment-management-page {
   margin: 0 auto;
   max-width: 1180px;
@@ -18979,7 +19120,6 @@ body:is(.polaris-signed-in, .polaris-signed-out)
   }
 }
 
-/* Assessment publishing workflow */
 .assessment-library-actions {
   align-items: center;
   display: flex;

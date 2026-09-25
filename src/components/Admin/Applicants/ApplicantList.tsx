@@ -4,7 +4,6 @@ import { educationLabel, formatSalary } from "./applicantHelpers";
 import { formatDate, goodScore } from "../adminData";
 import { statusLabels, type ApplicantListItem, type ApplicationStatus } from "../../../types/applicant";
 
-/** Matches the original applicant-table chip styling. */
 const statusTones: Record<ApplicationStatus, string> = {
   PENDING: "",
   TEST_ASSIGNED: "wait",
@@ -40,11 +39,11 @@ export function ApplicantList({ applicants, onOpen, onPreviewCv }: ApplicantList
             <b>{item.applicant.name}</b>
             {item.priorityReview && <em className="admin-chip good">Priority</em>}
           </span>
-          <span>{item.applicant.age ?? "N/A"}</span>
-          <span>{educationLabel(item.applicant.lastEducation)}</span>
-          <span>{formatSalary(item.expectedSalary, item.expectedSalaryCurrency)}</span>
-          <span>{formatDate(item.appliedAt)}</span>
-          <span>
+          <span data-label="Age">{item.applicant.age ?? "N/A"}</span>
+          <span data-label="Education">{educationLabel(item.applicant.lastEducation)}</span>
+          <span data-label="Expected salary">{formatSalary(item.expectedSalary, item.expectedSalaryCurrency)}</span>
+          <span data-label="Applied">{formatDate(item.appliedAt)}</span>
+          <span data-label="Test score">
             {item.testScore == null ? (
               <em className="admin-chip">No test</em>
             ) : (
@@ -53,7 +52,7 @@ export function ApplicantList({ applicants, onOpen, onPreviewCv }: ApplicantList
               </em>
             )}
           </span>
-          <span>
+          <span data-label="Status">
             <em className={`admin-chip ${statusTones[item.status]}`}>{statusLabels[item.status]}</em>
           </span>
           <span className="admin-row-actions">

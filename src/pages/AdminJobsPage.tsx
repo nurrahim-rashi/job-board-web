@@ -142,7 +142,7 @@ export default function AdminJobsPage() {
           <h2>{error.message}</h2>
         </div>
       ) : results.length ? (
-        <div className="admin-table">
+        <div className="admin-table jobs">
           <div className="admin-row admin-row-head">
             <span>Role</span>
             <span>Category</span>
@@ -159,19 +159,19 @@ export default function AdminJobsPage() {
                   {job.cityLocation} · {formatSalary(job)}
                 </small>
               </span>
-              <span>
+              <span className="admin-job-category">
                 <em className="admin-chip">{categoryLabel(job.category)}</em>
               </span>
-              <span>
+              <span className="admin-job-applied">
                 <b>{job.applicantCount}</b> applied
               </span>
-              <span>
+              <span className="admin-job-deadline">
                 {formatDate(job.deadline)}
                 <small className={daysLeft(job.deadline) < 0 ? "danger" : ""}>
                   {daysLeft(job.deadline) < 0 ? "Closed" : `${daysLeft(job.deadline)} days left`}
                 </small>
               </span>
-              <span>
+              <span className="admin-job-publish">
                 <button
                   type="button"
                   role="switch"
