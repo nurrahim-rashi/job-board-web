@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode, useLayoutEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Briefcase, Building, Calendar, Clipboard, Gauge, Users } from "../site/Icons";
 import { useAuth } from "../../stores/useAuth";
@@ -22,6 +22,15 @@ export function AdminShell({ eyebrow, title, lead, actions, showHeader = true, c
   const { pathname } = useLocation();
   const company = useAuth((state) => state.user?.company);
   const isActive = (to: string) => (to === "/admin" ? pathname === "/admin" || pathname.startsWith("/admin/jobs") : pathname.startsWith(to));
+  const navRef = useRef<HTMLElement>(null);
+
+  useLayoutEffect(() => {
+    const nav = navRef.current;
+    const active = nav?.querySelector<HTMLElement>("a.active");
+    if (!nav || !active || nav.scrollWidth <= nav.clientWidth) return;
+    const offset = active.getBoundingClientRect().left - nav.getBoundingClientRect().left;
+    nav.scrollLeft += offset - (nav.clientWidth - active.offsetWidth) / 2;
+  }, [pathname]);
   async function handleLogout() {
     await logout();
     navigateAfterLogout();
@@ -32,7 +41,7 @@ export function AdminShell({ eyebrow, title, lead, actions, showHeader = true, c
         <aside className="admin-side">
           <Link className="admin-side-brand" to="/admin">✦ Polaris</Link>
           <p className="eyebrow">Company admin</p>
-          <nav>
+          <nav ref={navRef}>
             {menu.map((item) => (
               <Link key={item.to} to={item.to} className={isActive(item.to) ? "active" : ""}>
                 <item.icon />

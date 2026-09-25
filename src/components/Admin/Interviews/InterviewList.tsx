@@ -30,11 +30,11 @@ export function InterviewList({ interviews, onEdit, onDelete }: InterviewListPro
               <ApplicantAvatar name={interview.applicant.name} avatar={interview.applicant.avatar} />
               <b>{interview.applicant.name}</b>
             </span>
-            <span className="interview-when">
+            <span className="interview-when" data-label="Schedule">
               <b>{formatDay(interview.interviewDate)}</b>
               <small>{countdownLabel(interview.interviewDate)}</small>
             </span>
-            <span className="interview-where">
+            <span className="interview-where" data-label="Where">
               {online ? <Video /> : <MapPin />}
               {online ? (
                 <a href={interview.locationOrLink} target="_blank" rel="noreferrer">
@@ -44,7 +44,7 @@ export function InterviewList({ interviews, onEdit, onDelete }: InterviewListPro
                 <span title={interview.locationOrLink}>{interview.locationOrLink}</span>
               )}
             </span>
-            <span>
+            <span className="interview-status" data-label="Status">
               <StatusBadge status={interview.status} />
               <small>H-1 · {reminder.label}</small>
             </span>
