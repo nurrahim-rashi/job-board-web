@@ -8,11 +8,13 @@ import {
   type JobApplicationStatus,
 } from "../services/application.service";
 import { getPublicJob, type PublicJobDetail } from "../services/job.service";
+import { getMySavedJobIds, saveJob, unsaveJob } from "../services/saved-job.service";
 import { useAuth } from "../stores/useAuth";
 import { isNewJob } from "../lib/job-age";
 import { categoryLabel } from "../types/job-posting";
 import { ShareJobModal } from "../components/JobDetail/ShareJobModal";
 import { ExpandableContent } from "../components/site/ExpandableContent";
+import { RichText } from "../components/site/RichText";
 import { SalaryConverter } from "../components/JobDetail/SalaryConverter";
 import {
   Bookmark,
@@ -47,22 +49,23 @@ export default function JobDetailPage() {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    if (!user || user.role !== "JOB_SEEKER") return setSaved(false);
-    const savedJobs = JSON.parse(
-      localStorage.getItem(`polaris-saved-jobs-${user.id}`) ?? "[]",
-    ) as string[];
-    setSaved(savedJobs.includes(slug));
-  }, [slug, user]);
+    if (!user || user.role !== "JOB_SEEKER" || !job) return setSaved(false);
+    getMySavedJobIds()
+      .then((ids) => setSaved(ids.includes(job.id)))
+      .catch(() => setSaved(false));
+  }, [job, user]);
 
-  const toggleSaved = () => {
+  const toggleSaved = async () => {
     if (!user || user.role !== "JOB_SEEKER") return;
-    const key = `polaris-saved-jobs-${user.id}`;
-    const savedJobs = JSON.parse(localStorage.getItem(key) ?? "[]") as string[];
-    const next = savedJobs.includes(slug)
-      ? savedJobs.filter((item) => item !== slug)
-      : [...savedJobs, slug];
-    localStorage.setItem(key, JSON.stringify(next));
-    setSaved(next.includes(slug));
+    const next = !saved;
+    setSaved(next);
+    try {
+      if (next) await saveJob(slug);
+      else await unsaveJob(slug);
+    } catch (error) {
+      setSaved(!next);
+      toast.error(error instanceof Error ? error.message : "Unable to update saved jobs.");
+    }
   };
 
   useEffect(() => {
@@ -205,7 +208,7 @@ export default function JobDetailPage() {
                   type="button"
                   className={saved ? "saved" : ""}
                   aria-pressed={saved}
-                  onClick={toggleSaved}
+                  onClick={() => void toggleSaved()}
                 >
                   <Bookmark />
                   {saved ? "Saved" : "Save job"}
@@ -302,7 +305,7 @@ export default function JobDetailPage() {
               )}
               <section className="job-company-card">
                 <p className="eyebrow">About {job.company.companyName}</p>
-                <p>{job.company.profileContent}</p>
+                <RichText html={job.company.profileContent} />
                 <dl className="company-post-meta">
                   <div>
                     <dt>Posted by</dt>

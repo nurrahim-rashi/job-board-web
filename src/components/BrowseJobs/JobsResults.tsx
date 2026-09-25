@@ -9,6 +9,8 @@ import { useAuth } from "../../stores/useAuth";
 import { ShareJobModal } from "../JobDetail/ShareJobModal";
 import { formatJobLocation } from "../../lib/location";
 import { formatCurrencyRange } from "../../lib/currency";
+import { getMySavedJobIds, saveJob, unsaveJob } from "../../services/saved-job.service";
+import { toast } from "react-hot-toast";
 
 const salary = (job: PublicJob) =>
   formatCurrencyRange(job.salaryMin, job.salaryMax, job.salaryCurrency);
@@ -29,26 +31,29 @@ export function JobsResults({
   onReset: () => void;
 }) {
   const user = useAuth((state) => state.user);
-  const [saved, setSaved] = useState<string[]>([]);
+  const [saved, setSaved] = useState<number[]>([]);
   const [sharing, setSharing] = useState<PublicJob | null>(null);
   const [page, setPage] = useState(1);
   const pageSize = 9;
   const totalPages = Math.max(1, Math.ceil(jobs.length / pageSize));
-  const storageKey = user ? `polaris-saved-jobs-${user.id}` : "";
   useEffect(() => {
     if (user?.role !== "JOB_SEEKER") {
       setSaved([]);
       return;
     }
-    setSaved(JSON.parse(localStorage.getItem(storageKey) ?? "[]") as string[]);
-  }, [storageKey, user?.role]);
+    getMySavedJobIds().then(setSaved).catch(() => setSaved([]));
+  }, [user?.role]);
   useEffect(() => setPage(1), [jobs]);
-  const toggleSaved = (slug: string) => {
-    const next = saved.includes(slug)
-      ? saved.filter((item) => item !== slug)
-      : [...saved, slug];
-    setSaved(next);
-    localStorage.setItem(storageKey, JSON.stringify(next));
+  const toggleSaved = async (job: PublicJob) => {
+    const isSaved = saved.includes(job.id);
+    setSaved((current) => (isSaved ? current.filter((id) => id !== job.id) : [...current, job.id]));
+    try {
+      if (isSaved) await unsaveJob(job.slug);
+      else await saveJob(job.slug);
+    } catch (error) {
+      setSaved((current) => (isSaved ? [...current, job.id] : current.filter((id) => id !== job.id)));
+      toast.error(error instanceof Error ? error.message : "Unable to update saved jobs.");
+    }
   };
   if (loading)
     return (
@@ -96,10 +101,10 @@ export function JobsResults({
                                 <button
                                   type="button"
                                   className={
-                                    saved.includes(job.slug) ? "saved" : ""
+                                    saved.includes(job.id) ? "saved" : ""
                                   }
-                                  aria-label={`${saved.includes(job.slug) ? "Remove" : "Save"} ${job.title}`}
-                                  onClick={() => toggleSaved(job.slug)}
+                                  aria-label={`${saved.includes(job.id) ? "Remove" : "Save"} ${job.title}`}
+                                  onClick={() => void toggleSaved(job)}
                                 >
                                   <Bookmark />
                                 </button>

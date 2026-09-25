@@ -10,6 +10,7 @@ import { removeCompanyMedia, uploadCompanyMedia } from "../services/company.serv
 import { getCountries, getWorldwideCities, getWorldwideStates, type Region } from "../services/region.service";
 import { CountryCombobox } from "../components/site/CountryCombobox";
 import { LocationFilterCombobox } from "../components/site/LocationFilterCombobox";
+import { RichTextEditor } from "../components/site/RichTextEditor";
 
 const lines = (value: FormDataEntryValue | null) =>
   String(value ?? "").split("\n").map((item) => item.trim()).filter(Boolean);
@@ -150,8 +151,8 @@ export default function CompanyEditProfilePage() {
             <label>Company size<select name="companySize" defaultValue={companySizes.includes(company.size) ? company.size : ""}><option value="">Select company size</option>{companySizes.map((size) => <option key={size} value={size}>{size}</option>)}</select></label>
             <label>Founded year<select name="companyFounded" defaultValue={company.founded ?? ""}><option value="">Select year</option>{foundedYears.map((year) => <option key={year} value={year}>{year}</option>)}</select></label>
             <label className="profile-wide">Company website<input name="companyWebsite" type="url" defaultValue={company.website} placeholder="https://company.com" /></label>
-            <label className="profile-wide">Tagline<input name="companyTagline" defaultValue={company.tagline} placeholder="A short line about your company" /></label>
-            <label className="profile-wide">Company profile content<textarea name="profileContent" defaultValue={company.profileContent} /></label>
+            <label className="profile-wide">Tagline <small>one short line, max 140 characters</small><input name="companyTagline" defaultValue={company.tagline} maxLength={140} placeholder="A short line about your company" /></label>
+            <label className="profile-wide">Company profile content<RichTextEditor name="profileContent" defaultValue={company.profileContent} placeholder="Tell candidates what it's like to work here." /></label>
             <label className="profile-wide">Perks &amp; life there <small>one per line</small><textarea name="companyPerks" defaultValue={company.perks.join("\n")} /></label>
             <div className="profile-wide experience-editor selected-work-editor">
               <div className="experience-editor-heading">

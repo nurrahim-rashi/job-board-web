@@ -5,6 +5,7 @@ import type { PublicCompany } from "../../services/company.service";
 import { DataSkeleton } from "../site/DataSkeleton";
 import { formatCompanyLocation } from "../../lib/location";
 import { hasTopTierQuality } from "../../lib/quality";
+import { stripRichTextToPlainText } from "../../lib/rich-text";
 
 export function CompanyResults({
   companies,
@@ -68,7 +69,7 @@ export function CompanyResults({
                       💎 Top Tier Company
                     </span>
                   )}
-                  <p className="company-about">{company.profileContent}</p>
+                  <p className="company-about">{stripRichTextToPlainText(company.profileContent)}</p>
                   {company.distance != null && (
                     <small>
                       <MapPin />

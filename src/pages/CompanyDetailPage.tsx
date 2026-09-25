@@ -12,6 +12,8 @@ import { DataSkeleton } from "../components/site/DataSkeleton";
 import { QualityScoreCard } from "../components/Profile/QualityScoreCard";
 import { PageLoading } from "../components/site/PageLoading";
 import { ExpandableContent } from "../components/site/ExpandableContent";
+import { RichText } from "../components/site/RichText";
+import { stripRichTextToPlainText } from "../lib/rich-text";
 import { useMatchedCardMinHeights } from "../hooks/useMatchedCardMinHeights";
 import { CompanyReviews } from "../components/CompanyReview/CompanyReviews";
 import {
@@ -83,7 +85,12 @@ export default function CompanyDetailPage() {
 
   const founded = company.founded ?? new Date(company.createdAt).getFullYear();
   const size = company.size || "Independent company";
-  const tagline = company.tagline || company.profileContent;
+  const strippedProfileContent = stripRichTextToPlainText(company.profileContent);
+  const tagline =
+    company.tagline ||
+    (strippedProfileContent.length > 160
+      ? `${strippedProfileContent.slice(0, 160).trimEnd()}…`
+      : strippedProfileContent);
   const products = company.products ?? [];
   const canEdit =
     user?.role === "COMPANY_ADMIN" && String(user.company?.id) === companyId;
@@ -157,7 +164,7 @@ export default function CompanyDetailPage() {
                 <h2>About the company</h2>
                 <ExpandableContent maxHeight={300}>
                   {company.profileContent ? (
-                    <p>{company.profileContent}</p>
+                    <RichText html={company.profileContent} />
                   ) : (
                     <div className="company-profile-empty">
                       <p>No company profile has been added yet.</p>
