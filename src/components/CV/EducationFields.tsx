@@ -95,7 +95,7 @@ export function EducationFields({ value, onChange }: Props) {
           </label>
 
           {value.length > 1 && (
-            <button type="button" onClick={() => remove(index)}>
+            <button className="cv-remove-button" type="button" onClick={() => remove(index)}>
               Remove education
             </button>
           )}
@@ -103,6 +103,7 @@ export function EducationFields({ value, onChange }: Props) {
       ))}
 
       <button
+        className="cv-add-button"
         type="button"
         onClick={() => onChange([...value, emptyEducation()])}
       >

@@ -32,11 +32,13 @@ import {
 } from "../components/Profile/SocialLinks";
 import { useMatchedCardMinHeights } from "../hooks/useMatchedCardMinHeights";
 import {
+  fetchAssessmentBadges,
   fetchAssessmentSkillOptions,
   startAssessment,
   type AssessmentSkillOption,
 } from "../lib/assessment-api";
 import { formatLocation } from "../lib/location";
+import type { AssessmentBadge } from "../types/assessment";
 
 const experienceTime = (period: string) => {
   const [start = "", end = ""] = period.split(/\s+[–-]\s+/);
@@ -83,6 +85,7 @@ export default function PublicProfilePage() {
   const [assessmentSkills, setAssessmentSkills] = useState<
     AssessmentSkillOption[]
   >([]);
+  const [assessmentBadges, setAssessmentBadges] = useState<AssessmentBadge[]>([]);
   useMatchedCardMinHeights(
     columnsRef,
     ":scope > .profile-left-column > article",
@@ -128,6 +131,20 @@ export default function PublicProfilePage() {
       .then(setAssessmentSkills)
       .catch(() => setAssessmentSkills([]));
   }, [skillsModalOpen]);
+
+  useEffect(() => {
+    if (
+      currentUser?.role !== "JOB_SEEKER" ||
+      String(currentUser.id) !== userId
+    ) {
+      setAssessmentBadges([]);
+      return;
+    }
+
+    fetchAssessmentBadges()
+      .then((response) => setAssessmentBadges(response.data))
+      .catch(() => setAssessmentBadges([]));
+  }, [currentUser?.id, currentUser?.role, userId]);
 
   useEffect(() => {
     if (profile?.role !== "COMPANY_ADMIN" || !profile.company?.id) {
@@ -567,6 +584,18 @@ export default function PublicProfilePage() {
                   </div>
                 )}
               </section>
+              {isOwnProfile && assessmentBadges.length > 0 && (
+                <section>
+                  <div className="seeker-section-heading">
+                    <h2>Skill badges</h2>
+                  </div>
+                  <div className="seeker-profile-tags">
+                    {assessmentBadges.map((badge) => (
+                      <span key={badge.assessmentId}>{badge.badgeName}</span>
+                    ))}
+                  </div>
+                </section>
+              )}
               <section>
                 <div className="seeker-section-heading">
                   <h2>Social links</h2>

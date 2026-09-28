@@ -112,13 +112,14 @@ export function WorkExperienceFields({ value, onChange }: Props) {
             />
           </label>
 
-          <button type="button" onClick={() => remove(index)}>
+          <button className="cv-remove-button" type="button" onClick={() => remove(index)}>
             Remove experience
           </button>
         </div>
       ))}
 
       <button
+        className="cv-add-button"
         type="button"
         onClick={() => onChange([...value, emptyExperience()])}
       >

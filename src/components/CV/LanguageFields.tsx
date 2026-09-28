@@ -51,13 +51,14 @@ export function LanguageFields({ value, onChange }: Props) {
             />
           </label>
 
-          <button type="button" onClick={() => remove(index)}>
+          <button className="cv-remove-button" type="button" onClick={() => remove(index)}>
             Remove language
           </button>
         </div>
       ))}
 
       <button
+        className="cv-add-button"
         type="button"
         onClick={() => onChange([...value, emptyLanguage()])}
       >
