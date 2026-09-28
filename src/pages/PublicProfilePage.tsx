@@ -85,7 +85,9 @@ export default function PublicProfilePage() {
   const [assessmentSkills, setAssessmentSkills] = useState<
     AssessmentSkillOption[]
   >([]);
-  const [assessmentBadges, setAssessmentBadges] = useState<AssessmentBadge[]>([]);
+  const [assessmentBadges, setAssessmentBadges] = useState<AssessmentBadge[]>(
+    [],
+  );
   useMatchedCardMinHeights(
     columnsRef,
     ":scope > .profile-left-column > article",
@@ -141,9 +143,24 @@ export default function PublicProfilePage() {
       return;
     }
 
+    let isCurrent = true;
+    setAssessmentBadges([]);
+
     fetchAssessmentBadges()
-      .then((response) => setAssessmentBadges(response.data))
-      .catch(() => setAssessmentBadges([]));
+      .then((response) => {
+        if (isCurrent) {
+          setAssessmentBadges(response.data);
+        }
+      })
+      .catch(() => {
+        if (isCurrent) {
+          setAssessmentBadges([]);
+        }
+      });
+
+    return () => {
+      isCurrent = false;
+    };
   }, [currentUser?.id, currentUser?.role, userId]);
 
   useEffect(() => {
@@ -173,7 +190,9 @@ export default function PublicProfilePage() {
             <div className="seeker-profile-not-found-copy">
               <p className="eyebrow light">Profile unavailable</p>
               <h1>We couldn't find this profile</h1>
-              <p>It may have been removed, made private, or the link is wrong.</p>
+              <p>
+                It may have been removed, made private, or the link is wrong.
+              </p>
               <a href="/jobs">Browse jobs</a>
             </div>
           </section>
@@ -199,7 +218,11 @@ export default function PublicProfilePage() {
     );
   }
 
-  const location = formatLocation(profile.city, profile.province, profile.country);
+  const location = formatLocation(
+    profile.city,
+    profile.province,
+    profile.country,
+  );
   const experiences = [...(profile.experiences ?? [])].sort(
     (a, b) => experienceTime(b.period) - experienceTime(a.period),
   );
@@ -249,7 +272,9 @@ export default function PublicProfilePage() {
             {location && <span>{location}</span>}
             {profile.lastEducation && <span>{profile.lastEducation}</span>}
             {profile.salaryExpectation && (
-              <span>{profile.salaryExpectationCurrency} {profile.salaryExpectation}</span>
+              <span>
+                {profile.salaryExpectationCurrency} {profile.salaryExpectation}
+              </span>
             )}
           </div>
           {isOwnProfile && (
@@ -510,7 +535,11 @@ export default function PublicProfilePage() {
                           <a
                             key={link.label}
                             href={link.url}
-                            target={link.url.startsWith("mailto:") ? undefined : "_blank"}
+                            target={
+                              link.url.startsWith("mailto:")
+                                ? undefined
+                                : "_blank"
+                            }
                             rel="noreferrer"
                           >
                             {link.label}
@@ -602,7 +631,11 @@ export default function PublicProfilePage() {
                   {isOwnProfile && (
                     <button
                       type="button"
-                      aria-label={hasSocialLinks ? "Edit social links" : "Add social links"}
+                      aria-label={
+                        hasSocialLinks
+                          ? "Edit social links"
+                          : "Add social links"
+                      }
                       onClick={() => setSocialLinksModalOpen(true)}
                     >
                       {hasSocialLinks ? <Pencil /> : <Plus />}
@@ -625,7 +658,9 @@ export default function PublicProfilePage() {
                 <Clipboard />
               </div>
               <p className="eyebrow">Verified skills</p>
-              <h2>Applicants with skill badges are more likely to get noticed</h2>
+              <h2>
+                Applicants with skill badges are more likely to get noticed
+              </h2>
               <p>
                 Prove your strengths with a Polaris assessment and add verified
                 skill badges to your profile.
@@ -842,64 +877,69 @@ export default function PublicProfilePage() {
             }}
           />
         )}
-        {storyModalOpen && profile && createPortal(
-          <div
-            className="experience-modal"
-            onMouseDown={(event) =>
-              event.target === event.currentTarget && setStoryModalOpen(false)
-            }
-          >
-            <form
-              className="experience-modal-dialog"
-              onSubmit={async (event) => {
-                event.preventDefault();
-                try {
-                  await updateProfile({ profileStory: storyDraft });
-                  await refreshProfile();
-                  setStoryModalOpen(false);
-                  toast.success("Story updated.");
-                } catch (error) {
-                  toast.error(
-                    error instanceof Error
-                      ? error.message
-                      : "Unable to update story.",
-                  );
-                }
-              }}
+        {storyModalOpen &&
+          profile &&
+          createPortal(
+            <div
+              className="experience-modal"
+              onMouseDown={(event) =>
+                event.target === event.currentTarget && setStoryModalOpen(false)
+              }
             >
-              <header>
-                <div>
-                  <p className="eyebrow">About you</p>
-                  <h2>Edit my story</h2>
+              <form
+                className="experience-modal-dialog"
+                onSubmit={async (event) => {
+                  event.preventDefault();
+                  try {
+                    await updateProfile({ profileStory: storyDraft });
+                    await refreshProfile();
+                    setStoryModalOpen(false);
+                    toast.success("Story updated.");
+                  } catch (error) {
+                    toast.error(
+                      error instanceof Error
+                        ? error.message
+                        : "Unable to update story.",
+                    );
+                  }
+                }}
+              >
+                <header>
+                  <div>
+                    <p className="eyebrow">About you</p>
+                    <h2>Edit my story</h2>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setStoryModalOpen(false)}
+                  >
+                    ×
+                  </button>
+                </header>
+                <div className="profile-fields">
+                  <label className="profile-wide">
+                    My story
+                    <textarea
+                      autoFocus
+                      value={storyDraft}
+                      onChange={(event) => setStoryDraft(event.target.value)}
+                    />
+                  </label>
                 </div>
-                <button type="button" onClick={() => setStoryModalOpen(false)}>
-                  ×
-                </button>
-              </header>
-              <div className="profile-fields">
-                <label className="profile-wide">
-                  My story
-                  <textarea
-                    autoFocus
-                    value={storyDraft}
-                    onChange={(event) => setStoryDraft(event.target.value)}
-                  />
-                </label>
-              </div>
-              <footer>
-                <button
-                  type="button"
-                  className="experience-modal-dismiss"
-                  onClick={() => setStoryModalOpen(false)}
-                >
-                  Dismiss
-                </button>
-                <button className="profile-submit">Save</button>
-              </footer>
-            </form>
-          </div>,
-          document.body,
-        )}
+                <footer>
+                  <button
+                    type="button"
+                    className="experience-modal-dismiss"
+                    onClick={() => setStoryModalOpen(false)}
+                  >
+                    Dismiss
+                  </button>
+                  <button className="profile-submit">Save</button>
+                </footer>
+              </form>
+            </div>,
+            document.body,
+          )}
       </section>
     </div>
   );
