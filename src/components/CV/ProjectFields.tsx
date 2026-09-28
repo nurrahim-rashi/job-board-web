@@ -70,13 +70,14 @@ export function ProjectFields({ value, onChange }: Props) {
             />
           </label>
 
-          <button type="button" onClick={() => remove(index)}>
+          <button className="cv-remove-button" type="button" onClick={() => remove(index)}>
             Remove project
           </button>
         </div>
       ))}
 
       <button
+        className="cv-add-button"
         type="button"
         onClick={() => onChange([...value, emptyProject()])}
       >

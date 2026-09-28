@@ -19311,3 +19311,38 @@ body:is(.polaris-signed-in, .polaris-signed-out)
 .rich-text-editor-content a {
   color: #485eb4;
 }
+
+.assessment-take-page > main {
+  padding-top: 72px;
+}
+
+/* CV Generator field controls */
+.cv-add-button,
+.cv-remove-button {
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 700;
+  margin-top: 14px;
+  padding: 7px 14px;
+}
+
+.cv-add-button {
+  background: #485eb4;
+  border: 1px solid #485eb4;
+  color: white;
+}
+
+.cv-remove-button {
+  background: transparent;
+  border: 1px solid #cfc9bd;
+  color: #67656c;
+}
+
+.cv-add-button:hover {
+  background: #3d50a0;
+}
+
+.cv-remove-button:hover {
+  background: #f3f0e9;
+  border-color: #b9b2a6;
+}
