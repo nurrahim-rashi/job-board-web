@@ -7,6 +7,12 @@ import {
   endRequestButtonFeedback,
 } from "./request-button-feedback";
 
+export class ApiRequestError extends Error {
+  constructor(message: string, public code?: string) {
+    super(message);
+  }
+}
+
 const configuredApiUrl = import.meta.env.VITE_API_URL?.trim();
 const defaultApiUrl = import.meta.env.PROD
   ? "https://job-board-backend-sage.vercel.app"
@@ -43,7 +49,8 @@ axiosInstance.interceptors.response.use(
     if (axios.isAxiosError(error)) {
       endRequestButtonFeedback(error.config);
       const message = (error.response?.data as { message?: string } | undefined)?.message;
-      return Promise.reject(new Error(message ?? "Something went wrong. Please try again."));
+      const code = (error.response?.data as { code?: string } | undefined)?.code;
+      return Promise.reject(new ApiRequestError(message ?? "Something went wrong. Please try again.", code));
     }
 
     return Promise.reject(error);

@@ -73,6 +73,10 @@ export async function resendVerification(email: string) {
   await axiosInstance.post("/auth/resend-verification", { email });
 }
 
+export async function resendVerificationByToken(token: string) {
+  await axiosInstance.post("/auth/resend-verification", { token });
+}
+
 export async function forgotPassword(email: string) {
   await axiosInstance.post("/auth/forgot-password", { email });
 }

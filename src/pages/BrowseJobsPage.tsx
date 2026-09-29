@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { parseAsFloat, parseAsString, parseAsStringLiteral, useQueryStates } from "nuqs";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Footer } from "../components/Footer";
 import {
   BrowseFilters,
@@ -30,24 +31,71 @@ const categories = [
   "HEALTHCARE",
   "OTHER",
 ];
+const searchParams = {
+  q: parseAsString.withDefault(""),
+  country: parseAsString.withDefault("all"),
+  provinceName: parseAsString.withDefault("all"),
+  city: parseAsString.withDefault("all"),
+  category: parseAsStringLiteral(["all", ...categories]).withDefault("all"),
+  dateFilter: parseAsStringLiteral(["any", "7d", "30d", "range"]).withDefault("any"),
+  from: parseAsString.withDefault(""),
+  to: parseAsString.withDefault(""),
+  sort: parseAsStringLiteral(["newest", "oldest", "nearest"]).withDefault("newest"),
+  latitude: parseAsFloat,
+  longitude: parseAsFloat,
+};
+
 export default function BrowseJobsPage() {
-  const initialSearch = new URLSearchParams(window.location.search);
-  const [query, setQuery] = useState(initialSearch.get("q") ?? "");
-  const [category, setCategory] = useState(
-    initialSearch.get("category") ?? "all",
-  );
-  const [country, setCountry] = useState(initialSearch.get("country") ?? "all");
-  const [province, setProvince] = useState(
-    initialSearch.get("provinceName") ?? "all",
-  );
-  const [location, setLocation] = useState(initialSearch.get("city") ?? "all");
-  const [dateFilter, setDateFilter] = useState<DateFilter>("any");
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [sort, setSort] = useState<SortKey>("newest");
-  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
-    null,
-  );
+  const [{
+    q: query,
+    country,
+    provinceName: province,
+    city: location,
+    category,
+    dateFilter,
+    from,
+    to,
+    sort: requestedSort,
+    latitude,
+    longitude,
+  }, setParams] = useQueryStates(searchParams);
+  const coords = useMemo(() => {
+    if (latitude === null || longitude === null ||
+        !Number.isFinite(latitude) || !Number.isFinite(longitude) ||
+        Math.abs(latitude) > 90 || Math.abs(longitude) > 180) return null;
+    return { lat: latitude, lng: longitude };
+  }, [latitude, longitude]);
+  const sort = requestedSort === "nearest" && !coords ? "newest" : requestedSort;
+  const setQuery = (value: string) => {
+    void setParams({ q: value });
+  };
+  const setCountry = (value: string) => {
+    void setParams({ country: value });
+  };
+  const setProvince = (value: string) => {
+    void setParams({ provinceName: value });
+  };
+  const setLocation = (value: string) => {
+    void setParams({ city: value });
+  };
+  const setCategory = (value: string) => {
+    void setParams({ category: value });
+  };
+  const setDateFilter = (value: DateFilter) => {
+    void setParams({ dateFilter: value });
+  };
+  const setFrom = (value: string) => {
+    void setParams({ from: value });
+  };
+  const setTo = (value: string) => {
+    void setParams({ to: value });
+  };
+  const setSort = (value: SortKey) => {
+    void setParams({ sort: value });
+  };
+  const setCoords = (value: { lat: number; lng: number } | null) => {
+    void setParams({ latitude: value?.lat ?? null, longitude: value?.lng ?? null });
+  };
   const [locating, setLocating] = useState(false);
   const [jobs, setJobs] = useState<PublicJob[]>([]);
   const [loading, setLoading] = useState(true);
