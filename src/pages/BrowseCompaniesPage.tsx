@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { parseAsFloat, parseAsString, parseAsStringLiteral, useQueryStates } from "nuqs";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CompaniesHero } from "../components/BrowseCompanies/CompaniesHero";
 import { CompanyFilters } from "../components/BrowseCompanies/CompanyFilters";
 import { CompanyResults } from "../components/BrowseCompanies/CompanyResults";
@@ -17,15 +18,51 @@ import {
 } from "../services/region.service";
 import { toast } from "react-hot-toast";
 
+const searchParams = {
+  q: parseAsString.withDefault(""),
+  country: parseAsString.withDefault("all"),
+  provinceName: parseAsString.withDefault("all"),
+  city: parseAsString.withDefault("all"),
+  sort: parseAsStringLiteral(["az", "za", "nearest"]).withDefault("az"),
+  latitude: parseAsFloat,
+  longitude: parseAsFloat,
+};
+
 export default function BrowseCompaniesPage() {
-  const initialSearch = new URLSearchParams(window.location.search);
-  const [query, setQuery] = useState(initialSearch.get("q") ?? "");
-  const [country, setCountry] = useState(initialSearch.get("country") ?? "all");
-  const [province, setProvince] = useState(
-    initialSearch.get("provinceName") ?? "all",
-  );
-  const [city, setCity] = useState(initialSearch.get("city") ?? "all");
-  const [sort, setSort] = useState<"az" | "za" | "nearest">("az");
+  const [{
+    q: query,
+    country,
+    provinceName: province,
+    city,
+    sort: requestedSort,
+    latitude,
+    longitude,
+  }, setParams] = useQueryStates(searchParams);
+  const coords = useMemo(() => {
+    if (latitude === null || longitude === null ||
+        !Number.isFinite(latitude) || !Number.isFinite(longitude) ||
+        Math.abs(latitude) > 90 || Math.abs(longitude) > 180) return null;
+    return { lat: latitude, lng: longitude };
+  }, [latitude, longitude]);
+  const sort = requestedSort === "nearest" && !coords ? "az" : requestedSort;
+  const setQuery = (value: string) => {
+    void setParams({ q: value });
+  };
+  const setCountry = (value: string) => {
+    void setParams({ country: value });
+  };
+  const setProvince = (value: string) => {
+    void setParams({ provinceName: value });
+  };
+  const setCity = (value: string) => {
+    void setParams({ city: value });
+  };
+  const setSort = (value: "az" | "za" | "nearest") => {
+    void setParams({ sort: value });
+  };
+  const setCoords = (value: { lat: number; lng: number } | null) => {
+    void setParams({ latitude: value?.lat ?? null, longitude: value?.lng ?? null });
+  };
   const [companies, setCompanies] = useState<PublicCompany[]>([]);
   const [loading, setLoading] = useState(true);
   const [provinces, setProvinces] = useState<Region[]>([]);
@@ -33,9 +70,6 @@ export default function BrowseCompaniesPage() {
   const [cities, setCities] = useState<Region[]>([]);
   const [provincesLoading, setProvincesLoading] = useState(false);
   const [citiesLoading, setCitiesLoading] = useState(false);
-  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
-    null,
-  );
   const [locating, setLocating] = useState(false);
   const locationSnapshot = useRef<{
     country: string;

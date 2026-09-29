@@ -3,7 +3,10 @@ import {
   forgotPassword,
   resetPassword,
   verifyEmail,
+  resendVerification,
+  resendVerificationByToken,
 } from "../services/auth.service";
+import { ApiRequestError } from "../lib/axios";
 import { useAuth } from "../stores/useAuth";
 import { PasswordField } from "../components/site/PasswordField";
 
@@ -12,22 +15,61 @@ type EmailAction = "verify" | "forgot" | "reset";
 export default function EmailActionPage({ action }: { action: EmailAction }) {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const verificationStarted = useRef(false);
+  const verificationStarted = useRef("");
+  const [verificationStatus, setVerificationStatus] = useState<"checking" | "success" | "expired" | "invalid" | "error">("checking");
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
   const token = new URLSearchParams(window.location.search).get("token") ?? "";
 
   useEffect(() => {
-    if (action !== "verify" || !token || verificationStarted.current) return;
-    verificationStarted.current = true;
-
+    if (action !== "verify") return;
+    if (token.length < 20) {
+      setVerificationStatus("invalid");
+      setError("Verification link is invalid or missing a token. Request a new link.");
+      return;
+    }
+    if (verificationStarted.current === token) return;
+    verificationStarted.current = token;
+    setVerificationStatus("checking");
+    setMessage("");
+    setError("");
+    setSent(false);
     verifyEmail(token)
-      .then(async () => {
+      .then(() => {
         useAuth.getState().logout();
-        setMessage(
-          "Email verified. Please sign in again to use protected features.",
-        );
+        setVerificationStatus("success");
+        setMessage("Email verified. Please sign in again to use protected features.");
       })
-      .catch((requestError) => setError(requestError.message));
+      .catch((requestError) => {
+        setVerificationStatus(
+          requestError instanceof ApiRequestError && requestError.code === "VERIFICATION_EXPIRED"
+            ? "expired"
+            : requestError instanceof ApiRequestError && requestError.code === "VERIFICATION_INVALID"
+              ? "invalid" : "error",
+        );
+        setError(requestError.message);
+      });
   }, [action, token]);
+
+  async function resend(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (sending || sent) return;
+    const email = String(new FormData(event.currentTarget).get("email") ?? "");
+    setSending(true);
+    setError("");
+    try {
+      if (verificationStatus === "expired") await resendVerificationByToken(token);
+      else await resendVerification(email);
+      setSent(true);
+      setMessage("If your account needs verification, a new link has been sent. It is valid for 5 minutes. Check your inbox and spam folder.");
+    } catch (requestError) {
+      if (requestError instanceof ApiRequestError && requestError.code === "VERIFICATION_INVALID")
+        setVerificationStatus("invalid");
+      setError(requestError instanceof Error ? requestError.message : "Unable to send a new link. Please try again.");
+    } finally {
+      setSending(false);
+    }
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -61,7 +103,11 @@ export default function EmailActionPage({ action }: { action: EmailAction }) {
 
   const title =
     action === "verify"
-      ? "Verifying your email"
+      ? verificationStatus === "expired" ? "Verification link expired"
+        : verificationStatus === "invalid" ? "Invalid verification link"
+        : verificationStatus === "success" ? "Email verified"
+        : verificationStatus === "error" ? "Unable to verify email"
+        : "Verifying your email"
       : action === "forgot"
         ? "Reset your password"
         : "Choose a new password";
@@ -73,7 +119,26 @@ export default function EmailActionPage({ action }: { action: EmailAction }) {
         {action === "verify" ? (
           <>
             <p>{message || error || "Checking your verification link…"}</p>
-            <a className="profile-submit" href="/?auth=signin">
+            {(verificationStatus === "expired" || verificationStatus === "invalid") && (
+              <form onSubmit={resend}>
+                <p>Verification links are valid for 5 minutes.</p>
+                {verificationStatus === "invalid" && !sent && (
+                  <label>
+                    Email
+                    <input type="email" name="email" required placeholder="you@example.com" />
+                  </label>
+                )}
+                <button className="profile-submit" disabled={sending || sent}>
+                  {sending ? "Sending…" : sent ? "Verification email sent" : "Resend verification email"}
+                </button>
+              </form>
+            )}
+            {verificationStatus === "error" && (
+              <button className="profile-submit" onClick={() => window.location.reload()}>
+                Try again
+              </button>
+            )}
+            <a className="email-action-signin" href="/?auth=signin">
               Sign in to Polaris
             </a>
           </>
