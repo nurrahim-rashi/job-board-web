@@ -19368,3 +19368,7 @@ body:is(.polaris-signed-in, .polaris-signed-out)
   background: #f3f0e9;
   border-color: #b9b2a6;
 }
+
+html:has(.signed-in-footer) {
+  background: #10162e;
+}
