@@ -85,6 +85,10 @@ export async function resetPassword(token: string, password: string) {
   await axiosInstance.post("/auth/reset-password", { token, password });
 }
 
+export async function validatePasswordResetLink(token: string) {
+  await axiosInstance.post("/auth/reset-password/validate", { token });
+}
+
 export async function verifyEmail(token: string) {
   await axiosInstance.post("/auth/verify-email", { token });
 }
