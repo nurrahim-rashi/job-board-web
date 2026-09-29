@@ -7,7 +7,6 @@ type BarListProps = {
   }>;
   series: Array<{ name: string; color: string }>;
   format?: (value: number) => string;
-  /** Pass the top of a fixed scale (a 5 point rating) so bars are not scaled to the winner. */
   scaleMax?: number;
 };
 

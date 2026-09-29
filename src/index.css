@@ -2600,10 +2600,15 @@ body.polaris-signed-out .job-hero > div:last-child {
   font-size: 12px;
   margin-top: 55px;
 }
+:root {
+  --signed-in-footer-height: 80px;
+}
 .signed-in-footer {
   background: #10162e;
   border-top: 1px solid rgb(255 255 255 / 0.1);
+  box-sizing: border-box;
   color: white;
+  min-height: var(--signed-in-footer-height);
   padding: 25px 24px;
 }
 .signed-in-footer > div {
@@ -14990,7 +14995,8 @@ input[type="month"]:focus-visible {
   border-color: rgb(255 255 255 / 0.16);
   color: #dce5ff;
 }
-.assessment-take-page .site-nav nav {
+.assessment-take-page .site-nav nav,
+.pretest-page .site-nav nav {
   background: rgb(248 245 237 / 0.9);
   border-color: #ddd9ce;
   box-shadow: 0 12px 28px rgb(33 34 44 / 0.1);
@@ -14998,13 +15004,25 @@ input[type="month"]:focus-visible {
 
 .assessment-take-page .nav-mark,
 .assessment-take-page .site-nav li a,
-.assessment-take-page .nav-profile {
+.assessment-take-page .nav-profile,
+.pretest-page .nav-mark,
+.pretest-page .site-nav li a,
+.pretest-page .nav-profile {
   color: #202129;
 }
 
 .assessment-take-page .site-nav li a:hover,
-.assessment-take-page .nav-profile:hover {
+.assessment-take-page .nav-profile:hover,
+.pretest-page .site-nav li a:hover,
+.pretest-page .nav-profile:hover {
   background: #f0ede5;
+}
+
+.pretest-page .site-nav li a.active,
+.pretest-page .site-nav .nav-profile.active {
+  background: #e4e8f6;
+  border-color: #d0d7ef;
+  color: #334994;
 }
 
 .application-priority-card {
@@ -15454,6 +15472,10 @@ input[type="month"]:focus-visible {
   }
 }
 
+/* The navbar is fixed, so only the signed-in footer takes space below the page. */
+.workspace-dashboard.pretest-page {
+  min-height: calc(100dvh - var(--signed-in-footer-height));
+}
 .pretest-panel {
   padding-top: 96px;
 }

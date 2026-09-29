@@ -1,3 +1,4 @@
+import { parseAsInteger, parseAsString, parseAsStringLiteral } from "nuqs";
 import { interviewStatusLabels, interviewStatuses, type InterviewQuery } from "../../../types/interview";
 import { Search } from "../../site/Icons";
 import { AdminSelect, type AdminSelectOption } from "../AdminSelect";
@@ -29,6 +30,14 @@ export const emptyInterviewFilters: InterviewFilterState = {
   dateFrom: "",
   dateTo: "",
   sortOrder: "asc",
+};
+
+export const interviewSearchParams = {
+  status: parseAsStringLiteral(["all", ...interviewStatuses]).withDefault("all"),
+  dateFrom: parseAsString.withDefault(emptyInterviewFilters.dateFrom),
+  dateTo: parseAsString.withDefault(emptyInterviewFilters.dateTo),
+  sortOrder: parseAsStringLiteral(["asc", "desc"]).withDefault(emptyInterviewFilters.sortOrder),
+  page: parseAsInteger.withDefault(1),
 };
 
 export function toInterviewQuery(filters: InterviewFilterState): InterviewQuery {

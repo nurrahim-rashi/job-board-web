@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useQueryStates } from "nuqs";
 
 import { useDeleteInterview } from "../../../hooks/api/interview/useDeleteInterview";
 import { useInterviews } from "../../../hooks/api/interview/useInterviews";
@@ -7,8 +8,8 @@ import { Calendar } from "../../site/Icons";
 import { ConfirmDialog } from "../ConfirmDialog";
 import { EditInterviewModal } from "./EditInterviewModal";
 import {
-  emptyInterviewFilters,
   hasActiveInterviewFilters,
+  interviewSearchParams,
   InterviewFilters,
   toInterviewQuery,
   type InterviewFilterState,
@@ -23,15 +24,18 @@ const ROSTER_LIMIT = 50;
 type InterviewSectionProps = { slug: string };
 
 export function InterviewSection({ slug }: InterviewSectionProps) {
-  const [filters, setFilters] = useState<InterviewFilterState>(emptyInterviewFilters);
-  const [page, setPage] = useState(1);
+  const [search, setSearch] = useQueryStates(interviewSearchParams);
+  const { status, dateFrom, dateTo, sortOrder, page } = search;
+  const filters = useMemo<InterviewFilterState>(() => ({ status, dateFrom, dateTo, sortOrder }), [status, dateFrom, dateTo, sortOrder]);
   const [scheduling, setScheduling] = useState(false);
   const [editing, setEditing] = useState<Interview | null>(null);
   const [deleting, setDeleting] = useState<Interview | null>(null);
 
   const deleteInterview = useDeleteInterview();
 
-  useEffect(() => setPage(1), [filters]);
+  const setFilters = (next: InterviewFilterState) => setSearch({ ...next, status: next.status as typeof status, page: 1 });
+  const setPage = (next: number) => setSearch({ page: next });
+  const reset = () => setSearch(null);
 
   const query = useMemo(() => ({ ...toInterviewQuery(filters), page, limit: PAGE_SIZE }), [filters, page]);
   const { data, isPending, isError, error, isFetching } = useInterviews(slug, query);
@@ -84,7 +88,7 @@ export function InterviewSection({ slug }: InterviewSectionProps) {
         </article>
       </div>
 
-      <InterviewFilters filters={filters} onChange={setFilters} onReset={() => setFilters(emptyInterviewFilters)} />
+      <InterviewFilters filters={filters} onChange={setFilters} onReset={reset} />
 
       {isPending ? (
         <div className="admin-empty">
@@ -103,7 +107,7 @@ export function InterviewSection({ slug }: InterviewSectionProps) {
                 type="button"
                 className="admin-btn ghost"
                 disabled={page <= 1}
-                onClick={() => setPage((current) => current - 1)}
+                onClick={() => setPage(page - 1)}
               >
                 Previous
               </button>
@@ -114,7 +118,7 @@ export function InterviewSection({ slug }: InterviewSectionProps) {
                 type="button"
                 className="admin-btn ghost"
                 disabled={page >= totalPage}
-                onClick={() => setPage((current) => current + 1)}
+                onClick={() => setPage(page + 1)}
               >
                 Next
               </button>
@@ -125,7 +129,7 @@ export function InterviewSection({ slug }: InterviewSectionProps) {
         <div className="admin-empty">
           <h2>{hasActiveInterviewFilters(filters) ? "No interviews match those filters." : "No interviews scheduled."}</h2>
           {hasActiveInterviewFilters(filters) ? (
-            <button type="button" className="admin-btn ghost" onClick={() => setFilters(emptyInterviewFilters)}>
+            <button type="button" className="admin-btn ghost" onClick={reset}>
               Clear filters
             </button>
           ) : (

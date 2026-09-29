@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { parseAsString, parseAsStringLiteral, useQueryStates } from "nuqs";
 import { AdminShell } from "../components/Admin/AdminShell";
 import { AdminSelect, type AdminSelectOption } from "../components/Admin/AdminSelect";
 import { ConfirmDialog } from "../components/Admin/ConfirmDialog";
@@ -11,7 +12,16 @@ import { categoryLabel, jobCategories, type JobCategory, type JobListQuery } fro
 import { ArrowRight, Search } from "../components/site/Icons";
 import { isNewJob } from "../lib/job-age";
 
-type SortKey = "newest" | "oldest" | "title" | "applicants" | "deadline";
+const sortKeys = ["newest", "oldest", "title", "applicants", "deadline"] as const;
+
+type SortKey = (typeof sortKeys)[number];
+
+const searchParams = {
+  search: parseAsString.withDefault(""),
+  category: parseAsStringLiteral(["all", ...jobCategories.map((item) => item.value)]).withDefault("all"),
+  status: parseAsStringLiteral(["all", "published", "draft"]).withDefault("all"),
+  sort: parseAsStringLiteral(sortKeys).withDefault("newest"),
+};
 
 const categoryOptions: AdminSelectOption[] = [
   { value: "all", label: "All categories" },
@@ -40,11 +50,8 @@ const sorting: Record<Exclude<SortKey, "applicants">, Pick<JobListQuery, "sortBy
 };
 
 export default function AdminJobsPage() {
-  const [query, setQuery] = useState("");
-  const [term, setTerm] = useState("");
-  const [category, setCategory] = useState("all");
-  const [status, setStatus] = useState("all");
-  const [sort, setSort] = useState<SortKey>("newest");
+  const [{ search: query, category, status, sort }, setParams] = useQueryStates(searchParams);
+  const [term, setTerm] = useState(query.trim());
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
 
   useEffect(() => {
@@ -78,10 +85,7 @@ export default function AdminJobsPage() {
   const doomed = jobs.find((job) => job.slug === pendingDelete);
 
   function reset() {
-    setQuery("");
-    setCategory("all");
-    setStatus("all");
-    setSort("newest");
+    setParams(null);
   }
 
   return (
@@ -116,21 +120,21 @@ export default function AdminJobsPage() {
       <section className="admin-filters">
         <label className="admin-search">
           <Search />
-          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search by job title" />
+          <input value={query} onChange={(event) => setParams({ search: event.target.value })} placeholder="Search by job title" />
         </label>
         <AdminSelect
           ariaLabel="Filter by category"
           value={category}
-          onChange={setCategory}
+          onChange={(next) => setParams({ category: next as typeof category })}
           options={categoryOptions}
         />
         <AdminSelect
           ariaLabel="Filter by publish status"
           value={status}
-          onChange={setStatus}
+          onChange={(next) => setParams({ status: next as typeof status })}
           options={statusOptions}
         />
-        <AdminSelect label="Sort" value={sort} onChange={(next) => setSort(next as SortKey)} options={sortOptions} />
+        <AdminSelect label="Sort" value={sort} onChange={(next) => setParams({ sort: next as SortKey })} options={sortOptions} />
       </section>
 
       {isPending ? (

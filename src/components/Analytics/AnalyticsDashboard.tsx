@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import { parseAsNumberLiteral, parseAsStringLiteral, useQueryStates } from "nuqs";
 
 import { useAnalyticsOverview } from "../../hooks/api/analytics/useAnalyticsOverview";
 import { useApplicantInterests } from "../../hooks/api/analytics/useApplicantInterests";
@@ -26,18 +27,20 @@ const categoryOptions: AdminSelectOption[] = [
   ...jobCategories.map((item) => ({ value: item.value, label: item.label })),
 ];
 
+const searchParams = {
+  months: parseAsNumberLiteral(analyticsRanges.map((range) => range.value)).withDefault(6),
+  category: parseAsStringLiteral(jobCategories.map((item) => item.value)),
+  currency: parseAsStringLiteral(currencyOptions.map((option) => option.value)).withDefault("IDR"),
+};
+
 export function AnalyticsDashboard() {
-  const [months, setMonths] = useState(6);
-  const [category, setCategory] = useState<JobCategory | "">("");
-  const [currency, setCurrency] = useState("IDR");
+  const [{ months, category, currency }, setParams] = useQueryStates(searchParams);
 
   const query = useMemo(
     () => ({ months, currency, ...(category ? { category } : {}) }),
     [months, category, currency],
   );
 
-  // The company ranking is developer only, so it is skipped rather than requested and refused,
-  // which would otherwise replace the whole dashboard with the 403.
   const isDeveloper = useAuth((state) => state.user?.role) === "DEVELOPER";
 
   const overview = useAnalyticsOverview(query);
@@ -64,21 +67,21 @@ export function AnalyticsDashboard() {
           variant="stacked"
           label="Range"
           value={String(months)}
-          onChange={(next) => setMonths(Number(next))}
+          onChange={(next) => setParams({ months: Number(next) as typeof months })}
           options={rangeOptions}
         />
         <AdminSelect
           variant="stacked"
           label="Category"
-          value={category}
-          onChange={(next) => setCategory(next as JobCategory | "")}
+          value={category ?? ""}
+          onChange={(next) => setParams({ category: (next as JobCategory) || null })}
           options={categoryOptions}
         />
         <AdminSelect
           variant="stacked"
           label="Salary currency"
           value={currency}
-          onChange={setCurrency}
+          onChange={(next) => setParams({ currency: next })}
           options={currencyOptions}
         />
         <p>

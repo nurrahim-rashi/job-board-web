@@ -38,7 +38,6 @@ export function isMeetingLink(value: string) {
   return /^https?:\/\//i.test(value.trim());
 }
 
-/** Interviews still ahead of us, counted from now. */
 export function daysUntil(iso: string) {
   const start = new Date();
   start.setHours(0, 0, 0, 0);
