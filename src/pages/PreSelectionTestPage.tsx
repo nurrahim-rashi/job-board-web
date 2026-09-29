@@ -97,7 +97,7 @@ export default function PreSelectionTestPage() {
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="workspace-dashboard">
+    <div className="workspace-dashboard pretest-page">
       <Navbar />
       <main>
         <section className="role-panel pretest-panel">{children}</section>

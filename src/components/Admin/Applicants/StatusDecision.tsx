@@ -40,8 +40,6 @@ export function StatusDecision({ slug, applicationId, status, onInviteToIntervie
       setRejecting(true);
       return;
     }
-    // Scheduling the interview already moves the applicant to INTERVIEW, so the
-    // invitation hands over to the scheduler instead of flipping the status on its own.
     if (next === "INTERVIEW" && onInviteToInterview) {
       onInviteToInterview();
       return;

@@ -9,7 +9,6 @@ export const applicationStatuses = [
 
 export type ApplicationStatus = (typeof applicationStatuses)[number];
 
-/** Statuses an admin can move an applicant to, mirroring the backend transition map. */
 export type DecisionStatus = "PROCESS" | "INTERVIEW" | "ACCEPTED" | "REJECTED";
 
 export const nextStatuses: Record<ApplicationStatus, DecisionStatus[]> = {
@@ -30,11 +29,6 @@ export const statusLabels: Record<ApplicationStatus, string> = {
   REJECTED: applicationStatusLabel("REJECTED"),
 };
 
-/**
- * `lastEducation` is free text, so the suggestion list shows a readable label and
- * searches on the shortest term that still matches every spelling an applicant
- * might have typed ("SMA" catches SMA_SMK, SMA/SMK and SMA alike).
- */
 export const educationOptions = [
   { label: "Elementary School", query: "Elementary School" },
   { label: "Middle School", query: "Middle School" },

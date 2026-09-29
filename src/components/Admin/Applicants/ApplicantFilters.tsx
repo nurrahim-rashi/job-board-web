@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from "react";
+import { parseAsInteger, parseAsString, parseAsStringLiteral } from "nuqs";
 
 import { Search } from "../../site/Icons";
 import { AdminSelect, type AdminSelectOption } from "../AdminSelect";
@@ -16,7 +17,9 @@ export type FilterState = {
   sort: SortKey;
 };
 
-export type SortKey = "earliest" | "latest" | "salaryLow" | "salaryHigh" | "name";
+const sortKeys = ["earliest", "latest", "salaryLow", "salaryHigh", "name"] as const;
+
+export type SortKey = (typeof sortKeys)[number];
 
 export const emptyFilters: FilterState = {
   name: "",
@@ -27,6 +30,18 @@ export const emptyFilters: FilterState = {
   education: "",
   status: "all",
   sort: "earliest",
+};
+
+export const applicantSearchParams = {
+  name: parseAsString.withDefault(emptyFilters.name),
+  minAge: parseAsString.withDefault(emptyFilters.minAge),
+  maxAge: parseAsString.withDefault(emptyFilters.maxAge),
+  minSalary: parseAsString.withDefault(emptyFilters.minSalary),
+  maxSalary: parseAsString.withDefault(emptyFilters.maxSalary),
+  education: parseAsString.withDefault(emptyFilters.education),
+  status: parseAsString.withDefault(emptyFilters.status),
+  sort: parseAsStringLiteral(sortKeys).withDefault(emptyFilters.sort),
+  page: parseAsInteger.withDefault(1),
 };
 
 const sorting: Record<SortKey, Pick<ApplicantQuery, "sortBy" | "sortOrder">> = {

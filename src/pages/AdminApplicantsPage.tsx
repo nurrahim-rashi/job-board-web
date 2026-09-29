@@ -1,26 +1,21 @@
-import { useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { parseAsString, useQueryStates } from "nuqs";
 import { AdminShell } from "../components/Admin/AdminShell";
 import { ApplicantSection } from "../components/Admin/Applicants/ApplicantSection";
+import { applicantSearchParams } from "../components/Admin/Applicants/ApplicantFilters";
 import { AdminSelect } from "../components/Admin/AdminSelect";
 import { useJobPostings } from "../hooks/api/job-posting/useJobPostings";
 import { ArrowRight } from "../components/site/Icons";
 
 export default function AdminApplicantsPage() {
-  const [params, setParams] = useSearchParams();
+  const [params, setParams] = useQueryStates({ job: parseAsString.withDefault(""), ...applicantSearchParams });
   const { data, isPending, isError, error } = useJobPostings({ limit: 50 });
   const jobs = data?.jobs ?? [];
-  const [slug, setSlug] = useState(params.get("job") ?? "");
-
-  useEffect(() => {
-    if (!slug && jobs.length) setSlug(jobs[0].slug);
-  }, [jobs, slug]);
-
-  const selected = jobs.find((job) => job.slug === slug);
+  const selected = jobs.find((job) => job.slug === params.job) ?? jobs[0];
+  const slug = selected?.slug ?? "";
 
   function pick(next: string) {
-    setSlug(next);
-    setParams(next ? { job: next } : {}, { replace: true });
+    setParams({ ...Object.fromEntries(Object.keys(params).map((key) => [key, null])), job: next || null });
   }
 
   return (
