@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AdminShell } from "../components/Admin/AdminShell";
 import { questionCount } from "../components/Admin/adminData";
@@ -6,12 +6,19 @@ import { useJobPosting } from "../hooks/api/job-posting/useJobPosting";
 import { usePreSelectionTest } from "../hooks/api/pre-selection-test/usePreSelectionTest";
 import { useSaveTestQuestions } from "../hooks/api/pre-selection-test/useSaveTestQuestions";
 import { useSetTestActivation } from "../hooks/api/pre-selection-test/useSetTestActivation";
-import { answerOptions, type TestQuestionInput } from "../types/pre-selection-test";
+import {
+  answerOptions,
+  type TestQuestionInput,
+} from "../types/pre-selection-test";
 import { ArrowLeft, Check } from "../components/site/Icons";
 
 type Draft = { question: string; options: string[]; answer: number };
 
-const blankQuestion = (): Draft => ({ question: "", options: ["", "", "", ""], answer: 0 });
+const blankQuestion = (): Draft => ({
+  question: "",
+  options: ["", "", "", ""],
+  answer: 0,
+});
 const blankTest = () => Array.from({ length: questionCount }, blankQuestion);
 
 export default function AdminTestPage() {
@@ -21,6 +28,8 @@ export default function AdminTestPage() {
   const test = usePreSelectionTest(slug);
   const saveQuestions = useSaveTestQuestions(slug);
   const setActivation = useSetTestActivation(slug);
+  const draftKey = `test-draft:${slug}`;
+  const edited = useRef(false);
 
   const [questions, setQuestions] = useState<Draft[]>(blankTest);
   const [duration, setDuration] = useState("30");
@@ -30,14 +39,22 @@ export default function AdminTestPage() {
   const saved = test.data;
 
   useEffect(() => {
+    if (edited.current)
+      localStorage.setItem(draftKey, JSON.stringify(questions));
+  }, [questions, draftKey]);
+
+  useEffect(() => {
     if (!saved) return;
+    const draft = localStorage.getItem(draftKey);
+    if (draft && !saved.isLocked) return setQuestions(JSON.parse(draft));
     const stored = saved.questions.map((item) => ({
       question: item.question,
       options: item.options,
       answer: Math.max(0, answerOptions.indexOf(item.correctAnswer)),
     }));
     setQuestions([...stored, ...blankTest()].slice(0, questionCount));
-    if (saved.testDurationMinutes) setDuration(String(saved.testDurationMinutes));
+    if (saved.testDurationMinutes)
+      setDuration(String(saved.testDurationMinutes));
   }, [saved]);
 
   if (test.isPending || job.isPending) {
@@ -54,7 +71,11 @@ export default function AdminTestPage() {
     return (
       <AdminShell eyebrow="Pre-selection test" title="Posting not found">
         <div className="admin-empty">
-          <h2>{test.error?.message ?? job.error?.message ?? "That posting is no longer in your dashboard."}</h2>
+          <h2>
+            {test.error?.message ??
+              job.error?.message ??
+              "That posting is no longer in your dashboard."}
+          </h2>
           <Link className="admin-btn ghost" to="/admin">
             Back to job postings
           </Link>
@@ -71,12 +92,21 @@ export default function AdminTestPage() {
   const busy = saveQuestions.isPending || setActivation.isPending;
 
   function update(patch: Partial<Draft>) {
-    setQuestions((list) => list.map((item, index) => (index === active ? { ...item, ...patch } : item)));
+    edited.current = true;
+    setQuestions((list) =>
+      list.map((item, index) =>
+        index === active ? { ...item, ...patch } : item,
+      ),
+    );
     setNotice("");
   }
 
   function updateOption(index: number, value: string) {
-    update({ options: current.options.map((option, position) => (position === index ? value : option)) });
+    update({
+      options: current.options.map((option, position) =>
+        position === index ? value : option,
+      ),
+    });
   }
 
   async function submit() {
@@ -86,13 +116,19 @@ export default function AdminTestPage() {
     }
     const minutes = Number(duration);
     if (!Number.isInteger(minutes) || minutes < 1) {
-      setNotice("Set a whole number of minutes for the time limit before saving.");
+      setNotice(
+        "Set a whole number of minutes for the time limit before saving.",
+      );
       return;
     }
-    const duplicate = questions.findIndex((item) => isComplete(item) && hasDuplicateOptions(item));
+    const duplicate = questions.findIndex(
+      (item) => isComplete(item) && hasDuplicateOptions(item),
+    );
     if (duplicate !== -1) {
       setActive(duplicate);
-      setNotice(`Question ${duplicate + 1} repeats an answer option. Each of the four must be different.`);
+      setNotice(
+        `Question ${duplicate + 1} repeats an answer option. Each of the four must be different.`,
+      );
       return;
     }
     const payload: TestQuestionInput[] = complete.map((item) => ({
@@ -100,8 +136,13 @@ export default function AdminTestPage() {
       options: item.options.map((option) => option.trim()),
       correctAnswer: answerOptions[item.answer],
     }));
-    const result = await saveQuestions.mutateAsync({ questions: payload, testDurationMinutes: minutes }).catch(() => null);
-    if (result) navigate(`/admin/jobs/${slug}`);
+    const result = await saveQuestions
+      .mutateAsync({ questions: payload, testDurationMinutes: minutes })
+      .catch(() => null);
+    if (result) {
+      localStorage.removeItem(draftKey);
+      navigate(`/admin/jobs/${slug}`);
+    }
   }
 
   function toggleActivation() {
@@ -114,7 +155,10 @@ export default function AdminTestPage() {
       setNotice("Set a whole number of minutes before activating the test.");
       return;
     }
-    setActivation.mutate({ hasPreSelectionTest: true, testDurationMinutes: minutes });
+    setActivation.mutate({
+      hasPreSelectionTest: true,
+      testDurationMinutes: minutes,
+    });
   }
 
   return (
@@ -127,13 +171,23 @@ export default function AdminTestPage() {
           <Link className="admin-btn ghost" to={`/admin/jobs/${slug}`}>
             <ArrowLeft /> Back
           </Link>
-          <button type="button" className="admin-btn primary" onClick={submit} disabled={busy || locked}>
+          <button
+            type="button"
+            className="admin-btn primary"
+            onClick={submit}
+            disabled={busy || locked}
+          >
             {saveQuestions.isPending ? "Saving…" : "Save test"}
           </button>
         </>
       }
     >
-      {locked ? <p className="admin-alert">An applicant has already answered this test, so the questions are locked and can no longer be edited.</p> : null}
+      {locked ? (
+        <p className="admin-alert">
+          An applicant has already answered this test, so the questions are
+          locked and can no longer be edited.
+        </p>
+      ) : null}
       {notice ? <p className="admin-alert">{notice}</p> : null}
 
       <div className="admin-card">
@@ -163,7 +217,12 @@ export default function AdminTestPage() {
         <div className="admin-fields">
           <label>
             Time limit (minutes)
-            <input inputMode="numeric" value={duration} onChange={(event) => setDuration(event.target.value)} placeholder="30" />
+            <input
+              inputMode="numeric"
+              value={duration}
+              onChange={(event) => setDuration(event.target.value)}
+              placeholder="30"
+            />
           </label>
         </div>
       </div>
@@ -179,7 +238,12 @@ export default function AdminTestPage() {
           </div>
           <div className="admin-question-grid">
             {questions.map((question, index) => (
-              <button key={index} type="button" className={`${index === active ? "active" : ""} ${isComplete(question) ? "done" : ""}`} onClick={() => setActive(index)}>
+              <button
+                key={index}
+                type="button"
+                className={`${index === active ? "active" : ""} ${isComplete(question) ? "done" : ""}`}
+                onClick={() => setActive(index)}
+              >
                 {index + 1}
               </button>
             ))}
@@ -190,29 +254,63 @@ export default function AdminTestPage() {
           <p className="eyebrow">Question {active + 1}</p>
           <label className="admin-question-field">
             Question
-            <textarea value={current.question} disabled={locked} onChange={(event) => update({ question: event.target.value })} placeholder="Which artifact best communicates interaction states to engineers?" />
+            <textarea
+              value={current.question}
+              disabled={locked}
+              onChange={(event) => update({ question: event.target.value })}
+              placeholder="Which artifact best communicates interaction states to engineers?"
+            />
           </label>
-          <p className="admin-note">Pick the correct answer by selecting its letter.</p>
+          <p className="admin-note">
+            Pick the correct answer by selecting its letter.
+          </p>
           <div className="admin-options">
             {current.options.map((option, index) => (
-              <div key={index} className={current.answer === index ? "picked" : ""}>
-                <button type="button" disabled={locked} onClick={() => update({ answer: index })} aria-label={`Mark option ${answerOptions[index]} as correct`}>
+              <div
+                key={index}
+                className={current.answer === index ? "picked" : ""}
+              >
+                <button
+                  type="button"
+                  disabled={locked}
+                  onClick={() => update({ answer: index })}
+                  aria-label={`Mark option ${answerOptions[index]} as correct`}
+                >
                   {current.answer === index ? <Check /> : answerOptions[index]}
                 </button>
-                <input value={option} disabled={locked} onChange={(event) => updateOption(index, event.target.value)} placeholder={`Option ${answerOptions[index]}`} />
+                <input
+                  value={option}
+                  disabled={locked}
+                  onChange={(event) => updateOption(index, event.target.value)}
+                  placeholder={`Option ${answerOptions[index]}`}
+                />
               </div>
             ))}
           </div>
           <footer className="admin-test-nav">
-            <button type="button" className="admin-btn ghost" disabled={active === 0} onClick={() => setActive(active - 1)}>
+            <button
+              type="button"
+              className="admin-btn ghost"
+              disabled={active === 0}
+              onClick={() => setActive(active - 1)}
+            >
               Previous
             </button>
             {active === questionCount - 1 ? (
-              <button type="button" className="admin-btn primary" onClick={submit} disabled={busy || locked}>
+              <button
+                type="button"
+                className="admin-btn primary"
+                onClick={submit}
+                disabled={busy || locked}
+              >
                 {saveQuestions.isPending ? "Saving…" : "Save test"}
               </button>
             ) : (
-              <button type="button" className="admin-btn ghost" onClick={() => setActive(active + 1)}>
+              <button
+                type="button"
+                className="admin-btn ghost"
+                onClick={() => setActive(active + 1)}
+              >
                 Next question
               </button>
             )}
@@ -224,7 +322,10 @@ export default function AdminTestPage() {
 }
 
 function isComplete(question: Draft) {
-  return Boolean(question.question.trim()) && question.options.every((option) => option.trim());
+  return (
+    Boolean(question.question.trim()) &&
+    question.options.every((option) => option.trim())
+  );
 }
 
 function hasDuplicateOptions(question: Draft) {
